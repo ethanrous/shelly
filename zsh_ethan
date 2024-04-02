@@ -1,0 +1,189 @@
+#!/bin/zsh
+
+### Alias ###
+alias dps="sudo docker ps --format \"table {{.ID}} \t{{.Status}} \t{{.Names}}\""
+alias sbp="source ~/shelly/zsh_main"
+alias ebrc="em ~/shelly/"
+alias ebtv='em ./buildSrc/tools/config/versions.bash'
+alias v='lsd -lth'
+alias va='lsd -ltAh'
+alias n='ping 1.1.1.1'
+alias whoamip='curl -s ifconfig.me'
+alias ip='ifconfig | grep 10.10.1'
+alias dd='docker exec -it'
+alias pathls='echo $PATH | tr ":" "\n"'
+alias webpack='./node_modules/.bin/webpack'
+
+
+### Style Points ###
+export COLOR=white
+
+autoload -Uz vcs_info
+precmd() { vcs_info }
+
+zstyle ':vcs_info:git:*' formats '%F{red}(%b)%f '
+
+setopt PROMPT_SUBST
+PROMPT='[%F{$COLOR}%t %m%f] %11F%~%f ${vcs_info_msg_0_}%f$ '
+
+### Funcs ###
+
+function run_cmd() {
+  if [[ $2 =~ ^([^@]+@)?([^:]+):(.*)$ ]]; then
+    ssh $match[1]$match[2] $1 $match[3]
+  else
+    $(which $1) $2 $3
+  fi
+}
+
+cat() {
+    run_cmd /bin/cat ${@: -1}
+}
+
+lsd() {
+    # $1 is the options for lsd, use $2
+    if [[ -f /usr/local/bin/lsd ]]; then
+      run_cmd lsd $1 ${@: -1}
+    else
+      run_cmd ls $1 ${@: -1}
+    fi
+}
+
+copy_to_lucy() {
+  # Copy from $1 local path to remote $2 on lucy
+  # Do NOT include root@lucy:/... in either argument
+  if [[ $HOST == "lucy" ]]; then
+    cp -r $1 $2
+  else
+    scp -r $1 root@lucy:$2
+  fi
+}
+
+copy_from_lucy() {
+  # Copy from $1 lucy path local $2
+  # Do NOT include root@lucy:/... in either argument
+  if [[ $HOST == "lucy" ]]; then
+    cp -r $1 $2
+  else
+    scp -r root@lucy:$1 $2
+  fi
+}
+
+cat_lucy() {
+  # Cat on lucy
+  if [[ $HOST == "lucy" ]]; then
+    cat $1
+  else
+    cat root@lucy:$1
+  fi
+}
+
+pullsh() {
+  cat_output=$(for file in ~/shelly/zsh_*; do cat $file; done)
+  local_sha=$(echo $cat_output | shasum)
+  remote_sha=$(cat_lucy /mnt/user/config/shell/shelly/hash)
+  if [[ "$local_sha" == "$remote_sha" ]]; then
+    echo "Already up to date"
+  else
+    echo "Pulling changes"
+    copy_from_lucy /mnt/user/config/shell/shelly ~
+  fi
+  sbp
+}
+
+pushsh() {
+  # Update SHA
+  cat_output=$(for file in ~/shelly/zsh_*; do cat $file; done)
+  local_sha=$(echo $cat_output | shasum)
+  echo $local_sha > ~/shelly/hash
+
+  if [[ $local_sha == $(cat_lucy /mnt/user/config/shell/shelly/hash) ]]; then
+    echo "Remote and local hash already match"
+  else
+    echo "New hash: $local_sha"
+    echo $local_sha > ~/shelly/hash
+    copy_to_lucy ~/shelly /mnt/user/config/shell/
+  fi
+}
+
+diff() {
+    thing1=$1
+    thing2=$2
+    if [[ -f "$thing1" || "$thing1" =~ ^([^@]+@)?([^:]+):(.*)$ ]]; then
+        thing1=$(cat $thing1)
+    fi
+    if [[ -f "$thing2" || "$thing2" =~ ^([^@]+@)?([^:]+):(.*)$ ]]; then
+        thing2=$(cat $thing2)
+    fi
+    /usr/bin/diff <(echo "$thing1") <(echo "$thing2")
+}
+
+em() {
+  if [[ -z "${SSH_CONNECTION}" || "$2" == "--local" ]]; then
+    $EDITOR "$1"
+  else
+    client=$(cut -d' ' -f1 <<<"$SSH_CONNECTION")
+    server=$(cut -d' ' -f3 <<<"$SSH_CONNECTION")
+    proj=$(realpath $1)
+    if [ -f $proj ]; then
+      proj=$(dirname "$proj")
+    fi
+    remote_command="/usr/local/bin/code --folder-uri "vscode-remote://ssh-remote+$HOST$proj""
+    full_command="ssh ethan@$client $remote_command"
+    if [[ "$2" == "--cmd" ]]; then
+      echo $remote_command
+    else
+      eval $full_command
+    fi
+  fi
+}
+
+search() {
+  DIR=""
+  if [[ "$2" != "" ]]; then
+	  DIR="$2"
+  else
+	  DIR=.
+  fi
+  find "$DIR" -name "*$1*" 2>&1 | grep -v "find: "
+}
+
+searchall() {
+    find / -name "$1" 2>&1 | grep -v "find: "
+}
+
+known-host-rm() {
+  cat ~/.ssh/known_hosts | grep -v $1
+  #  > ~/.ssh/known_hosts
+}
+
+printProcess() {
+	printf "\n------ Processes Matching \"$1\" ------\n$(ps aux | grep "$1" | grep -v grep | awk '{print $2, $11}')\n\n"
+}
+
+killall() {
+	if [[ "$1" == "" ]]
+  then
+    echo "Search string cannot be empty"
+  else
+    printProcess "$1"
+    read -n 1 -p "End these processes: (y/n)? " answer
+    printf "\n"
+	fi
+ 	if [[ "$answer" == "y" ]]
+  then
+  #  pkill -f "$1"
+	fi
+}
+
+mcsay() {
+  text="\"$@\""
+
+  command="/Users/ethan/repos/mcrcon/mcrcon -H lucy.arcticnet -p minecraft1234 "
+  command+=\'
+  command+="tellraw @a "
+  command+=$text
+  command+=\'
+  eval "$command"
+  # ~/repos/mcrcon/mcrcon -H lucy.arcticnet -p minecraft1234 $(echo $command)
+}

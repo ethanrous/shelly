@@ -1,0 +1,119 @@
+gb()
+{
+ git branch $*
+}
+
+gc()
+{
+ git checkout $*
+}
+
+# gd()
+# {
+#  git difftool $*
+# }
+
+gd1()
+{
+ gd HEAD~1 $*
+}
+
+gdn()
+{
+ git difftool --name-only $*
+}
+
+gdn1()
+{
+ gdn HEAD~1 $*
+}
+
+gl()
+{
+ git log --pretty=format:'%h %aI %ae %s' $*
+}
+
+gll()
+{
+ git log --pretty=format:'%H %aI %ae %s' $*
+}
+
+gp()
+{
+ git pull $*
+}
+
+gft()
+{
+ git fetch --tags --force
+}
+
+gslm()
+{
+ git show lsb/master
+}
+
+gs()
+{
+ git status $*
+}
+
+git_wip()
+{
+    local answer="$1"
+    if [[ "$answer" != "y" ]]; then
+        printf "Really WIP add/commit/push y/[n]? "
+        read -n -k 1 answer
+        printf "\n"
+    fi
+    if [[ "$answer" == "y" ]]; then
+        git add -A
+        git commit -m "WIP"
+        git push origin HEAD
+    fi
+}
+
+gitCheckBranchPrefix()
+{
+ local regex="^erousseau.*"
+ if [[ ! $1 =~ $regex ]]; then
+    echo "Error: $1 does not match $regex"
+    return 1
+ fi
+}
+
+git_cbpo()
+{
+ gitCheckBranchPrefix $1
+ if [[ $? -ne 0 ]]; then return 1; fi
+
+ read -n 1 -p "Really checkout -b/push origin on: $1 (y/n)? " answer
+ printf "\n"
+ if [ $answer == "y" ]
+ then
+    printf "\ngit checkout -b $1\n"
+    git checkout -b $1
+    if [[ $? -ne 0 ]]; then return 1; fi
+    printf "\ngit push -u origin HEAD\n"
+    git push -u origin HEAD
+    printf "\n"
+ fi
+}
+
+git_rb()
+{
+ read -n 1 -p "Really remove: $* (y/n)? " answer
+ printf "\n"
+ [[ $answer != "y" ]] && return
+
+ for branch in $*; do
+    gitCheckBranchPrefix $branch
+    if [[ $? -ne 0 ]]; then return 1; fi
+
+    printf "\ngit push origin --delete $branch\n"
+    git push origin --delete $branch || true
+    printf "\ngit branch -D $branch\n"
+    git branch -D $branch
+    printf "\n"
+ done
+}

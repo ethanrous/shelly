@@ -1,0 +1,37 @@
+#!/bin/zsh
+
+alias lucy='ssh root@lucy'
+alias du='gdu'
+
+eval $(/opt/homebrew/bin/brew shellenv)
+export NVM_DIR="$HOME/.nvm"
+[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
+[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+
+# export EDITOR='nvim'
+export EDITOR='code'
+export COLOR='magenta'
+
+if [[ ":$PATH:" != *":$HOME/.cargo/bin:"* ]]; then
+    export PATH=$PATH:$HOME/.cargo/bin
+fi
+if [[ ":$PATH:" != *":/Library/Frameworks/Python.framework/Versions/3.10/bin:"* ]]; then
+    export PATH=$PATH:/Library/Frameworks/Python.framework/Versions/3.10/bin
+fi
+if [[ ":$PATH:" != *":/opt/homebrew/bin:"* ]]; then
+    export PATH=$PATH:/opt/homebrew/bin
+fi
+
+export CPATH="/opt/homebrew/include/"
+# export C_INCLUDE_PATH=/opt/homebrew/include
+# export CPLUS_INCLUDE_PATH=/opt/homebrew/include
+# export LD_LIBRARY_PATH=/opt/homebrew/lib
+# export LIBRARY_PATH=/opt/homebrew/lib
+# export LDFLAGS="-L/opt/homebrew/lib"
+# export CPPFLAGS="-I/opt/homebrew/include"
+# export CGO_CFLAGS="-I/opt/homebrew/include"
+
+#PATH=$PATH:$(/usr/local/go/bin/go env GOPATH)/bin
+#PATH="$PATH:/usr/local/mysql/bin"
+#PATH="$PATH:/Library/Frameworks/Python.framework/Versions/3.10/bin"
+#PATH="$PATH:/opt/homebrew/Cellar/mongosh/1.8.0/bin"

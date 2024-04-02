@@ -1,0 +1,4 @@
+#!/bin/zsh
+
+export EDITOR='emacs'
+export COLOR='blue'

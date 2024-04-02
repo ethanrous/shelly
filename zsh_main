@@ -1,0 +1,23 @@
+count=0
+for f in ~/shelly/zsh_*
+do
+    if [[ $f == *"zsh_ma"* ]]; then
+        continue
+    fi
+    ((count++))
+    source $f
+done
+
+machine_specific="$HOME/shelly/zsh_machine_$HOST"
+if [ ! -f $machine_specific ]; then
+    echo "No config found for this \$HOST ($HOST). Create one? (y/[n])"
+
+    read -sk a
+    if [[ $a == "y" ]]; then
+        touch $machine_specific && echo "Created machine specific config at $machine_specific"
+    fi
+else
+    source $machine_specific && ((count++))
+fi
+# test -f "$machine_specific" &&
+# echo "Sourced $count config files from ~/zsh_conf/"
