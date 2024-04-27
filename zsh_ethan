@@ -153,8 +153,7 @@ searchall() {
 }
 
 known-host-rm() {
-  cat ~/.ssh/known_hosts | grep -v $1
-  #  > ~/.ssh/known_hosts
+  cat ~/.ssh/known_hosts | grep -v $1 > ~/.ssh/known_hosts
 }
 
 printProcess() {
@@ -186,4 +185,13 @@ mcsay() {
   command+=\'
   eval "$command"
   # ~/repos/mcrcon/mcrcon -H lucy.arcticnet -p minecraft1234 $(echo $command)
+}
+
+port() {
+    echo "Finding processes listening on port $1..."
+    sudo lsof -i -P | grep LISTEN | grep :$1
+}
+
+shelly-sync() {
+    git -C ~/shelly add . && git -C ~/shelly commit -m "auto" && git -C ~/shelly push
 }
