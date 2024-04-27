@@ -194,4 +194,5 @@ port() {
 
 shelly-sync() {
     git -C ~/shelly add . && git -C ~/shelly commit -m "auto" && git -C ~/shelly push
+    git -C ~/shelly pull
 }
