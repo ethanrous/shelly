@@ -199,5 +199,6 @@ shelly-sync() {
         echo "No changes to push"
     fi
 
-    git -C ~/shelly pull
+    echo "Pulling changes..."
+    git -C ~/shelly pull 1>/dev/null
 }
