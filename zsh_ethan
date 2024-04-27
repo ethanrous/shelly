@@ -194,7 +194,7 @@ port() {
 
 shelly-sync() {
     if [[ `git -C ~/shelly status --porcelain` ]]; then
-        git -C ~/shelly add . && git -C ~/shelly commit -m "auto" && git -C ~/shelly push
+        git -C ~/shelly add . && git -C ~/shelly commit -m "sync from $HOST" && git -C ~/shelly push
     else
         echo "No changes to push"
     fi
