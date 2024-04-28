@@ -189,7 +189,7 @@ mcsay() {
 
 port() {
     echo "Finding processes listening on port $1..."
-    lsof -i -P | grep LISTEN | grep :$1
+    lsof -n -i4TCP:$1 | grep LISTEN
 }
 
 shelly-sync() {
