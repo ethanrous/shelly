@@ -3,13 +3,13 @@
 alias lucy='ssh root@lucy'
 alias du='gdu'
 
-eval $(/opt/homebrew/bin/brew shellenv)
-export NVM_DIR="$HOME/.nvm"
-[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
-[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+# eval $(/opt/homebrew/bin/brew shellenv)
+# export NVM_DIR="$HOME/.nvm"
+# [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
+# [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
 
-# export EDITOR='nvim'
-export EDITOR='code'
+export EDITOR='nvim'
+# export EDITOR='code'
 export COLOR='magenta'
 
 if [[ ":$PATH:" != *":$HOME/.cargo/bin:"* ]]; then
@@ -21,6 +21,12 @@ fi
 if [[ ":$PATH:" != *":/opt/homebrew/bin:"* ]]; then
     export PATH=$PATH:/opt/homebrew/bin
 fi
+if [[ ":$PATH:" != *":/Users/ethan/go/bin:"* ]]; then
+    export PATH=$PATH:/Users/ethan/go/bin
+fi
+
+# Make tmux play nice with emacs keybindings
+bindkey -e
 
 export CPATH="/opt/homebrew/include/"
 # export C_INCLUDE_PATH=/opt/homebrew/include

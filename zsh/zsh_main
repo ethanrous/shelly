@@ -1,0 +1,27 @@
+
+# This is the entry point for reading the zsh configuration.
+# It sources all files in ~/shelly/zsh_conf/ and ~/shelly/zsh_machine_$HOST
+
+export SHELLY=$HOME/shelly
+
+count=0
+for f in $SHELLY/zsh/source/*
+do
+    ((count++))
+    source $f
+done
+
+machine_specific_path="$SHELLY/zsh/machines/$HOST"
+if [ ! -f $machine_specific_path ]; then
+    echo "No config found for this \$HOST ($HOST). Create one? (y/[n])"
+
+    read -sk a
+    if [[ $a == "y" ]]; then
+        touch $machine_specific_path && echo "Created machine specific config at $machine_specific_path"
+    fi
+else
+    source $machine_specific_path && ((count++))
+fi
+
+# test -f "$machine_specific" &&
+# echo "Sourced $count config files from ~/zsh_conf/"

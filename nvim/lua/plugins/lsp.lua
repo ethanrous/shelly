@@ -1,0 +1,186 @@
+vim.diagnostic.config({
+	virtual_text = {
+		hl_mode = "blend",
+		format = function(diagnostic)
+			local lines = vim.split(diagnostic.message, "\n")
+			return lines[1]
+		end,
+		virt_text_pos = "eol",
+		-- virt_text_win_col = 100,
+	},
+	signs = true,
+	update_in_insert = true,
+	float = {
+
+		source = "always",
+		border = "rounded",
+		focusable = false,
+	},
+	severity_sort = true,
+})
+
+local toggle_inlay_hint = function()
+	local is_enabled = vim.lsp.inlay_hint.is_enabled()
+	vim.lsp.inlay_hint.enable(not is_enabled)
+end
+
+local ts_organize_imports = function()
+	local params = {
+		command = "_typescript.organizeImports",
+		arguments = { vim.api.nvim_buf_get_name(0) },
+		title = "",
+	}
+	vim.lsp.buf.execute_command(params)
+end
+
+-- LSP
+local on_attach = function(client, bufnr)
+	local opts = { buffer = bufnr, remap = false }
+
+	vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+	vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+	vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, opts)
+	vim.keymap.set("n", "<LEADER>r", vim.lsp.buf.rename, opts)
+	vim.keymap.set("n", "<LEADER>f", function()
+		vim.lsp.buf.format({ async = true })
+	end, opts)
+	vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+	vim.keymap.set("n", "ge", vim.diagnostic.open_float, opts)
+	vim.keymap.set("n", "<LEADER>t", toggle_inlay_hint, opts)
+end
+
+local lsp = vim.lsp
+local make_client_capabilities = lsp.protocol.make_client_capabilities
+function lsp.protocol.make_client_capabilities()
+	local caps = make_client_capabilities()
+	if not (caps.workspace or {}).didChangeWatchedFiles then
+		vim.notify("lsp capability didChangeWatchedFiles is already disabled", vim.log.levels.WARN)
+	else
+		caps.workspace.didChangeWatchedFiles = nil
+	end
+
+	return caps
+end
+
+return {
+	-- LSP
+	{
+		"neovim/nvim-lspconfig",
+		config = function()
+			require("mason").setup()
+			require("mason-lspconfig").setup({
+				ensure_installed = {
+					-- "ts_ls",
+					"gopls",
+					"lua_ls",
+					"bashls",
+					"cssls",
+					"eslint",
+					"html",
+					"jsonls",
+					"ruff",
+					-- "basedpyright",
+					"pyright",
+					"yamlls",
+					"svelte",
+					"tailwindcss",
+				},
+			})
+			local capabilities = vim.lsp.protocol.make_client_capabilities()
+			capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
+
+			require("mason-lspconfig").setup_handlers({
+				function(server_name) -- default handler (optional)
+					require("lspconfig")[server_name].setup({
+						capabilities = capabilities,
+						on_attach = on_attach,
+					})
+				end,
+				["lua_ls"] = function()
+					require("lspconfig")["lua_ls"].setup({
+						capabilities = capabilities,
+						on_attach = on_attach,
+						settings = {
+							Lua = {
+								diagnostics = {
+									globals = { "vim" },
+									disable = { "missing-parameters", "missing-fields" },
+								},
+								hint = { enable = true },
+								telemetry = { enable = false },
+							},
+						},
+					})
+				end,
+				["gopls"] = function()
+					require("lspconfig")["gopls"].setup({
+						capabilities = capabilities,
+						on_attach = on_attach,
+						settings = {
+							gopls = {
+								hints = {
+									assignVariableTypes = true,
+									compositeLiteralFields = true,
+									compositeLiteralTypes = true,
+									constantValues = true,
+									functionTypeParameters = true,
+									parameterNames = true,
+									rangeVariableTypes = true,
+								},
+							},
+						},
+					})
+				end,
+				-- ["basedpyright"] = function()
+				-- 	require("lspconfig")["basedpyright"].setup({
+				-- 		capabilities = capabilities,
+				-- 		on_attach = on_attach,
+				-- 	})
+				-- end,
+				["ts_ls"] = function()
+					local inlayHints = {
+						includeInlayEnumMemberValueHints = true,
+						includeInlayFunctionLikeReturnTypeHints = true,
+						includeInlayFunctionParameterTypeHints = true,
+						includeInlayParameterNameHints = "all",
+						includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+						includeInlayPropertyDeclarationTypeHints = true,
+						includeInlayVariableTypeHints = false,
+					}
+					require("lspconfig")["ts_ls"].setup({
+						capabilities = capabilities,
+						on_attach = on_attach,
+						settings = {
+							javascript = {
+								inlayHints = inlayHints,
+							},
+							typescript = {
+								inlayHints = inlayHints,
+							},
+						},
+						commands = {
+							OrganizeImports = {
+								ts_organize_imports,
+								description = "Organize Imports",
+							},
+						},
+					})
+				end,
+			})
+		end,
+		dependencies = {
+			-- LSP Support
+			"williamboman/mason.nvim",
+			"williamboman/mason-lspconfig.nvim",
+		},
+		event = "BufEnter",
+		opts = { inlay_hints = { enabled = true } },
+	},
+
+	-- Rust config
+	{
+		"mrcjkb/rustaceanvim",
+		version = "^4",
+		ft = { "rust" },
+	},
+}

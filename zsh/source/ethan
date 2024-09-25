@@ -2,9 +2,8 @@
 
 ### Alias ###
 alias dps="sudo docker ps --format \"table {{.ID}} \t{{.Status}} \t{{.Names}}\""
-alias sbp="source ~/shelly/zsh_main"
-alias ebrc="em ~/shelly/"
-alias ebtv='em ./buildSrc/tools/config/versions.bash'
+alias sbp="source $SHELLY/zsh/zsh_main"
+alias ebrc="em $SHELLY"
 alias v='lsd -lth'
 alias va='lsd -ltAh'
 alias n='ping 1.1.1.1'
@@ -12,8 +11,7 @@ alias whoamip='curl -s ifconfig.me'
 alias ip='ifconfig | grep 10.10.1'
 alias dd='docker exec -it'
 alias pathls='echo $PATH | tr ":" "\n"'
-alias webpack='./node_modules/.bin/webpack'
-
+alias shelly-sync="$SHELLY/zsh/setup.zsh"
 
 ### Style Points ###
 export COLOR=white
@@ -78,33 +76,34 @@ cat_lucy() {
   fi
 }
 
-pullsh() {
-  cat_output=$(for file in ~/shelly/zsh_*; do cat $file; done)
-  local_sha=$(echo $cat_output | shasum)
-  remote_sha=$(cat_lucy /mnt/user/config/shell/shelly/hash)
-  if [[ "$local_sha" == "$remote_sha" ]]; then
-    echo "Already up to date"
-  else
-    echo "Pulling changes"
-    copy_from_lucy /mnt/user/config/shell/shelly ~
-  fi
-  sbp
-}
-
-pushsh() {
-  # Update SHA
-  cat_output=$(for file in ~/shelly/zsh_*; do cat $file; done)
-  local_sha=$(echo $cat_output | shasum)
-  echo $local_sha > ~/shelly/hash
-
-  if [[ $local_sha == $(cat_lucy /mnt/user/config/shell/shelly/hash) ]]; then
-    echo "Remote and local hash already match"
-  else
-    echo "New hash: $local_sha"
-    echo $local_sha > ~/shelly/hash
-    copy_to_lucy ~/shelly /mnt/user/config/shell/
-  fi
-}
+# Old - using git now, which I should have been doing all along
+# pullsh() {
+#   cat_output=$(for file in $SHELLY/zsh/zsh_*; do cat $file; done)
+#   local_sha=$(echo $cat_output | shasum)
+#   remote_sha=$(cat_lucy /mnt/user/config/shell/shelly/hash)
+#   if [[ "$local_sha" == "$remote_sha" ]]; then
+#     echo "Already up to date"
+#   else
+#     echo "Pulling changes"
+#     copy_from_lucy /mnt/user/config/shell/shelly ~
+#   fi
+#   sbp
+# }
+# 
+# pushsh() {
+#   # Update SHA
+#   cat_output=$(for file in ~/shelly/zsh_*; do cat $file; done)
+#   local_sha=$(echo $cat_output | shasum)
+#   echo $local_sha > ~/shelly/hash
+# 
+#   if [[ $local_sha == $(cat_lucy /mnt/user/config/shell/shelly/hash) ]]; then
+#     echo "Remote and local hash already match"
+#   else
+#     echo "New hash: $local_sha"
+#     echo $local_sha > ~/shelly/hash
+#     copy_to_lucy ~/shelly /mnt/user/config/shell/
+#   fi
+# }
 
 diff() {
     thing1=$1
@@ -192,13 +191,14 @@ port() {
     lsof -n -i4TCP:$1 | grep LISTEN
 }
 
-shelly-sync() {
-    if [[ `git -C ~/shelly status --porcelain` ]]; then
-        git -C ~/shelly add . && git -C ~/shelly commit -m "sync from $HOST" && git -C ~/shelly push
-    else
-        echo "No changes to push"
-    fi
-
-    echo "Pulling changes..."
-    git -C ~/shelly pull 1>/dev/null
-}
+# Again, should have been using git all along
+# shelly-sync() {
+#     if [[ `git -C ~/shelly status --porcelain` ]]; then
+#         git -C ~/shelly add . && git -C ~/shelly commit -m "sync from $HOST" && git -C ~/shelly push
+#     else
+#         echo "No changes to push"
+#     fi
+# 
+#     echo "Pulling changes..."
+#     git -C ~/shelly pull 1>/dev/null
+# }

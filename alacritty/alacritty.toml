@@ -1,0 +1,80 @@
+# https://alacritty.org/config-alacritty.html
+
+live_config_reload = true
+
+[window]
+blur = true
+opacity = 0.9
+decorations = "None"
+startup_mode = "Maximized"
+option_as_alt = "Both"
+
+[font]
+normal = { family = "JetBrainsMono Nerd Font" }
+size = 15
+
+# [colors]
+# normal.black = "#1e2129"
+# bright.black = "#676767"
+# 
+# normal.red = "#c13027"
+# bright.red = "#d92f20"
+# 
+# normal.yellow = "#c6c43d"
+# bright.yellow = "#ee8f3a"
+# 
+# normal.magenta = "#8e58ad"
+# bright.magenta = "#8a32bc"
+# 
+# normal.cyan = "#65aae0"
+# bright.cyan = "#479ef1"
+# 
+# normal.white = "#e6e6e6"
+# bright.white = "#feffff"
+
+# TokyoNight Alacritty Colors
+# Default colors
+[colors.primary]
+background = '#24283b'
+foreground = '#c0caf5'
+
+#[colors.cursor]
+#cursor = '#c0caf5'
+#text = '#24283b'
+
+# Normal colors
+[colors.normal]
+black = '#1d202f'
+red = '#f7768e'
+green = '#9ece6a'
+yellow = '#e0af68'
+blue = '#7aa2f7'
+magenta = '#bb9af7'
+cyan = '#7dcfff'
+white = '#a9b1d6'
+
+# Bright colors
+[colors.bright]
+black = '#414868'
+red = '#f7768e'
+green = '#9ece6a'
+yellow = '#e0af68'
+blue = '#7aa2f7'
+magenta = '#bb9af7'
+cyan = '#7dcfff'
+white = '#c0caf5'
+
+# Indexed Colors
+[[colors.indexed_colors]]
+index = 16
+color = '#ff9e64'
+
+[[colors.indexed_colors]]
+index = 17
+color = '#db4b4b'
+
+[keyboard]
+bindings = [
+{ key = "N", mods = "Command", action = "CreateNewWindow"},
+    # { key = "ArrowRight", mods = "Command", chars = "\\x1b[,ArrowRight" }
+]
