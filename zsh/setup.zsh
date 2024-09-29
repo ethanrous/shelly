@@ -15,6 +15,7 @@ if [ ! -d ~/.config ]; then
     mkdir ~/.config
 fi
 
+rm -rf ~/.config/nvim
 cp -r $SHELLY/nvim ~/.config/nvim
 
 if [[ "$( ls -i ~/shelly/tmux/tmux.conf | awk '{print $1}' )" != "$( ls -i ~/.tmux.conf | awk '{print $1}' )" ]]; then

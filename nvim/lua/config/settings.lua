@@ -22,13 +22,14 @@ opt.linespace = 0
 opt.mouse = "a"
 opt.number = true
 opt.ruler = false
-opt.scrolloff = 10
+opt.scrolloff = 20
 opt.shiftwidth = 4
 
 -- Danny. Why. Why would you use this. I hate it.
 -- opt.showmatch = true
 
-opt.signcolumn = "yes"
+opt.signcolumn = "yes:1"
+
 opt.smartcase = true
 opt.smartindent = true
 opt.smarttab = true
@@ -46,6 +47,9 @@ o.breakindent = true
 o.gdefault = true
 
 g.mapleader = " "
+
+opt.number = true
+opt.relativenumber = true
 
 -- Toggle relative line numbering
 -- vim.cmd("command! ToggleRelLines set relativenumber!")

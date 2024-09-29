@@ -38,15 +38,17 @@ local on_attach = function(client, bufnr)
 	local opts = { buffer = bufnr, remap = false }
 
 	vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
-	vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+	vim.keymap.set("n", "gh", vim.lsp.buf.hover, opts)
 	vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, opts)
 	vim.keymap.set("n", "<LEADER>r", vim.lsp.buf.rename, opts)
 	vim.keymap.set("n", "<LEADER>f", function()
 		vim.lsp.buf.format({ async = true })
 	end, opts)
-	vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+	-- vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
 	vim.keymap.set("n", "ge", vim.diagnostic.open_float, opts)
 	vim.keymap.set("n", "<LEADER>t", toggle_inlay_hint, opts)
+
+	vim.keymap.set("n", "gs", require("nvim-navbuddy").open, { buffer = bufnr, remap = true })
 end
 
 local lsp = vim.lsp
@@ -67,10 +69,17 @@ return {
 	{
 		"neovim/nvim-lspconfig",
 		config = function()
+			local navbuddy = require("nvim-navbuddy")
+			-- navbuddy.setup({
+			-- 	mappings = {
+			-- 		["gs"] = actions.toggle_preview(),
+			-- 	},
+			-- })
+
 			require("mason").setup()
 			require("mason-lspconfig").setup({
 				ensure_installed = {
-					-- "ts_ls",
+					"ts_ls",
 					"gopls",
 					"lua_ls",
 					"bashls",
@@ -131,12 +140,13 @@ return {
 						},
 					})
 				end,
-				-- ["basedpyright"] = function()
-				-- 	require("lspconfig")["basedpyright"].setup({
-				-- 		capabilities = capabilities,
-				-- 		on_attach = on_attach,
-				-- 	})
-				-- end,
+				["clangd"] = function()
+					require("lspconfig")["clangd"].setup({
+						on_attach = function(client, bufnr)
+							navbuddy.attach(client, bufnr)
+						end,
+					})
+				end,
 				["ts_ls"] = function()
 					local inlayHints = {
 						includeInlayEnumMemberValueHints = true,
@@ -169,6 +179,14 @@ return {
 			})
 		end,
 		dependencies = {
+			{
+				"SmiteshP/nvim-navbuddy",
+				dependencies = {
+					"SmiteshP/nvim-navic",
+					"MunifTanjim/nui.nvim",
+				},
+				opts = { lsp = { auto_attach = true } },
+			},
 			-- LSP Support
 			"williamboman/mason.nvim",
 			"williamboman/mason-lspconfig.nvim",

@@ -1,9 +1,11 @@
 local autocmd = vim.api.nvim_create_autocmd
 
+-- Edit config
 vim.api.nvim_create_user_command("Config", function()
 	vim.cmd("edit ~/shelly")
 end, { nargs = 0 })
 
+-- Save all buffers when leaving the window
 autocmd({ "BufLeave", "FocusLost" }, {
 	pattern = "*",
 	callback = function()
@@ -11,6 +13,7 @@ autocmd({ "BufLeave", "FocusLost" }, {
 	end,
 })
 
+-- Set the number column "on" for all buffers (except NvimTree)
 autocmd("BufEnter", {
 	pattern = "*",
 	callback = function()
@@ -23,6 +26,7 @@ autocmd("BufEnter", {
 	end,
 })
 
+-- Highlight yanked text
 autocmd("TextYankPost", {
 	callback = function()
 		vim.highlight.on_yank()

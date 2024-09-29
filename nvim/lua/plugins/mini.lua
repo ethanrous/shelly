@@ -73,8 +73,8 @@ return {
 					-- Normal mode
 					line_left = "",
 					line_right = "",
-					line_down = "<A-Down>",
-					line_up = "<A-Up>",
+					line_down = "J",
+					line_up = "K",
 				},
 			})
 		end,

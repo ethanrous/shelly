@@ -16,6 +16,11 @@ return {
 			{
 				"<S-A-s>",
 				function()
+					local listedBufs = vim.fn.getbufinfo({ buflisted = 1 })
+					local bufPaths = vim.tbl_map(function(buf)
+						return buf.name
+					end, listedBufs)
+					vim.list_extend(vim.v.oldfiles, bufPaths)
 					require("fzf-lua").oldfiles()
 				end,
 				desc = "View recent files",
@@ -31,32 +36,26 @@ return {
 			{
 				"gi",
 				function()
-					vim.lsp.buf.implementation()
-					-- vim.api.nvim_command("q")
-					-- require("fzf-lua").quickfix()
+					require("fzf-lua").lsp_implementations()
 				end,
-				desc = "Goto implementation",
+				desc = "Goto implementations",
+			},
+			{
+				"gr",
+				function()
+					require("fzf-lua").lsp_references()
+				end,
+				desc = "Goto references",
 			},
 		},
 		oldfiles = {
 			prompt = "History❯ ",
 			cwd_only = false,
-			stat_file = true, -- verify files exist on disk
+			stat_file = false, -- verify files exist on disk
 			-- can also be a lua function, for example:
 			-- stat_file = require("fzf-lua").utils.file_is_readable,
 			-- stat_file = function() return true end,
 			include_current_session = true, -- include bufs from current session
-		},
-	},
-
-	-- Yeah yeah, its a bit overkill, but I like the previews
-	{
-		"ojroques/nvim-lspfuzzy", -- for mapping lsp to fzf previews
-		dependencies = { "junegunn/fzf", "junegunn/fzf.vim" },
-		config = {
-			function()
-				require("lspfuzzy").setup({})
-			end,
 		},
 	},
 }
