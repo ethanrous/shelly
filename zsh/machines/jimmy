@@ -1,0 +1,2 @@
+export PATH=$PATH:/home/ethan/cmake/bin
+export PATH=$PATH:/home/ethan/.cargo/bin
