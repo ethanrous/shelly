@@ -41,11 +41,13 @@ local on_attach = function(client, bufnr)
 	vim.keymap.set("n", "gh", vim.lsp.buf.hover, opts)
 	vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, opts)
 	vim.keymap.set("n", "<LEADER>r", vim.lsp.buf.rename, opts)
-	vim.keymap.set("n", "<LEADER>f", function()
-		vim.lsp.buf.format({ async = true })
-	end, opts)
-	-- vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+	-- vim.keymap.set("n", "<LEADER>f", function()
+	-- 	vim.lsp.buf.format({ async = true })
+	-- end, opts)
 	vim.keymap.set("n", "ge", vim.diagnostic.open_float, opts)
+	vim.keymap.set("n", "<LEADER>d", vim.diagnostic.open_float, { silent = true })
+	vim.keymap.set({ "n", "i" }, "<A-d>", vim.diagnostic.goto_next, { silent = true })
+	vim.keymap.set({ "n", "i" }, "<A-S-d>", vim.diagnostic.goto_prev, { silent = true })
 	vim.keymap.set("n", "<LEADER>t", toggle_inlay_hint, opts)
 
 	vim.keymap.set("n", "gs", require("nvim-navbuddy").open, { buffer = bufnr, remap = true })
@@ -70,12 +72,6 @@ return {
 		"neovim/nvim-lspconfig",
 		config = function()
 			local navbuddy = require("nvim-navbuddy")
-			-- navbuddy.setup({
-			-- 	mappings = {
-			-- 		["gs"] = actions.toggle_preview(),
-			-- 	},
-			-- })
-
 			require("mason").setup()
 			require("mason-lspconfig").setup({
 				ensure_installed = {
@@ -88,11 +84,11 @@ return {
 					"html",
 					"jsonls",
 					"ruff",
-					-- "basedpyright",
 					"pyright",
 					"yamlls",
 					"svelte",
 					"tailwindcss",
+					"rust_analyzer",
 				},
 			})
 			local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -196,9 +192,9 @@ return {
 	},
 
 	-- Rust config
-	{
-		"mrcjkb/rustaceanvim",
-		version = "^4",
-		ft = { "rust" },
-	},
+	-- {
+	-- 	"mrcjkb/rustaceanvim",
+	-- 	version = "^4",
+	-- 	ft = { "rust" },
+	-- },
 }

@@ -6,7 +6,7 @@ return {
 			require("luasnip.loaders.from_vscode").lazy_load()
 			local luasnip = require("luasnip")
 			local cmp = require("cmp")
-			
+
 			local copilot = require("copilot.suggestion")
 			vim.g.copilot_no_tab_map = true
 
@@ -72,8 +72,8 @@ return {
 					{ name = "nvim_lsp_signature_help" },
 				},
 				mapping = {
-					["<A-Up>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
-					["<A-Down>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
+					["<A-k>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
+					["<A-j>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
 					["<A-Tab>"] = cmp.mapping(function(fallback)
 						if copilot.is_visible() then
 							copilot.accept()
@@ -86,6 +86,13 @@ return {
 						"i",
 						"s",
 					}),
+					["<A-l>"] = cmp.mapping(function(fallback)
+						if cmp.visible() then
+							cmp.confirm()
+						else
+							fallback()
+						end
+					end, { "i", "s" }), --cmp.mapping.confirm({ select = true }),
 					["<A-Enter>"] = cmp.mapping(function(fallback)
 						if cmp.visible() then
 							cmp.confirm()

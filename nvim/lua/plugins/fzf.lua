@@ -3,7 +3,13 @@ return {
 		"ibhagwan/fzf-lua",
 		dependencies = { "nvim-tree/nvim-web-devicons" },
 		config = function()
-			require("fzf-lua").setup({})
+			require("fzf-lua").setup({
+				hls = { border = "FloatBorder" },
+			})
+			vim.keymap.set("n", "<A-j>", function()
+				local actions = require("fzf-lua.actions")
+				print(actions)
+			end, { silent = true })
 		end,
 		keys = {
 			{
@@ -14,14 +20,9 @@ return {
 				desc = "Find files",
 			},
 			{
-				"<S-A-s>",
+				"<A-a>",
 				function()
-					local listedBufs = vim.fn.getbufinfo({ buflisted = 1 })
-					local bufPaths = vim.tbl_map(function(buf)
-						return buf.name
-					end, listedBufs)
-					vim.list_extend(vim.v.oldfiles, bufPaths)
-					require("fzf-lua").oldfiles()
+					require("fzf-lua").buffers()
 				end,
 				desc = "View recent files",
 			},
@@ -32,7 +33,13 @@ return {
 				end,
 				desc = "Grep files",
 			},
-
+			{
+				"gn",
+				function()
+					require("fzf-lua").lsp_workspace_diagnostics()
+				end,
+				desc = "Workspace diagnostics",
+			},
 			{
 				"gi",
 				function()

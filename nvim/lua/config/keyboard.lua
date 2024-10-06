@@ -2,17 +2,28 @@
 -- Keyboard shortcuts --
 ------------------------
 
+-- Disable arrow keys
+vim.keymap.set("n", "<Up>", "<Nop>", { silent = true, noremap = true })
+vim.keymap.set("n", "<Down>", "<Nop>", { silent = true, noremap = true })
+vim.keymap.set("n", "<Left>", "<Nop>", { silent = true, noremap = true })
+vim.keymap.set("n", "<Right>", "<Nop>", { silent = true, noremap = true })
+
+vim.keymap.set("n", "<A-k>", "<Up>", { silent = true, noremap = true })
+vim.keymap.set("n", "<A-j>", "<Down>", { silent = true, noremap = true })
+vim.keymap.set("n", "<A-h>", "<Left>", { silent = true, noremap = true })
+vim.keymap.set("n", "<A-l>", "<Right>", { silent = true, noremap = true })
+
 -- Text Manipulation --
 
 -- Stop from moving back a space when exiting insert mode.
 -- I'm sure this is a crime somewhere, but it bugs the hell out of me so... I'm doing it.
-vim.keymap.set("i", "<Esc>", "<C-[>`^", { silent = true })
+-- vim.keymap.set("i", "<Esc>", "<C-[>`^", { silent = true })
 
 -- Ctrl + k: "Delete line"
-vim.keymap.set("n", "<C-k>", "dd", { silent = true })
+vim.keymap.set("n", "<C-k>", "dd", { silent = true, noremap = true })
 
 -- Ctrl + k: "Delete line"
-vim.keymap.set("i", "<C-k>", "<C-[>`^Di<Right>", { silent = true })
+vim.keymap.set("i", "<C-k>", "<C-[>`^Di<Right>", { silent = true, nowait = true })
 
 -- Ctrl + y: Emulate emacs yank
 vim.keymap.set({ "i", "n" }, "<C-y>", "<Esc>pi<Right>", { silent = true, noremap = true })
@@ -23,44 +34,33 @@ vim.keymap.set("v", "<S-A-Down>", "y']i<Down><CR><Up><Esc>p", { silent = true })
 -- General Navigation o7 --
 
 -- Ctrl + e: emulate emacs goto end of line
-vim.keymap.set({ "i", "n" }, "<C-e>", "<esc>A", { silent = true })
+vim.keymap.set("i", "<C-e>", "<Esc>A", { silent = true })
+vim.keymap.set("n", "<C-e>", "$", { silent = true })
 
 -- Ctrl + a: emulate emacs goto start of line
-vim.keymap.set("i", "<C-a>", "<esc>^i", { silent = true })
+vim.keymap.set("i", "<C-a>", "<Esc>^i", { silent = true })
 vim.keymap.set("n", "<C-a>", "^", { silent = true })
 
 -- Duplicate line
-vim.keymap.set({ "i", "n" }, "<A-S-Down>", "<esc>yypA", { silent = true })
+vim.keymap.set({ "i", "n" }, "<A-S-Down>", "<Esc>mcyyp`cj", { silent = true })
+vim.keymap.set({ "i", "n" }, "<A-S-j>", "<Esc>mcyyp`cj", { silent = true })
+vim.keymap.set("v", "<A-S-j>", "y']p", { silent = true })
 
--- vim.keymap.set("n", "<D-Left>", "^", { silent = true })
--- vim.keymap.set("n", "<D-Right>", "$", { silent = true })
--- vim.keymap.set("i", "<D-Left>", "<esc>^i", { silent = true })
--- vim.keymap.set("i", "<D-Right>", "<esc>A", { silent = true })
--- vim.keymap.set("i", "<D-Enter>", "$<Enter>", { silent = true })
-
--- vim.keymap.set("i", "<D-Up>", "<esc>gg<C-0>i", { silent = true })
--- vim.keymap.set("n", "<D-Up>", "<esc>gg<C-0>", { silent = true })
--- vim.keymap.set("i", "<D-Down>", "<esc>Gi", { silent = true })
--- vim.keymap.set("n", "<D-Down>", "G", { silent = true })
+-- Default paste to non-volatile register
+vim.keymap.set("n", "p", '"0p', { silent = true })
 
 -- Go [b]ack / go... [v]orward ??
 vim.keymap.set("n", "gb", "<C-o>", { silent = true })
 vim.keymap.set("n", "gv", "<C-i>", { silent = true })
 
--- Diagnostics --
-vim.keymap.set("n", "<LEADER>d", vim.diagnostic.open_float, { silent = true })
-vim.keymap.set({ "n", "i" }, "<A-d>", vim.diagnostic.goto_next, { silent = true })
-vim.keymap.set({ "n", "i" }, "<A-S-d>", vim.diagnostic.goto_prev, { silent = true })
-
 -- Window/Buffer Control --
 vim.keymap.set({ "i", "n" }, "<C-w><C-l>", "<Esc>:vert split<CR>", { silent = true })
 -- vim.keymap.set( { 'i', 'n' }, '<D-e>', require('fzf-lua').files, { desc = "Fzf Files", silent = true})
-vim.keymap.set({ "i", "n" }, "<A-a>", "<Esc><C-^>", { silent = true })
+vim.keymap.set({ "i", "n" }, "<A-s>", "<Esc><C-^>")
 
 -- Save + exit --
 vim.keymap.set({ "i", "n" }, "<C-q>", "<Esc>:wqa<CR>", { silent = true })
-vim.keymap.set({ "i", "n" }, "<C-x><C-s>", "<Esc>:w<CR>", { silent = true })
-vim.keymap.set("n", "xx", ":update<CR>", { silent = true })
+-- vim.keymap.set("n", "xx", ":update<CR>", { silent = true })
 
 -- Selection --
 
@@ -159,9 +159,9 @@ end, { silent = true })
 vim.keymap.set("n", "<A-x>", function()
 	require("dap").down()
 end, { silent = true })
-vim.keymap.set("n", "<A-s>", function()
-	require("dap").step_over()
-end, { silent = true })
+-- vim.keymap.set("n", "<A-s>", function()
+-- 	require("dap").step_over()
+-- end, { silent = true })
 
 vim.keymap.set("n", "<A-S-z>", function()
 	require("dap").step_out()
