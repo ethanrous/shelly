@@ -32,6 +32,23 @@ return {
 					logLevel = "DEBUG",
 					env = { CONFIG_NAME = "DEBUG-CORE", APP_ROOT = vim.fn.getcwd() },
 				},
+				{
+					type = "delve",
+					request = "attach",
+					-- program = "./cmd/weblens/main.go",
+					name = "Attach to weblens CORE",
+					-- program = function()
+					-- 	vim.system("./scripts/startWeblens")
+					-- 	print("YOOOOOO")
+					-- 	return ""
+					-- 	-- return "${workspaceFolder}/.build/debug/" .. vim.fn.substitute(vim.fn.getcwd(), "^.*/", "", "")
+					-- end,
+					waitFor = "weblens",
+					showLog = true,
+					logFile = vim.fn.getcwd() .. "/build/logs/debug-weblens-core.log",
+					logLevel = "DEBUG",
+					env = { CONFIG_NAME = "DEBUG-CORE", APP_ROOT = vim.fn.getcwd() },
+				},
 			}
 		end,
 	},
@@ -56,6 +73,7 @@ return {
 			require("nvim-dap-virtual-text").setup({
 				virt_text_win_col = 80,
 				highlight_changed_variables = true,
+				clear_on_continue = true,
 			})
 		end,
 	},

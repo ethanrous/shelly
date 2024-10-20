@@ -72,9 +72,9 @@ return {
 					{ name = "nvim_lsp_signature_help" },
 				},
 				mapping = {
-					["<A-k>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
-					["<A-j>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
-					["<A-Tab>"] = cmp.mapping(function(fallback)
+					["<C-k>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
+					["<C-j>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
+					["<S-Tab>"] = cmp.mapping(function(fallback)
 						if copilot.is_visible() then
 							copilot.accept()
 						elseif luasnip.expand_or_jumpable() then
@@ -86,14 +86,14 @@ return {
 						"i",
 						"s",
 					}),
-					["<A-l>"] = cmp.mapping(function(fallback)
+					["<C-l>"] = cmp.mapping(function(fallback)
 						if cmp.visible() then
 							cmp.confirm()
 						else
 							fallback()
 						end
 					end, { "i", "s" }), --cmp.mapping.confirm({ select = true }),
-					["<A-Enter>"] = cmp.mapping(function(fallback)
+					["<C-Enter>"] = cmp.mapping(function(fallback)
 						if cmp.visible() then
 							cmp.confirm()
 						else

@@ -25,6 +25,13 @@ if [[ ":$PATH:" != *":/Users/ethan/go/bin:"* ]]; then
     export PATH=$PATH:/Users/ethan/go/bin
 fi
 
+weblens() {
+    cd ~/repos/weblens
+    export APP_ROOT=$(pwd)
+    export CONFIG_NAME=TEST
+    open -a /Applications/GoLand.app
+}
+
 # Make tmux play nice with emacs keybindings
 bindkey -e
 

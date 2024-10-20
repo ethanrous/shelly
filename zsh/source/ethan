@@ -3,7 +3,7 @@
 ### Alias ###
 alias dps="sudo docker ps --format \"table {{.ID}} \t{{.Status}} \t{{.Names}}\""
 alias sbp="source $SHELLY/zsh/zsh_main"
-alias ebrc="em $SHELLY"
+alias ebrc="cd $SHELLY && em ."
 alias v='lsd -lth'
 alias va='lsd -ltAh'
 alias n='ping 1.1.1.1'
@@ -202,3 +202,6 @@ port() {
 #     echo "Pulling changes..."
 #     git -C ~/shelly pull 1>/dev/null
 # }
+
+# Danger??
+ulimit -n 4096

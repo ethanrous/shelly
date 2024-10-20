@@ -8,10 +8,10 @@ vim.keymap.set("n", "<Down>", "<Nop>", { silent = true, noremap = true })
 vim.keymap.set("n", "<Left>", "<Nop>", { silent = true, noremap = true })
 vim.keymap.set("n", "<Right>", "<Nop>", { silent = true, noremap = true })
 
-vim.keymap.set("n", "<A-k>", "<Up>", { silent = true, noremap = true })
-vim.keymap.set("n", "<A-j>", "<Down>", { silent = true, noremap = true })
-vim.keymap.set("n", "<A-h>", "<Left>", { silent = true, noremap = true })
-vim.keymap.set("n", "<A-l>", "<Right>", { silent = true, noremap = true })
+-- vim.keymap.set("n", "<A-k>", "<Up>", { silent = true, noremap = true })
+-- vim.keymap.set("n", "<A-j>", "<Down>", { silent = true, noremap = true })
+-- vim.keymap.set("n", "<A-h>", "<Left>", { silent = true, noremap = true })
+-- vim.keymap.set("n", "<A-l>", "<Right>", { silent = true, noremap = true })
 
 -- Text Manipulation --
 
@@ -30,6 +30,11 @@ vim.keymap.set({ "i", "n" }, "<C-y>", "<Esc>pi<Right>", { silent = true, noremap
 
 -- Shift + Alt + Down: "Duplicate Selection"
 vim.keymap.set("v", "<S-A-Down>", "y']i<Down><CR><Up><Esc>p", { silent = true })
+
+-- Auto-indent on new line
+vim.keymap.set("n", "i", function()
+	return string.match(vim.api.nvim_get_current_line(), "%g") == nil and "cc" or "i"
+end, { expr = true, noremap = true })
 
 -- General Navigation o7 --
 
@@ -61,6 +66,10 @@ vim.keymap.set({ "i", "n" }, "<A-s>", "<Esc><C-^>")
 -- Save + exit --
 vim.keymap.set({ "i", "n" }, "<C-q>", "<Esc>:wqa<CR>", { silent = true })
 -- vim.keymap.set("n", "xx", ":update<CR>", { silent = true })
+
+-- Move lines fast
+vim.keymap.set({ "n", "v" }, "<A-j>", "10j", { silent = true })
+vim.keymap.set({ "n", "v" }, "<A-k>", "10k", { silent = true })
 
 -- Selection --
 
@@ -159,9 +168,9 @@ end, { silent = true })
 vim.keymap.set("n", "<A-x>", function()
 	require("dap").down()
 end, { silent = true })
--- vim.keymap.set("n", "<A-s>", function()
--- 	require("dap").step_over()
--- end, { silent = true })
+vim.keymap.set("n", "<A-n>", function()
+	require("dap").step_over()
+end, { silent = true })
 
 vim.keymap.set("n", "<A-S-z>", function()
 	require("dap").step_out()

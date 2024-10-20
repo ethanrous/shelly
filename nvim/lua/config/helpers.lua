@@ -6,7 +6,7 @@ vim.api.nvim_create_user_command("Config", function()
 end, { nargs = 0 })
 
 -- Save all buffers when leaving the window
-autocmd({ "BufLeave", "FocusLost" }, {
+autocmd({ "BufLeave", "FocusLost", "InsertLeave" }, {
 	pattern = "*",
 	callback = function()
 		vim.cmd("wa")
@@ -23,6 +23,11 @@ autocmd("BufEnter", {
 		else
 			vim.cmd("set number")
 		end
+
+		vim.api.nvim_set_hl(0, "DapBreakpoint", { fg = "#eaeaeb", bg = "#ffffff" })
+		vim.api.nvim_set_hl(0, "DapLogPoint", { fg = "#eaeaeb", bg = "#ffffff" })
+		vim.api.nvim_set_hl(0, "DapStopped", { fg = "#eaeaeb", bg = "#ffffff" })
+		vim.api.nvim_set_hl(0, "Visual", { fg = "#000000", bg = "#ffffff" })
 	end,
 })
 
@@ -33,3 +38,18 @@ autocmd("TextYankPost", {
 	end,
 	desc = "Briefly highlight yanked text",
 })
+
+function Dump(o)
+	if type(o) == "table" then
+		local s = "{ "
+		for k, v in pairs(o) do
+			if type(k) ~= "number" then
+				k = '"' .. k .. '"'
+			end
+			s = s .. "[" .. k .. "] = " .. Dump(v) .. ","
+		end
+		return s .. "} "
+	else
+		return tostring(o)
+	end
+end

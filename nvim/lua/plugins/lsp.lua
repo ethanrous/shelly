@@ -77,6 +77,7 @@ return {
 				ensure_installed = {
 					"ts_ls",
 					"gopls",
+					"golangci_lint_ls",
 					"lua_ls",
 					"bashls",
 					"cssls",
@@ -115,6 +116,12 @@ return {
 								telemetry = { enable = false },
 							},
 						},
+					})
+				end,
+				["golangci_lint_ls"] = function()
+					require("lspconfig")["golangci_lint_ls"].setup({
+						capabilities = capabilities,
+						on_attach = on_attach,
 					})
 				end,
 				["gopls"] = function()
