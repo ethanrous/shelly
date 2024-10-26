@@ -1,19 +1,22 @@
 # https://alacritty.org/config-alacritty.html
+[general]
 import = ["~/.config/alacritty/rose-pine-moon.toml"]
 
 [window]
+blur = true
 opacity = 1.0
 decorations = "None"
 startup_mode = "Maximized"
 option_as_alt = "Both"
 
 [font]
-normal = { family = "JetBrainsMono Nerd Font" }
-size = 17
+normal = { family = "JetBrainsMonoNerdFont" }
+# normal = { family = "monospace", style = "Regular" }
+size = 13
 
 [env]
-# TERM = "screen-256color"
-# ALACRITTY = "true"
+TERM = "screen-256color"
+ALACRITTY = "true"
 
 [keyboard]
 bindings = [
