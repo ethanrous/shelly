@@ -51,8 +51,8 @@ g.mapleader = " "
 opt.number = true
 opt.relativenumber = true
 
-o.guicursor = "n-v-c-sm:block,ci-ve:ver25,r-cr-o:hor20,i:block-blinkoff400-blinkon350-Cursor/lCursor"
-vim.api.nvim_set_hl(0, "Visual", { fg = "#000000", bg = "#ffffff" })
+-- o.guicursor = "n-v-c-sm:block,ci-ve:ver25,r-cr-o:hor20,i:block-blinkoff400-blinkon350"
+-- o.guicursor = "n-v-c-sm-i:block,ci-ve:ver25,r-cr-o:hor20"
 
 -- Toggle relative line numbering
 -- vim.cmd("command! ToggleRelLines set relativenumber!")

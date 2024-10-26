@@ -41,12 +41,12 @@ return {
 				},
 			})
 			vim.keymap.set({ "n", "i" }, "<A-S-f>", function()
-				require("fzf-lua").live_grep()
+				require("fzf-lua").live_grep_glob()
 			end, { silent = true, noremap = true })
 
 			vim.keymap.set("v", "<A-S-f>", function()
 				local selection = Get_current_selection()
-				require("fzf-lua").live_grep({ search = selection })
+				require("fzf-lua").live_grep_glob({ search = selection })
 			end, { silent = true, noremap = true })
 		end,
 		keys = {

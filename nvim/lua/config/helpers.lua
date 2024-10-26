@@ -1,5 +1,24 @@
 local autocmd = vim.api.nvim_create_autocmd
 
+local function get_full_hl_by_name(group)
+	local gui_hl = vim.api.nvim_get_hl_by_name(group, true)
+
+	local cterm = vim.api.nvim_get_hl_by_name(group, false)
+	local ctermfg, ctermbg = cterm.foreground, cterm.background
+	cterm.foreground, cterm.background = nil, nil
+
+	return vim.tbl_extend("error", gui_hl, {
+		ctermfg = ctermfg,
+		ctermbg = ctermbg,
+		cterm = cterm,
+	})
+end
+
+local function update_hl(group, vals)
+	local new_vals = vim.tbl_extend("force", vals, get_full_hl_by_name(group))
+	vim.api.nvim_set_hl(0, group, new_vals)
+end
+
 -- Edit config
 vim.api.nvim_create_user_command("Config", function()
 	vim.cmd("edit ~/shelly")
@@ -9,6 +28,9 @@ end, { nargs = 0 })
 autocmd({ "BufLeave", "FocusLost", "InsertLeave" }, {
 	pattern = "*",
 	callback = function()
+		if vim.bo.filetype == "oil" then
+			return
+		end
 		vim.cmd("wa")
 	end,
 })
@@ -27,7 +49,8 @@ autocmd("BufEnter", {
 		vim.api.nvim_set_hl(0, "DapBreakpoint", { fg = "#eaeaeb", bg = "#ffffff" })
 		vim.api.nvim_set_hl(0, "DapLogPoint", { fg = "#eaeaeb", bg = "#ffffff" })
 		vim.api.nvim_set_hl(0, "DapStopped", { fg = "#eaeaeb", bg = "#ffffff" })
-		vim.api.nvim_set_hl(0, "Visual", { fg = "#000000", bg = "#ffffff" })
+		update_hl("Visual", { fg = "#000000", bg = "#ffffff" })
+		update_hl("Normal", { fg = "#ffffff" })
 	end,
 })
 

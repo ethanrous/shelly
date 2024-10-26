@@ -21,21 +21,8 @@ end
 
 return {
 	-- {
-	-- 	"catppuccin/nvim",
-	-- 	lazy = false,
-	-- 	priority = 1000,
-	-- 	name = "catppuccin",
-	-- 	config = function()
-	-- 		require("catppuccin").setup()
-	-- 	end,
+	-- 	"shaunsingh/nord.nvim",
 	-- },
-
-	-- {
-	-- 	"rebelot/kanagawa.nvim",
-	-- 	lazy = false,
-	-- 	priority = 1000,
-	-- },
-	--
 	{
 		"folke/tokyonight.nvim",
 		lazy = false,
@@ -43,15 +30,15 @@ return {
 		name = "tokyonight",
 		opts = {},
 	},
-	--	{
-	--		"rose-pine/neovim",
-	--		name = "rose-pine",
-	--		lazy = false,
-	--		priority = 1000,
-	--		config = function()
-	--			configureTheme("rose-pine")
-	--		end,
-	--	},
+	{
+		"rose-pine/neovim",
+		name = "rose-pine",
+		lazy = false,
+		priority = 1000,
+		-- config = function()
+		-- 	configureTheme("rose-pine")
+		-- end,
+	},
 
 	-- Illuminate words like the one you are hovering
 	{
