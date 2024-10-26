@@ -11,7 +11,7 @@ alias whoamip='curl -s ifconfig.me'
 alias ip='ifconfig | grep 10.10.1'
 alias dd='docker exec -it'
 alias pathls='echo $PATH | tr ":" "\n"'
-alias shelly-sync="$SHELLY/zsh/setup.zsh"
+alias sync="$SHELLY/zsh/setup.zsh"
 
 ### Style Points ###
 export COLOR=white
@@ -117,25 +117,26 @@ diff() {
     /usr/bin/diff <(echo "$thing1") <(echo "$thing2")
 }
 
-em() {
-  if [[ -z "${SSH_CONNECTION}" || "$2" == "--local" ]]; then
-    $EDITOR "$1"
-  else
-    client=$(cut -d' ' -f1 <<<"$SSH_CONNECTION")
-    server=$(cut -d' ' -f3 <<<"$SSH_CONNECTION")
-    proj=$(realpath $1)
-    if [ -f $proj ]; then
-      proj=$(dirname "$proj")
-    fi
-    remote_command="/usr/local/bin/code --folder-uri "vscode-remote://ssh-remote+$HOST$proj""
-    full_command="ssh ethan@$client $remote_command"
-    if [[ "$2" == "--cmd" ]]; then
-      echo $remote_command
-    else
-      eval $full_command
-    fi
-  fi
-}
+alias em="$EDITOR"
+# em() {
+#   if [[ -z "${SSH_CONNECTION}" || "$2" == "--local" ]]; then
+#     $EDITOR "$1"
+#   else
+#     client=$(cut -d' ' -f1 <<<"$SSH_CONNECTION")
+#     server=$(cut -d' ' -f3 <<<"$SSH_CONNECTION")
+#     proj=$(realpath $1)
+#     if [ -f $proj ]; then
+#       proj=$(dirname "$proj")
+#     fi
+#     remote_command="/usr/local/bin/code --folder-uri "vscode-remote://ssh-remote+$HOST$proj""
+#     full_command="ssh ethan@$client $remote_command"
+#     if [[ "$2" == "--cmd" ]]; then
+#       echo $remote_command
+#     else
+#       eval $full_command
+#     fi
+#   fi
+# }
 
 search() {
   DIR=""

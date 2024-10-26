@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 if [ ! -f ~/.zshrc ]; then
-    echo "Making ~/.zshrc"
+    echo "making ~/.zshrc"
     echo "source ~/shelly/zsh/zsh_main" > ~/.zshrc
 fi
 
@@ -11,12 +11,12 @@ if [[ "$SHELLY" == "" ]]; then
 fi
 
 if [ ! -d ~/.config ]; then
-    echo "Making ~/.config"
+    echo "making ~/.config"
     mkdir ~/.config
 fi
 
 rm -rf ~/.config/nvim
-cp -r $SHELLY/nvim ~/.config/nvim
+ln -s $SHELLY/nvim ~/.config/nvim
 
 if [[ "$( ls -i ~/shelly/tmux/tmux.conf | awk '{print $1}' )" != "$( ls -i ~/.tmux.conf | awk '{print $1}' )" ]]; then
     echo "tmux.conf is not the same as the one in shelly, linking from shelly..."
@@ -24,12 +24,20 @@ if [[ "$( ls -i ~/shelly/tmux/tmux.conf | awk '{print $1}' )" != "$( ls -i ~/.tm
     ln $SHELLY/tmux/tmux.conf ~/.tmux.conf
 fi
 
-if [ ! -f "~/.config/alacritty" ]; then
-    mkdir -p ~/.config/alacritty
+if [[ ! -L ~/.config/alacritty ]] || [[ ! -e ~/.config/alacritty ]]; then
+    rm -rf ~/.config/alacritty
+    echo "Linking ~/.config/alacritty"
+    ln -s $SHELLY/alacritty ~/.config/alacritty
 fi
 
-if [[ "$( ls -i ~/shelly/alacritty/alacritty.toml | awk '{print $1}' )" != "$( ls -i ~/.config/alacritty/alacritty.toml | awk '{print $1}' )" ]]; then
-    echo "alacritty.toml is not the same as the one in shelly, linking from shelly..."
+alacrittyName="alacritty-$(uname).toml"
+
+if [[ "$( ls -i $SHELLY/alacritty/$alacrittyName | awk '{print $1}' )" != "$( ls -i ~/.config/alacritty/alacritty.toml | awk '{print $1}' )" ]]; then
+    echo "Using $alacrittyName as alacritty config, linking..."
     rm -f ~/.config/alacritty/alacritty.toml
-    ln $SHELLY/alacritty/alacritty.toml ~/.config/alacritty/alacritty.toml
+    ln $SHELLY/alacritty/$alacrittyName ~/.config/alacritty/alacritty.toml
+fi
+
+if [[ $TMUX != "" ]]; then
+    tmux source-file ~/.tmux.conf
 fi

@@ -107,9 +107,10 @@ end
 
 M.get_statusline = function()
 	local parts = {
-		'%#StatusLineCwd# %{fnamemodify(getcwd(), ":~")}/%*',
+		'%{fnamemodify(getcwd(), ":~")}/%*',
 		"%<",
 		"%{%v:lua.status.get_filename()%}",
+		"%{IsBuffersModified()}%*",
 
 		"%=",
 		"%{%v:lua.status.get_diag_counts()%}",
@@ -330,7 +331,7 @@ M.get_git_branch = function()
 	if isempty(branch) then
 		return ""
 	else
-		return "%#StatusLineGit#   " .. branch .. "  %*"
+		return " " .. branch .. " %*"
 	end
 end
 
@@ -400,7 +401,7 @@ vim.cmd([[
   " [3] if 3 modified and current not, "" if none modified.
   function! IsBuffersModified()
       let cnt = len(filter(getbufinfo(), 'v:val.changed == 1'))
-      return cnt == 0 ? "" : ( &modified ? "[+". (cnt>1?cnt:"") ."]" : "[".cnt."]" )
+      return cnt == 0 ? "" : "*"
   endfunction
 ]])
 

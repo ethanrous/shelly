@@ -23,5 +23,21 @@ else
     source $machine_specific_path && ((count++))
 fi
 
-# test -f "$machine_specific" &&
-# echo "Sourced $count config files from ~/zsh_conf/"
+if [[ $TMUX == "" ]]; then
+    ss=(${(f)"$(tmux list-sessions)"})
+    if [[ ${#ss[*]} == 0 ]]; then
+        tmux new
+    elif [[ ${#ss[*]} == 1 ]]; then
+        tmux attach
+    else
+        echo "Multiple tmux sessions found. Choose one:"
+        tmux list-sessions
+        read -k 1 session
+        if [[ $session == $'\n' ]]; then
+            echo "Not attaching to tmux..."
+        else
+            tmux attach -t $session    
+        fi
+    fi
+fi
+

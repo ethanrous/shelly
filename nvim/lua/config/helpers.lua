@@ -28,7 +28,7 @@ end, { nargs = 0 })
 autocmd({ "BufLeave", "FocusLost", "InsertLeave" }, {
 	pattern = "*",
 	callback = function()
-		if vim.bo.filetype == "oil" then
+		if vim.fn.expand("%:p") == "" then
 			return
 		end
 		vim.cmd("wa")
