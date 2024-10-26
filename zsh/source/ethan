@@ -160,7 +160,7 @@ printProcess() {
 }
 
 killall() {
-	if [[ "$1" == "" ]]
+  if [[ "$1" == "" ]]
   then
     echo "Search string cannot be empty"
   else
@@ -172,6 +172,19 @@ killall() {
   then
   #  pkill -f "$1"
 	fi
+}
+
+getme() {
+  if [[ "$1" == "" ]]
+  then
+    echo "No filename specified"
+    return
+  fi
+
+  files=$(find . -type f -name "*$1*")
+  files=("${(@s:\n:)files}")
+  echo "Reading $files[1]"
+  cat $files[1]
 }
 
 mcsay() {

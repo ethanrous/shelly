@@ -84,7 +84,6 @@ return {
 					"eslint",
 					"html",
 					"jsonls",
-					"ruff",
 					"pyright",
 					"yamlls",
 					"svelte",

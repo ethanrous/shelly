@@ -45,6 +45,7 @@ opt.cursorline = true
 o.showmode = false
 o.breakindent = true
 o.gdefault = true
+o.termguicolors = true
 
 g.mapleader = " "
 

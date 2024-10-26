@@ -25,6 +25,9 @@ return {
 	-- },
 	{
 		"folke/tokyonight.nvim",
+		config = function()
+			configureTheme("tokyonight")
+		end,
 		lazy = false,
 		priority = 1000,
 		name = "tokyonight",
