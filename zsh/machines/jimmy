@@ -4,3 +4,9 @@ export PATH=$PATH:/home/ethan/.cargo/bin
 export PATH=$PATH:/home/ethan/go/bin
 export PATH=$PATH:/usr/local/go/bin
 export PATH=$PATH:/home/linuxbrew/.linuxbrew/bin
+
+alias term="alacritty&; disown && exit" 
+
+if [[ $ALACRITTY != true ]] then
+	alacritty&; disown && exit	
+fi

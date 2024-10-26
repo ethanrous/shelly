@@ -1,5 +1,6 @@
 # https://alacritty.org/config-alacritty.html
-general.import = ["~/.config/alacritty/rose-pine-moon.toml"]
+[general]
+import = ["~/.config/alacritty/rose-pine-moon.toml"]
 
 [window]
 blur = true
@@ -15,6 +16,7 @@ size = 13
 
 [env]
 TERM = "screen-256color"
+ALACRITTY = "true"
 
 [keyboard]
 bindings = [

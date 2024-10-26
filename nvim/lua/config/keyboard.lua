@@ -64,8 +64,8 @@ vim.keymap.set({ "i", "n" }, "<C-q>", "<Esc>:wqa<CR>", { silent = true })
 -- vim.keymap.set("n", "xx", ":update<CR>", { silent = true })
 
 -- Move lines fast
-vim.keymap.set({ "x" }, "<A-j>", "10j", { silent = true })
-vim.keymap.set({ "x" }, "<A-k>", "10k", { silent = true })
+vim.keymap.set({ "v", "n" }, "<A-j>", "10j", { silent = true })
+vim.keymap.set({ "v", "n" }, "<A-k>", "10k", { silent = true })
 
 -- Git --
 vim.keymap.set({ "n", "v" }, "<LEADER>gd", function()
