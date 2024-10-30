@@ -9,7 +9,6 @@ alias du='gdu'
 # [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
 
 export EDITOR='nvim'
-# export EDITOR='code'
 export COLOR='magenta'
 
 if [[ ":$PATH:" != *":$HOME/.cargo/bin:"* ]]; then
