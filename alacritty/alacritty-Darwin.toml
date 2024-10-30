@@ -19,3 +19,4 @@ size = 17
 bindings = [
 { key = "N", mods = "Command", action = "CreateNewWindow"},
 ]
+

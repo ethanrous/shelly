@@ -41,6 +41,8 @@ vim.keymap.set("n", "<C-e>", "$", { silent = true })
 -- vim.keymap.set("i", "<C-a>", "<Esc>^i", { silent = true })
 -- vim.keymap.set("n", "<C-a>", "^", { silent = true })
 
+-- vim.keymap.set("v", "o", "%", { silent = true })
+
 -- Duplicate line
 vim.keymap.set({ "i", "n" }, "<A-S-Down>", "<Esc>mcyyp`cj", { silent = true })
 vim.keymap.set({ "i", "n" }, "<A-S-j>", "<Esc>mcyyp`cj", { silent = true })

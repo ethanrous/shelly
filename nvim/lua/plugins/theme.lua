@@ -23,16 +23,16 @@ return {
 	-- {
 	-- 	"shaunsingh/nord.nvim",
 	-- },
-	{
-		"folke/tokyonight.nvim",
-		config = function()
-			configureTheme("tokyonight")
-		end,
-		lazy = false,
-		priority = 1000,
-		name = "tokyonight",
-		opts = {},
-	},
+	-- {
+	-- 	"folke/tokyonight.nvim",
+	-- 	config = function()
+	-- 		configureTheme("tokyonight")
+	-- 	end,
+	-- 	lazy = false,
+	-- 	priority = 1000,
+	-- 	name = "tokyonight",
+	-- 	opts = {},
+	-- },
 	{
 		"rose-pine/neovim",
 		name = "rose-pine",

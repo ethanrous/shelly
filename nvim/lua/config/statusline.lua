@@ -107,7 +107,7 @@ end
 
 M.get_statusline = function()
 	local parts = {
-		'%{fnamemodify(getcwd(), ":~")}/%*',
+		"%{%v:lua.status.get_path()%}",
 		"%<",
 		"%{%v:lua.status.get_filename()%}",
 		"%{IsBuffersModified()}%*",
@@ -333,6 +333,14 @@ M.get_git_branch = function()
 	else
 		return " " .. branch .. " %*"
 	end
+end
+
+M.get_path = function()
+	local path = require("oil").get_current_dir()
+	if not path then
+		path = vim.fn.getcwd() .. "/"
+	end
+	return vim.fn.fnamemodify(path, ":~")
 end
 
 M.get_git_changes = function()

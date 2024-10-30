@@ -1,108 +1,116 @@
-function Get_current_selection()
-	local vstart = vim.fn.getpos(".")
-	local vend = vim.fn.getpos("v")
-
-	if vstart[2] ~= vend[2] then
-		return ""
-	end
-
-	local line_start = vstart[3]
-	local line_end = vend[3]
-
-	if line_start > line_end then
-		line_start, line_end = line_end, line_start
-	end
-
-	-- or use api.nvim_buf_get_lines
-	return string.sub(vim.fn.getline("."), line_start, line_end)
-end
-
 return {
 	{
-		"ibhagwan/fzf-lua",
-		dependencies = { "nvim-tree/nvim-web-devicons" },
+		"nvim-telescope/telescope.nvim",
+		tag = "0.1.8",
+		dependencies = { "nvim-lua/plenary.nvim" },
 		config = function()
-			require("fzf-lua").setup({
-				keymap = {
-					fzf = false,
-				},
-				hls = { border = "FloatBorder" },
-				oldfiles = {
-					prompt = "History❯ ",
-					cwd_only = false,
-					stat_file = false, -- verify files exist on disk
-					-- can also be a lua function, for example:
-					-- stat_file = require("fzf-lua").utils.file_is_readable,
-					-- stat_file = function() return true end,
-					include_current_session = true, -- include bufs from current session
-				},
-				diagnostics = {
-					severity_only = 1,
+			local actions = require("telescope.actions")
+			local callTelescope = function(input)
+				-- local theme = require("telescope.themes").get_dropdown()
+				-- input(theme)
+				input()
+			end
+
+			vim.keymap.set("n", "gi", function()
+				callTelescope(require("telescope.builtin").lsp_implementations)
+			end, { silent = true })
+
+			vim.keymap.set("n", "gr", function()
+				callTelescope(require("telescope.builtin").lsp_references)
+			end, { silent = true })
+
+			vim.keymap.set("n", "gs", function()
+				callTelescope(require("telescope.builtin").lsp_document_symbols)
+			end, { silent = true })
+
+			vim.keymap.set("n", "gd", function()
+				callTelescope(require("telescope.builtin").lsp_definitions)
+			end, { silent = true })
+
+			vim.keymap.set("n", "<leader>fg", function()
+				callTelescope(require("telescope.builtin").live_grep)
+			end, { silent = true })
+
+			vim.keymap.set("v", "<leader>fg", function()
+				require("telescope.builtin").grep_string()
+			end, { silent = true })
+
+			vim.keymap.set("n", "<leader>gt", function()
+				require("telescope.builtin").builtin()
+			end, { silent = true })
+
+			vim.keymap.set("n", "<leader>gh", function()
+				require("telescope.builtin").highlights()
+			end, { silent = true })
+
+			vim.keymap.set("n", "<leader>gp", function()
+				callTelescope(require("telescope.builtin").diagnostics)
+			end, { silent = true })
+
+			vim.keymap.set("n", "<leader>ff", function()
+				callTelescope(require("telescope.builtin").find_files)
+			end, { silent = true })
+
+			vim.keymap.set("n", "gt", function()
+				callTelescope(require("telescope.builtin").lsp_type_definitions)
+			end, { silent = true })
+
+			vim.keymap.set({ "i", "n" }, "<A-f>", function()
+				callTelescope(require("telescope.builtin").current_buffer_fuzzy_find)
+			end, { silent = true })
+
+			require("telescope").setup({
+				defaults = {
+					layout_strategy = "flex",
+					layout_config = {
+						horizontal = {
+							width = 0.90,
+							height = 0.90,
+							preview_width = 0.5,
+						},
+						vertical = {
+							width = 0.90,
+							height = 0.90,
+							preview_width = 0.5,
+						},
+					},
+
+					path_display = { shorten = 1 },
+					mappings = {
+						i = {
+							["<esc>"] = actions.close,
+							["<C-c>"] = false,
+							["<C-h>"] = "which_key",
+							["<A-j>"] = "move_selection_next",
+							["<A-k>"] = "move_selection_previous",
+							["<A-e>"] = "move_selection_previous",
+							["<C-u>"] = false,
+						},
+					},
 				},
 			})
-			vim.keymap.set({ "n", "i" }, "<A-S-f>", function()
-				require("fzf-lua").live_grep_glob()
-			end, { silent = true, noremap = true })
-
-			vim.keymap.set("v", "<A-S-f>", function()
-				local selection = Get_current_selection()
-				require("fzf-lua").live_grep_glob({ search = selection })
-			end, { silent = true, noremap = true })
 		end,
+	},
+	{
+		"danielfalk/smart-open.nvim",
+		branch = "0.2.x",
+		config = function()
+			require("telescope").load_extension("smart_open")
+		end,
+		dependencies = {
+			"kkharji/sqlite.lua",
+			-- Only required if using match_algorithm fzf
+			{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+			-- Optional.  If installed, native fzy will be used when match_algorithm is fzy
+			{ "nvim-telescope/telescope-fzy-native.nvim" },
+		},
 		keys = {
 			{
 				"<A-e>",
 				function()
-					require("fzf-lua").files({ cwd = vim.fn.getcwd() })
+					require("telescope").extensions.smart_open.smart_open()
 				end,
-				desc = "Find files",
-			},
-			{
-				"<A-a>",
-				function()
-					require("fzf-lua").buffers()
-				end,
-				desc = "View recent files",
-				{ "n", "i" },
-			},
-			-- {
-			-- 	"<S-A-f>",
-			-- 	function()
-			-- 		require("fzf-lua").live_grep()
-			-- 	end,
-			-- 	desc = "Grep files",
-			-- 	{ "n", "i" },
-			-- },
-			-- {
-			-- 	"<S-A-f>",
-			-- 	function()
-			-- 		vim.fn.setreg("", vim.diagnostic.get_next().message)
-			-- 		require("fzf-lua").live_grep()
-			-- 		vim.api.nvim_paste(vim.fn.getreg('"'))
-			-- 	end,
-			-- 	desc = "Grep files",
-			-- 	"v",
-			-- },
-			{
-				"gn",
-				function()
-					require("fzf-lua").lsp_workspace_diagnostics()
-				end,
-				desc = "Workspace diagnostics",
-			},
-			{
-				"gi",
-				function()
-					require("fzf-lua").lsp_implementations()
-				end,
-				desc = "Goto implementations",
-			},
-			{
-				"gr",
-				function()
-					require("fzf-lua").lsp_references()
-				end,
-				desc = "Goto references",
+				desc = "Smart open files",
 			},
 		},
 	},

@@ -37,9 +37,9 @@ end
 local on_attach = function(client, bufnr)
 	local opts = { buffer = bufnr, remap = false }
 
-	vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+	-- vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
 	vim.keymap.set("n", "gh", vim.lsp.buf.hover, opts)
-	vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, opts)
+	-- vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, opts)
 	vim.keymap.set("n", "<LEADER>r", vim.lsp.buf.rename, opts)
 	-- vim.keymap.set("n", "<LEADER>f", function()
 	-- 	vim.lsp.buf.format({ async = true })
@@ -50,7 +50,7 @@ local on_attach = function(client, bufnr)
 	vim.keymap.set({ "n", "i" }, "<A-S-d>", vim.diagnostic.goto_prev, { silent = true })
 	vim.keymap.set("n", "<LEADER>t", toggle_inlay_hint, opts)
 
-	vim.keymap.set("n", "gs", require("nvim-navbuddy").open, { buffer = bufnr, remap = true })
+	-- vim.keymap.set("n", "gs", require("nvim-navbuddy").open, { buffer = bufnr, remap = true })
 end
 
 local lsp = vim.lsp

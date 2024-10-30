@@ -76,3 +76,9 @@ function Dump(o)
 		return tostring(o)
 	end
 end
+
+autocmd("FileType", {
+	pattern = { "qf" },
+	command = [[nnoremap <buffer> <CR> <CR>:cclose<CR>]],
+})
+
