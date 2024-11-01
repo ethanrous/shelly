@@ -74,7 +74,7 @@ return {
 				mapping = {
 					["<A-k>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
 					["<A-j>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
-					["<S-Tab>"] = cmp.mapping(function(fallback)
+					["<A-Tab>"] = cmp.mapping(function(fallback)
 						if copilot.is_visible() then
 							copilot.accept()
 						elseif luasnip.expand_or_jumpable() then

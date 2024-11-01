@@ -12,7 +12,7 @@ normal = { family = "JetBrainsMono Nerd Font" }
 size = 17
 
 [env]
-# TERM = "screen-256color"
+TERM = "screen-256color"
 # ALACRITTY = "true"
 
 [keyboard]

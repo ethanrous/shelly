@@ -37,13 +37,8 @@ end
 local on_attach = function(client, bufnr)
 	local opts = { buffer = bufnr, remap = false }
 
-	-- vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
 	vim.keymap.set("n", "gh", vim.lsp.buf.hover, opts)
-	-- vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, opts)
 	vim.keymap.set("n", "<LEADER>r", vim.lsp.buf.rename, opts)
-	-- vim.keymap.set("n", "<LEADER>f", function()
-	-- 	vim.lsp.buf.format({ async = true })
-	-- end, opts)
 	vim.keymap.set("n", "ge", vim.diagnostic.open_float, opts)
 	vim.keymap.set("n", "<LEADER>d", vim.diagnostic.open_float, { silent = true })
 	vim.keymap.set({ "n", "i" }, "<A-d>", vim.diagnostic.goto_next, { silent = true })

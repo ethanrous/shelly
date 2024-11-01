@@ -25,13 +25,18 @@ vim.api.nvim_create_user_command("Config", function()
 end, { nargs = 0 })
 
 -- Save all buffers when leaving the window
-autocmd({ "BufLeave", "FocusLost", "InsertLeave" }, {
+autocmd({ "BufLeave", "FocusLost" }, {
 	pattern = "*",
 	callback = function()
-		if vim.fn.expand("%:p") == "" then
+		local is_readonly = vim.api.nvim_buf_get_option(vim.api.nvim_win_get_buf(0), "readonly")
+		if is_readonly then
 			return
 		end
-		vim.cmd("wa")
+		local buftype = vim.fn.expand("%:p")
+		if buftype == "" or buftype:find("^oil") ~= nil then
+			return
+		end
+		vim.cmd("silent update")
 	end,
 })
 
@@ -46,11 +51,11 @@ autocmd("BufEnter", {
 			vim.cmd("set number")
 		end
 
-		vim.api.nvim_set_hl(0, "DapBreakpoint", { fg = "#eaeaeb", bg = "#ffffff" })
-		vim.api.nvim_set_hl(0, "DapLogPoint", { fg = "#eaeaeb", bg = "#ffffff" })
-		vim.api.nvim_set_hl(0, "DapStopped", { fg = "#eaeaeb", bg = "#ffffff" })
-		update_hl("Visual", { fg = "#000000", bg = "#ffffff" })
-		update_hl("Normal", { fg = "#ffffff" })
+		-- vim.api.nvim_set_hl(0, "DapBreakpoint", { fg = "#eaeaeb", bg = "#ffffff" })
+		-- vim.api.nvim_set_hl(0, "DapLogPoint", { fg = "#eaeaeb", bg = "#ffffff" })
+		-- vim.api.nvim_set_hl(0, "DapStopped", { fg = "#eaeaeb", bg = "#ffffff" })
+		-- update_hl("Visual", { fg = "#000000", bg = "#ffffff" })
+		-- update_hl("Normal", { fg = "#ffffff" })
 	end,
 })
 
@@ -81,4 +86,3 @@ autocmd("FileType", {
 	pattern = { "qf" },
 	command = [[nnoremap <buffer> <CR> <CR>:cclose<CR>]],
 })
-

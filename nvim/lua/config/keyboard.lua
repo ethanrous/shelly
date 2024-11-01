@@ -123,3 +123,12 @@ end, { silent = true })
 vim.keymap.set("n", "<D-S-d>", function()
 	require("dapui").toggle()
 end, { silent = true })
+
+vim.keymap.set("n", "<LEADER>ff", function()
+	require("conform").format({
+		lsp_fallback = true,
+		async = false,
+		timeout_ms = 500,
+	})
+	vim.cmd("silent update")
+end, { silent = true })

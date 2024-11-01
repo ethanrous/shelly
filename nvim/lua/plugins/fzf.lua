@@ -47,9 +47,9 @@ return {
 				callTelescope(require("telescope.builtin").diagnostics)
 			end, { silent = true })
 
-			vim.keymap.set("n", "<leader>ff", function()
-				callTelescope(require("telescope.builtin").find_files)
-			end, { silent = true })
+			-- vim.keymap.set("n", "<leader>ff", function()
+			-- 	callTelescope(require("telescope.builtin").find_files)
+			-- end, { silent = true })
 
 			vim.keymap.set("n", "gt", function()
 				callTelescope(require("telescope.builtin").lsp_type_definitions)
