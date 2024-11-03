@@ -16,7 +16,7 @@ return {
 			end, { silent = true })
 
 			vim.keymap.set("n", "gr", function()
-				callTelescope(require("telescope.builtin").lsp_references)
+				require("telescope.builtin").lsp_references({ include_declaration = false })
 			end, { silent = true })
 
 			vim.keymap.set("n", "gs", function()

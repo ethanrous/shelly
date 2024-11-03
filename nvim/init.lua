@@ -37,6 +37,10 @@ local TelescopeColor = {
 	TelescopePreviewBorder = { bg = surface, fg = surface },
 	TelescopePreviewTitle = { bg = surface, fg = subtle },
 
+	NormalFloat = { bg = surface, fg = subtle },
+	FloatBorder = { fg = surface, bg = surface },
+	LspSignatureActiveParameter = { fg = text, bg = pine, bold = true },
+
 	OilDir = { fg = foam },
 }
 

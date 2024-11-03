@@ -44,11 +44,11 @@ return {
 						Variable = "󰀫 ",
 					},
 					menu = {
-						buffer = "[buf]",
 						nvim_lsp = "[LSP]",
+						luasnip = "[snip]",
+						buffer = "[buf]",
 						nvim_lua = "[api]",
 						path = "[path]",
-						luasnip = "[snip]",
 					},
 				}),
 			}
@@ -87,13 +87,6 @@ return {
 						"s",
 					}),
 					["<A-l>"] = cmp.mapping(function(fallback)
-						if cmp.visible() then
-							cmp.confirm()
-						else
-							fallback()
-						end
-					end, { "i", "s" }), --cmp.mapping.confirm({ select = true }),
-					["<A-Enter>"] = cmp.mapping(function(fallback)
 						if cmp.visible() then
 							cmp.confirm()
 						else
