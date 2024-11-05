@@ -20,6 +20,9 @@ vim.keymap.set("n", "<C-k>", "dd", { silent = true, noremap = true })
 -- Ctrl + k: "Delete line"
 vim.keymap.set("i", "<C-k>", "<C-[>`^Di<Right>", { silent = true, nowait = true })
 
+-- in visual mode, d: "Delete to register k"
+vim.keymap.set("v", "d", '"kd', { silent = true, nowait = true })
+
 -- Ctrl + y: Emulate emacs yank
 vim.keymap.set({ "i", "n" }, "<C-y>", "<Esc>pi<Right>", { silent = true, noremap = true })
 
@@ -37,16 +40,10 @@ end, { expr = true, noremap = true })
 vim.keymap.set("i", "<C-e>", "<Esc>A", { silent = true })
 vim.keymap.set("n", "<C-e>", "$", { silent = true })
 
--- Ctrl + a: emulate emacs goto start of line
--- vim.keymap.set("i", "<C-a>", "<Esc>^i", { silent = true })
--- vim.keymap.set("n", "<C-a>", "^", { silent = true })
-
--- vim.keymap.set("v", "o", "%", { silent = true })
-
 -- Duplicate line
 vim.keymap.set({ "i", "n" }, "<A-S-Down>", "<Esc>mcyyp`cj", { silent = true })
-vim.keymap.set({ "i", "n" }, "<A-S-j>", "<Esc>mcyyp`cj", { silent = true })
-vim.keymap.set("v", "<A-S-j>", "y']p", { silent = true })
+vim.keymap.set({ "i", "n" }, "<A-S-j>", '<Esc>mc"kyy"kp`cj', { silent = true })
+vim.keymap.set("v", "<A-S-j>", '"ky\']"kp', { silent = true })
 
 -- Default paste to non-volatile register
 vim.keymap.set("x", "p", [["_dP]]) -- Paste without yanking

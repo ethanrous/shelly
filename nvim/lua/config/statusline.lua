@@ -11,8 +11,8 @@ vim.cmd([[
   highlight WinBarHeader     guibg=None guifg=#BBBBBB gui=bold,underline
   highlight WinBarNC         guibg=None guifg=#888888 gui=bold
   highlight WinBarLocation   guibg=None guifg=#888888 gui=bold
-  highlight WinBarModified   guibg=None guifg=#d7d787
-  highlight WinBarGitDirty   guibg=None guifg=#d7afd7
+  highlight WinBarModified   guibg=#2a273f guifg=#3e8fb0
+  highlight WinBarGitDirty   guibg=#2a273f guifg=#3e8fb0
   highlight WinBarIndicator  guibg=None guifg=#5fafd7 gui=bold
   highlight WinBarInactive   guibg=None guibg=#3a3a3a guifg=#777777 gui=bold
 
@@ -59,66 +59,6 @@ vim.cmd([[
     autocmd BufReadPost *.dbout call FindHeader()
   augroup END
 ]])
-
-M.get_neo_tree_context = function()
-	local context = require("neo-tree.ui.selector").get_scrolled_off_node_text()
-	if isempty(context) then
-		return M.active_indicator()
-	else
-		return context
-	end
-	--local source = vim.b.neo_tree_source
-	--if not isempty(source) then
-	--  local label = require("neo-tree").config.source_selector.tab_labels[source]
-	--  if not isempty(label) then
-	--    return label
-	--  end
-	--end
-	--return ""
-end
-
-M.get_header = function()
-	local header_line = vim.b.table_header or 1
-	-- Sets the winbar to the header line of the buffer, but only if the buffer is
-	-- scrolled down so that the header is not visible.
-	local view = vim.fn.winsaveview()
-	if view.topline <= header_line then
-		return nil
-	else
-		-- get the gutter width
-		local winid = vim.api.nvim_get_current_win()
-		local wininfo = vim.fn.getwininfo(winid)
-		if #wininfo == 0 then
-			return nil
-		end
-		local textoff = wininfo[1].textoff
-		local gutter = string.rep(" ", textoff)
-
-		local text = vim.fn.getline(header_line)
-		-- remove the first_col - 1 characters from the beginning of the text
-		if view.leftcol > 1 then
-			text = text:sub(view.leftcol + 1, -1)
-		end
-		-- add textoff to the beginning of the text
-		-- ensure the text is left aligned
-		return gutter .. "%#WinBarHeader#" .. text .. "%*%<"
-	end
-end
-
-M.get_statusline = function()
-	local parts = {
-		"%{%v:lua.status.get_path()%}",
-		"%<",
-		"%{%v:lua.status.get_filename()%}",
-		"%{IsBuffersModified()}%*",
-
-		"%=",
-		"%{%v:lua.status.get_diag_counts()%}",
-		"%{%v:lua.status.get_git_changes()%}",
-		"%{%v:lua.status.get_git_branch()%}",
-	}
-	return table.concat(parts)
-end
 
 -- mode_map copied from:
 -- https://github.com/nvim-lualine/lualine.nvim/blob/5113cdb32f9d9588a2b56de6d1df6e33b06a554a/lua/lualine/utils/mode.lua
@@ -357,7 +297,15 @@ M.get_git_dirty = function()
 	if isempty(dirty) then
 		return " "
 	else
-		return "%#WinBarGitDirty# %*"
+		return "%#WinBarGitDirty#"
+	end
+end
+
+M.get_recording_macro = function()
+	if vim.fn.reg_recording() ~= "" then
+		return "%#StatusLineWarn#" .. "Recording @" .. vim.fn.reg_recording() .. " "
+	else
+		return ""
 	end
 end
 
@@ -404,14 +352,33 @@ vim.cmd([[
       autocmd!
       autocmd BufEnter * let b:git_branch = GitBranch()
   augroup END
-
-  " [+] if only current modified, [+3] if 3 modified including current buffer.
-  " [3] if 3 modified and current not, "" if none modified.
-  function! IsBuffersModified()
-      let cnt = len(filter(getbufinfo(), 'v:val.changed == 1'))
-      return cnt == 0 ? "" : "*"
-  endfunction
 ]])
+
+M.is_buffer_modified = function()
+	local cnt = vim.fn.len(vim.fn.filter(vim.fn.getbufinfo(), "v:val.changed == 1"))
+	if cnt == 0 then
+		return ""
+	else
+		return "%#WinBarModified# *"
+	end
+end
+
+M.get_statusline = function()
+	local parts = {
+		"%{%v:lua.status.get_path()%}",
+		"%<",
+		"%{%v:lua.status.get_filename()%}",
+		"%{%v:lua.status.is_buffer_modified()%}",
+
+		"%=",
+		"%{%v:lua.status.get_recording_macro()%}",
+		"%{%v:lua.status.get_diag_counts()%}",
+		"%{%v:lua.status.get_git_dirty()%}",
+		"%{%v:lua.status.get_git_branch()%}",
+		"%{%v:lua.status.get_git_changes()%}%*",
+	}
+	return table.concat(parts)
+end
 
 _G.status = M
 vim.o.statusline = "%{%v:lua.status.get_statusline()%}"
