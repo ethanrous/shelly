@@ -10,9 +10,6 @@ export PATH=$PATH:/home/linuxbrew/.linuxbrew/bin
 export EDITOR='nvim'
 export COLOR='magenta'
 
-alias term="alacritty&; disown && exit" 
-
-echo $ALACRITTY
-if [[ $ALACRITTY != true ]] && [[ -z $SSH_CONNECTION ]] then
-	# alacritty&; disown && exit	
+if [[ $ALACRITTY != true ]] then
+	alacritty&; disown && exit	
 fi

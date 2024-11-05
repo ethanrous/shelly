@@ -18,10 +18,11 @@ fi
 rm -rf ~/.config/nvim
 ln -s $SHELLY/nvim ~/.config/nvim
 
-if [[ "$( ls -i ~/shelly/tmux/tmux.conf | awk '{print $1}' )" != "$( ls -i ~/.tmux.conf | awk '{print $1}' )" ]]; then
+tmuxName="tmux-$(uname).conf"
+if [[ "$( ls -i $SHELLY/tmux/$tmuxName | awk '{print $1}' )" != "$( ls -i ~/.tmux.conf | awk '{print $1}' )" ]]; then
     echo "tmux.conf is not the same as the one in shelly, linking from shelly..."
     rm -f ~/.tmux.conf
-    ln $SHELLY/tmux/tmux.conf ~/.tmux.conf
+    ln $SHELLY/tmux/$tmuxName ~/.tmux.conf
 fi
 
 if [[ ! -L ~/.config/alacritty ]] || [[ ! -e ~/.config/alacritty ]]; then
@@ -31,7 +32,6 @@ if [[ ! -L ~/.config/alacritty ]] || [[ ! -e ~/.config/alacritty ]]; then
 fi
 
 alacrittyName="alacritty-$(uname).toml"
-
 if [[ "$( ls -i $SHELLY/alacritty/$alacrittyName | awk '{print $1}' )" != "$( ls -i ~/.config/alacritty/alacritty.toml | awk '{print $1}' )" ]]; then
     echo "Using $alacrittyName as alacritty config, linking..."
     rm -f ~/.config/alacritty/alacritty.toml

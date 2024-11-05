@@ -11,11 +11,10 @@ option_as_alt = "Both"
 
 [font]
 normal = { family = "JetBrainsMonoNerdFont" }
-# normal = { family = "monospace", style = "Regular" }
 size = 13
 
 [env]
-TERM = "screen-256color"
+TERM = "xterm-256color"
 ALACRITTY = "true"
 
 [keyboard]
