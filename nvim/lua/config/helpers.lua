@@ -1,26 +1,8 @@
 local autocmd = vim.api.nvim_create_autocmd
-
-local function get_full_hl_by_name(group)
-	local gui_hl = vim.api.nvim_get_hl_by_name(group, true)
-
-	local cterm = vim.api.nvim_get_hl_by_name(group, false)
-	local ctermfg, ctermbg = cterm.foreground, cterm.background
-	cterm.foreground, cterm.background = nil, nil
-
-	return vim.tbl_extend("error", gui_hl, {
-		ctermfg = ctermfg,
-		ctermbg = ctermbg,
-		cterm = cterm,
-	})
-end
-
-local function update_hl(group, vals)
-	local new_vals = vim.tbl_extend("force", vals, get_full_hl_by_name(group))
-	vim.api.nvim_set_hl(0, group, new_vals)
-end
+local usercmd = vim.api.nvim_create_user_command
 
 -- Edit config
-vim.api.nvim_create_user_command("Config", function()
+usercmd("Config", function()
 	vim.cmd("edit ~/shelly")
 end, { nargs = 0 })
 
@@ -28,15 +10,23 @@ end, { nargs = 0 })
 autocmd({ "BufLeave", "FocusLost" }, {
 	pattern = "*",
 	callback = function()
-		local is_readonly = vim.api.nvim_buf_get_option(vim.api.nvim_win_get_buf(0), "readonly")
-		if is_readonly then
+		local buf = vim.api.nvim_get_current_buf()
+		local readonly = vim.api.nvim_buf_get_option(buf, "readonly")
+		if readonly or vim.o.buftype == "acwrite" then
 			return
 		end
-		local buftype = vim.fn.expand("%:p")
-		if buftype == "" or buftype:find("^oil") ~= nil then
+
+		local buf_modified = vim.api.nvim_buf_get_option(buf, "modified")
+		if buf_modified and vim.fn.expand("%s") ~= "" then
+			require("conform").format({
+				lsp_fallback = true,
+				async = true,
+				timeout_ms = 500,
+			})
+
+			vim.cmd("silent update")
 			return
 		end
-		vim.cmd("silent update")
 	end,
 })
 
@@ -44,11 +34,22 @@ autocmd({ "BufLeave", "FocusLost" }, {
 autocmd("BufEnter", {
 	pattern = "*",
 	callback = function()
-		local bufname = vim.fn.expand("%")
-		if string.sub(bufname, 1, 8) == "NvimTree" then
-			vim.cmd("set nonumber")
-		else
-			vim.cmd("set number")
+		vim.cmd("set number")
+		local harpoon = require("harpoon")
+
+		local bufname = vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf())
+		if string.find(bufname, ":/") then
+			return
+		end
+
+		if bufname ~= "" and vim.o.buftype == "" then
+			local item = harpoon:list().config.create_list_item(harpoon:list().config)
+			harpoon:list():remove(item)
+			if Starts_with(item.value, "/Users/") then
+				return
+			end
+			harpoon:list():prepend()
+			harpoon:list():select(1)
 		end
 
 		-- vim.api.nvim_set_hl(0, "DapBreakpoint", { fg = "#eaeaeb", bg = "#ffffff" })
@@ -82,7 +83,48 @@ function Dump(o)
 	end
 end
 
-autocmd("FileType", {
-	pattern = { "qf" },
-	command = [[nnoremap <buffer> <CR> <CR>:cclose<CR>]],
-})
+-- autocmd("FileType", {
+-- 	pattern = { "qf" },
+-- 	command = [[nnoremap <buffer> <CR> <CR>:cclose<CR>]],
+-- })
+
+-- autocmd("ModeChanged", {
+-- 	callback = function()
+-- 		vim.cmd("redraw")
+-- 	end,
+-- })
+
+-- autocmd({ "BufWritePost" }, {
+-- 	pattern = "*.go",
+-- 	command = "!swag fmt %",
+-- })
+
+usercmd("Swag", function()
+	vim.cmd("!swag fmt %")
+end, { nargs = 0 })
+
+usercmd("Help", function(args)
+	if not args["args"] then
+		return
+	end
+	vim.cmd("vert help " .. args["args"])
+end, { nargs = 1 })
+
+function Region_to_text(region)
+	local text = ""
+	local maxcol = vim.v.maxcol
+	for line, cols in vim.spairs(region) do
+		local endcol = cols[2] == maxcol and -1 or cols[2]
+		local chunk = vim.api.nvim_buf_get_text(0, line, cols[1], line, endcol, {})[1]
+		text = ("%s%s\n"):format(text, chunk)
+	end
+	return text
+end
+
+function Starts_with(str, start)
+	return str:sub(1, #start) == start
+end
+
+function Ends_with(str, ending)
+	return ending == "" or str:sub(-#ending) == ending
+end

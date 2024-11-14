@@ -3,10 +3,10 @@
 ------------------------
 
 -- Disable arrow keys
-vim.keymap.set("n", "<Up>", "<Nop>", { silent = true, noremap = true })
-vim.keymap.set("n", "<Down>", "<Nop>", { silent = true, noremap = true })
-vim.keymap.set("n", "<Left>", "<Nop>", { silent = true, noremap = true })
-vim.keymap.set("n", "<Right>", "<Nop>", { silent = true, noremap = true })
+vim.keymap.set({ "n", "v" }, "<Up>", "<Nop>", { silent = true, noremap = true })
+vim.keymap.set({ "n", "v" }, "<Down>", "<Nop>", { silent = true, noremap = true })
+vim.keymap.set({ "n", "v" }, "<Left>", "<Nop>", { silent = true, noremap = true })
+vim.keymap.set({ "n", "v" }, "<Right>", "<Nop>", { silent = true, noremap = true })
 
 -- Text Manipulation --
 
@@ -32,7 +32,7 @@ vim.keymap.set("v", "<S-A-Down>", "y']i<Down><CR><Up><Esc>p", { silent = true })
 -- Auto-indent on new line
 vim.keymap.set("n", "i", function()
 	return string.match(vim.api.nvim_get_current_line(), "%g") == nil and "cc" or "i"
-end, { expr = true, noremap = true })
+end, { expr = true, noremap = true, silent = true })
 
 -- General Navigation o7 --
 
@@ -45,7 +45,6 @@ vim.keymap.set({ "i", "n" }, "<A-S-Down>", "<Esc>mcyyp`cj", { silent = true })
 vim.keymap.set({ "i", "n" }, "<A-S-j>", '<Esc>mc"kyy"kp`cj', { silent = true })
 vim.keymap.set("v", "<A-S-j>", '"ky\']"kp', { silent = true })
 
--- Default paste to non-volatile register
 vim.keymap.set("x", "p", [["_dP]]) -- Paste without yanking
 -- vim.keymap.set("n", "p", '"0p', { silent = true })
 
@@ -55,8 +54,21 @@ vim.keymap.set("n", "gv", "<C-i>", { silent = true })
 
 -- Window/Buffer Control --
 vim.keymap.set({ "i", "n" }, "<C-w><C-l>", "<Esc>:vert split<CR>", { silent = true })
--- vim.keymap.set( { 'i', 'n' }, '<D-e>', require('fzf-lua').files, { desc = "Fzf Files", silent = true})
-vim.keymap.set({ "i", "n" }, "<A-s>", "<Esc><C-^>")
+vim.keymap.set({ "i", "n" }, "<A-s>", function()
+	local harpoon = require("harpoon")
+	if harpoon.ui.win_id ~= nil then
+		vim.api.nvim_feedkeys("\x0d", "m", false)
+		return
+	end
+
+	if harpoon:list()._length > 1 then
+		harpoon:list():select(2)
+		return
+	end
+
+	local key = vim.api.nvim_replace_termcodes("<C-^>", true, false, true)
+	vim.api.nvim_feedkeys(key, "n", false)
+end)
 
 -- Save + exit --
 vim.keymap.set({ "i", "n" }, "<C-q>", "<Esc>:wqa<CR>", { silent = true })
@@ -99,33 +111,55 @@ vim.keymap.set("n", "<A-r>", function()
 	require("dap").run_last()
 end, { silent = true })
 
-vim.keymap.set("n", "<A-z>", function()
+vim.keymap.set("n", "<leader>so", function()
 	require("dap").up()
 end, { silent = true })
-vim.keymap.set("n", "<A-x>", function()
+
+vim.keymap.set("n", "<leader>si", function()
 	require("dap").down()
 end, { silent = true })
+
 vim.keymap.set("n", "<A-n>", function()
 	require("dap").step_over()
 end, { silent = true })
 
-vim.keymap.set("n", "<A-S-z>", function()
+vim.keymap.set("n", "<leader>SO", function()
 	require("dap").step_out()
 end, { silent = true })
-vim.keymap.set("n", "<A-S-x>", function()
+
+vim.keymap.set("n", "<leader>SI", function()
 	require("dap").step_into()
 end, { silent = true })
 
--- Show Debug UI
-vim.keymap.set("n", "<D-S-d>", function()
-	require("dapui").toggle()
+vim.keymap.set("n", "<LEADER>ff", function()
+	-- require("conform").format({
+	-- 	lsp_fallback = true,
+	-- 	async = true,
+	-- 	timeout_ms = 500,
+	-- })
+	vim.cmd("silent update")
 end, { silent = true })
 
-vim.keymap.set("n", "<LEADER>ff", function()
+vim.keymap.set("n", "<LEADER>FF", function()
 	require("conform").format({
 		lsp_fallback = true,
 		async = false,
 		timeout_ms = 500,
 	})
 	vim.cmd("silent update")
+	local buf_name = vim.api.nvim_buf_get_name(0)
+	if buf_name:sub(-#".go") == ".go" then
+		vim.cmd("silent !swag fmt %")
+	end
+end, { silent = true })
+
+-- Open file in Default Application (i.e. pdf in Chrome)
+vim.keymap.set("n", "<leader>fo", function()
+	vim.cmd("silent !open " .. vim.fn.expand("%"))
+end, { silent = true })
+
+-- Search selection in google
+vim.keymap.set("v", "<leader>gs", function()
+	local r = vim.fn.getregion(vim.fn.getpos("v"), vim.fn.getpos("."))
+	vim.cmd("silent !~/shelly/zsh/source/gsearch " .. r[1])
 end, { silent = true })

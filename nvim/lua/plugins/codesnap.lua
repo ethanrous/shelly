@@ -11,6 +11,7 @@ return {
 				show_workspace = true,
 				-- bg_color = "#232136",
 				code_font_family = "JetBrainsMono Nerd Font",
+				mac_window_bar = false,
 			})
 		end,
 		build = "make",

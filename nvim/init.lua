@@ -41,6 +41,12 @@ local TelescopeColor = {
 	FloatBorder = { fg = surface, bg = surface },
 	LspSignatureActiveParameter = { fg = text, bg = pine, bold = true },
 
+	DapUIPlayPause = { fg = pine, bg = surface },
+	DapUIRestartNC = { fg = pine, bg = surface },
+	DapUIPlayPauseNC = { fg = pine, bg = surface },
+	DapUIStepOutNC = { fg = pine, bg = surface },
+	DapUIUnavailableNC = { fg = subtle, bg = surface },
+
 	OilDir = { fg = foam },
 }
 

@@ -17,6 +17,7 @@ return {
 				yaml = { "prettier" },
 				markdown = { "prettier" },
 				graphql = { "prettier" },
+				bash = { "shfmt" },
 				lua = { "stylua" },
 				python = { "isort", "black" },
 				go = { "gofmt", "goimports" },
@@ -26,6 +27,11 @@ return {
 				timeout_ms = 500,
 			},
 		})
+
+		conform.formatters.shfmt = {
+			prepend_args = { "-i", "4" },
+		}
+
 		-- vim.keymap.set("n", "<LEADER>f", function()
 		-- 	conform.format({
 		-- 		lsp_fallback = true,

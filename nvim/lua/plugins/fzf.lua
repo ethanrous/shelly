@@ -2,7 +2,10 @@ return {
 	{
 		"nvim-telescope/telescope.nvim",
 		tag = "0.1.8",
-		dependencies = { "nvim-lua/plenary.nvim" },
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"nvim-telescope/telescope-live-grep-args.nvim",
+		},
 		config = function()
 			local actions = require("telescope.actions")
 			local callTelescope = function(input)
@@ -28,8 +31,13 @@ return {
 			end, { silent = true })
 
 			vim.keymap.set("n", "<leader>fg", function()
-				callTelescope(require("telescope.builtin").live_grep)
+				require("telescope").extensions.live_grep_args.live_grep_args()
+				-- callTelescope(require("telescope.builtin").live_grep)
 			end, { silent = true })
+
+			vim.keymap.set("n", "<leader>tc", function()
+				require("telescope.builtin").resume({ cache_index = 1 })
+			end)
 
 			vim.keymap.set("v", "<leader>fg", function()
 				require("telescope.builtin").grep_string()
@@ -44,7 +52,10 @@ return {
 			end, { silent = true })
 
 			vim.keymap.set("n", "<leader>gp", function()
-				callTelescope(require("telescope.builtin").diagnostics)
+				require("telescope.builtin").diagnostics({
+					show_all = true,
+					severity = { "Error" },
+				})
 			end, { silent = true })
 
 			-- vim.keymap.set("n", "<leader>ff", function()
@@ -59,7 +70,27 @@ return {
 				callTelescope(require("telescope.builtin").current_buffer_fuzzy_find)
 			end, { silent = true })
 
+			local lga_actions = require("telescope-live-grep-args.actions")
 			require("telescope").setup({
+				extensions = {
+					live_grep_args = {
+						auto_quoting = true, -- enable/disable auto-quoting
+						-- define mappings, e.g.
+						mappings = { -- extend mappings
+							i = {
+								["<C-k>"] = lga_actions.quote_prompt(),
+								["<C-i>"] = lga_actions.quote_prompt({ postfix = " --iglob " }),
+								-- freeze the current list and start a fuzzy search in the frozen list
+								-- ["<C-m>"] = actions.to_fuzzy_refine,
+							},
+						},
+						-- ... also accepts theme settings, for example:
+						-- theme = "dropdown", -- use dropdown theme
+						-- theme = { }, -- use own theme spec
+						-- layout_config = { mirror=true }, -- mirror preview pane
+					},
+				},
+
 				defaults = {
 					layout_strategy = "flex",
 					layout_config = {
@@ -76,6 +107,21 @@ return {
 					},
 
 					path_display = { shorten = 1 },
+					vimgrep_arguments = {
+						"rg",
+						"--color=never",
+						"--no-heading",
+						"--with-filename",
+						"--line-number",
+						"--column",
+						"--smart-case",
+						"--ignore-file",
+						".gitignore",
+						"--ignore-file",
+						"swag/",
+						"--ignore-file",
+						"docs/",
+					},
 					mappings = {
 						i = {
 							["<esc>"] = actions.close,
@@ -88,7 +134,10 @@ return {
 						},
 					},
 				},
+				-- file_ignore_patterns = { ".git/", "node_modules/", "vendor/", "swag/", "docs/" },
 			})
+
+			require("telescope").load_extension("live_grep_args")
 		end,
 	},
 	{

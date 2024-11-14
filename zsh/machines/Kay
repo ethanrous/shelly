@@ -3,13 +3,19 @@
 alias lucy='ssh root@lucy'
 alias du='gdu'
 
-# eval $(/opt/homebrew/bin/brew shellenv)
-# export NVM_DIR="$HOME/.nvm"
-# [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
-# [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
 
 export EDITOR='nvim'
 export COLOR='magenta'
+
+add_to_path() {
+    if [[ ":$PATH:" != *":$1:"* ]]; then
+        export PATH=$PATH:$1
+    fi
+}
 
 if [[ ":$PATH:" != *":$HOME/.cargo/bin:"* ]]; then
     export PATH=$PATH:$HOME/.cargo/bin
@@ -23,25 +29,16 @@ fi
 if [[ ":$PATH:" != *":/Users/ethan/go/bin:"* ]]; then
     export PATH=$PATH:/Users/ethan/go/bin
 fi
+if [[ ":$PATH:" != *":/Users/ethan/go/bin:"* ]]; then
+    export PATH=$PATH:/Users/ethan/go/bin
+fi
 
-weblens() {
-    cd ~/repos/weblens
-    export APP_ROOT=$(pwd)
-    export CONFIG_NAME=TEST
-    open -a /Applications/GoLand.app
-}
+add_to_path "/Users/ethan/Library/Python/3.10/bin"
 
 # Make tmux play nice with emacs keybindings
 bindkey -e
 
 export CPATH="/opt/homebrew/include/"
-# export C_INCLUDE_PATH=/opt/homebrew/include
-# export CPLUS_INCLUDE_PATH=/opt/homebrew/include
-# export LD_LIBRARY_PATH=/opt/homebrew/lib
-# export LIBRARY_PATH=/opt/homebrew/lib
-# export LDFLAGS="-L/opt/homebrew/lib"
-# export CPPFLAGS="-I/opt/homebrew/include"
-# export CGO_CFLAGS="-I/opt/homebrew/include"
 
 #PATH=$PATH:$(/usr/local/go/bin/go env GOPATH)/bin
 #PATH="$PATH:/usr/local/mysql/bin"

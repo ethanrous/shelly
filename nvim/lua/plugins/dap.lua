@@ -35,14 +35,7 @@ return {
 				{
 					type = "delve",
 					request = "attach",
-					-- program = "./cmd/weblens/main.go",
 					name = "Attach to weblens CORE",
-					-- program = function()
-					-- 	vim.system("./scripts/startWeblens")
-					-- 	print("YOOOOOO")
-					-- 	return ""
-					-- 	-- return "${workspaceFolder}/.build/debug/" .. vim.fn.substitute(vim.fn.getcwd(), "^.*/", "", "")
-					-- end,
 					waitFor = "weblens",
 					showLog = true,
 					logFile = vim.fn.getcwd() .. "/build/logs/debug-weblens-core.log",
@@ -56,10 +49,48 @@ return {
 		"rcarriga/nvim-dap-ui",
 		config = function()
 			local dapui = require("dapui")
-			dapui.setup()
+			dapui.setup({
+				controls = {
+					enabled = false,
+				},
+				layouts = {
+					{
+						elements = {
+							{
+								id = "scopes",
+								size = 0.25,
+							},
+							{
+								id = "breakpoints",
+								size = 0.25,
+							},
+							{
+								id = "stacks",
+								size = 0.25,
+							},
+							{
+								id = "watches",
+								size = 0.25,
+							},
+						},
+						position = "right",
+						size = 0.4,
+					},
+				},
+			})
+
 			require("neodev").setup({
 				library = { plugins = { "nvim-dap-ui" }, types = true },
 			})
+
+			local dap = require("dap")
+			dap.listeners.before.attach.dapui_config = function()
+				dapui.open()
+			end
+
+			vim.keymap.set("n", "<leader>du", function()
+				dapui.toggle()
+			end, { noremap = true, silent = true })
 
 			vim.keymap.set({ "n", "i" }, "<A-v>", function()
 				dapui.eval()

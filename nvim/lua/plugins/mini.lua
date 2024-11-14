@@ -13,7 +13,11 @@ return {
 		"echasnovski/mini.splitjoin",
 		version = false,
 		config = function()
-			require("mini.splitjoin").setup()
+			local splitjoin = require("mini.splitjoin")
+			splitjoin.setup()
+			vim.keymap.set("n", "<leader>ts", function()
+				splitjoin.toggle()
+			end, { silent = true, desc = "Toggle between single-line and multiline statements" })
 		end,
 	},
 

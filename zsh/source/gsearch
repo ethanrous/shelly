@@ -1,0 +1,22 @@
+#!/bin/zsh
+
+gsearch () {
+    TLD=".com"
+    os="$(uname)"
+    CHROME_BIN=""
+    if [[ "$os" == "Linux" ]]; then
+        CHROME_BIN="firefox"
+    elif [[ "$os" == "Darwin" ]]; then
+        CHROME_BIN="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+    else
+        echo "Unknown OS"
+        exit 1
+    fi
+    encoded=$(python $SHELLY/py/urlencode.py "$1")
+    if [[ ! -z "$encoded" ]] then
+      url="https://www.google${TLD}/search?q=$encoded"
+      "${CHROME_BIN}" "${url}" &> /dev/null
+    fi
+}
+
+gsearch $1

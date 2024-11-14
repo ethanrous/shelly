@@ -41,6 +41,7 @@ opt.title = true
 opt.ttimeoutlen = 0
 opt.undofile = true
 opt.cursorline = true
+opt.inccommand = "nosplit"
 
 o.showmode = false
 o.breakindent = true

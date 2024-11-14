@@ -148,11 +148,71 @@ M.get_filename = function()
 		if vim.b.db_name then
 			return icon .. "%t [" .. vim.b.db_name .. "]"
 		else
-			return icon .. " %t"
+			return icon .. "%#WinBarModified# %t"
 		end
 	else
 		return " %t"
 	end
+end
+
+M.get_harpoon_index = function()
+	local h_list = require("harpoon"):list()
+	local h_list_items = h_list.items
+	local index = h_list._index
+	local number_of_items = h_list._length
+	if index == nil or number_of_items < 2 then
+		return ""
+	end
+
+	local display_index = 2
+	if vim.fn.expand("%:.") ~= h_list_items[1].value then
+		display_index = 1
+	end
+
+	local next = h_list_items[display_index].value
+	local slash = string.find(next, "/[^/]*$")
+	if slash == nil then
+		return "[" .. next .. "]"
+	end
+
+	next = string.sub(next, slash + 1)
+	return "[" .. next .. "]"
+
+	-- local index_str = " "
+	-- if vim.fn.expand("%:.") == h_list_items[index].value then
+	-- 	index_str = "%#WinBarModified# "
+	-- end
+	--
+	-- local current = h_list_items[index].value
+	-- if current ~= "" then
+	-- 	local slash = string.find(current, "/[^/]*$")
+	-- 	current = string.sub(current, slash + 1)
+	-- end
+	--
+	-- index_str = index_str .. current .. " "
+	--
+	-- local prev = ""
+	-- local next = ""
+	-- if index ~= number_of_items then
+	-- 	next = h_list_items[index + 1].value
+	-- end
+	--
+	-- if index ~= 1 then
+	-- 	prev = h_list_items[index - 1].value
+	-- end
+	--
+	-- if prev ~= "" then
+	-- 	local slash = string.find(prev, "/[^/]*$")
+	-- 	prev = string.sub(prev, slash + 1)
+	-- end
+	--
+	-- if next ~= "" then
+	-- 	local slash = string.find(next, "/[^/]*$")
+	-- 	next = string.sub(next, slash + 1)
+	-- end
+	--
+	-- local ret = " " .. prev .. " <" .. index_str .. "%*> " .. next
+	-- return ret
 end
 
 local make_two_char = function(symbol)
@@ -355,21 +415,27 @@ vim.cmd([[
 ]])
 
 M.is_buffer_modified = function()
-	local cnt = vim.fn.len(vim.fn.filter(vim.fn.getbufinfo(), "v:val.changed == 1"))
-	if cnt == 0 then
-		return ""
+	local buf = vim.api.nvim_get_current_buf()
+	local buf_modified = vim.api.nvim_buf_get_option(buf, "modified")
+	if buf_modified then
+		return "%#WinBarModified# *%*"
 	else
-		return "%#WinBarModified# *"
+		return "  "
 	end
 end
 
 M.get_statusline = function()
+	local filename = vim.fn.expand("%:t")
+	if Starts_with(filename, "DAP") then
+		return filename
+	end
 	local parts = {
 		"%{%v:lua.status.get_path()%}",
 		"%<",
-		"%{%v:lua.status.get_filename()%}",
-		"%{%v:lua.status.is_buffer_modified()%}",
-
+		"%#WinBarModified# %{%v:lua.status.get_filename()%}%*",
+		"%{%v:lua.status.is_buffer_modified()%} ",
+		-- "%=",
+		"%{%v:lua.status.get_harpoon_index()%}",
 		"%=",
 		"%{%v:lua.status.get_recording_macro()%}",
 		"%{%v:lua.status.get_diag_counts()%}",
@@ -382,14 +448,5 @@ end
 
 _G.status = M
 vim.o.statusline = "%{%v:lua.status.get_statusline()%}"
-
-vim.api.nvim_create_autocmd({ "ModeChanged" }, {
-	pattern = "*",
-	callback = function()
-		vim.schedule(function()
-			vim.cmd("redraw")
-		end)
-	end,
-})
 
 return M

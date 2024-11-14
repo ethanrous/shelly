@@ -39,11 +39,25 @@ local on_attach = function(client, bufnr)
 
 	vim.keymap.set("n", "gh", vim.lsp.buf.hover, opts)
 	vim.keymap.set("n", "<LEADER>r", vim.lsp.buf.rename, opts)
-	vim.keymap.set("n", "ge", vim.diagnostic.open_float, opts)
+	vim.keymap.set("n", "gE", vim.diagnostic.open_float, opts)
+	vim.keymap.set("n", "ge", vim.diagnostic.goto_next, { silent = true })
 	vim.keymap.set("n", "<LEADER>d", vim.diagnostic.open_float, { silent = true })
-	vim.keymap.set({ "n", "i" }, "<A-d>", vim.diagnostic.goto_next, { silent = true })
 	vim.keymap.set({ "n", "i" }, "<A-S-d>", vim.diagnostic.goto_prev, { silent = true })
 	vim.keymap.set("n", "<LEADER>t", toggle_inlay_hint, opts)
+
+	vim.lsp.handlers["textDocument/hover"] = function(_, result, ctx, config)
+		config = config or {}
+		config.focus_id = ctx.method
+		if not (result and result.contents) then
+			return
+		end
+		local markdown_lines = vim.lsp.util.convert_input_to_markdown_lines(result.contents)
+		markdown_lines = vim.lsp.util.trim_empty_lines(markdown_lines)
+		if vim.tbl_isempty(markdown_lines) then
+			return
+		end
+		return vim.lsp.util.open_floating_preview(markdown_lines, "markdown", config)
+	end
 
 	-- vim.keymap.set("n", "gs", require("nvim-navbuddy").open, { buffer = bufnr, remap = true })
 end
@@ -112,6 +126,9 @@ return {
 						},
 					})
 				end,
+				["bashls"] = function()
+					require("lspconfig")["bashls"].setup({})
+				end,
 				["golangci_lint_ls"] = function()
 					require("lspconfig")["golangci_lint_ls"].setup({
 						capabilities = capabilities,
@@ -163,6 +180,10 @@ return {
 							},
 							typescript = {
 								inlayHints = inlayHints,
+								referencesCodeLens = {
+									enabled = true,
+									includeImports = false,
+								},
 							},
 						},
 						commands = {
@@ -198,4 +219,41 @@ return {
 	-- 	version = "^4",
 	-- 	ft = { "rust" },
 	-- },
+
+	-- Go config
+	{
+		"olexsmir/gopher.nvim",
+		ft = "go",
+		-- branch = "develop", -- if you want develop branch
+		-- keep in mind, it might break everything
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"nvim-treesitter/nvim-treesitter",
+			"mfussenegger/nvim-dap", -- (optional) only if you use `gopher.dap`
+		},
+		config = function()
+			require("gopher").setup({
+				gotag = {
+					transform = "camelcase",
+				},
+			})
+		end,
+		-- (optional) will update plugin's deps on every update
+		build = function()
+			vim.cmd.GoInstallDeps()
+		end,
+		---@type gopher.Config
+		opts = {},
+	},
+	{
+		"ThePrimeagen/refactoring.nvim",
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"nvim-treesitter/nvim-treesitter",
+		},
+		lazy = false,
+		config = function()
+			require("refactoring").setup()
+		end,
+	},
 }
