@@ -9,6 +9,7 @@ option_as_alt = "Both"
 
 [font]
 normal = { family = "JetBrainsMono Nerd Font" }
+# normal = { family = "FiraMono Nerd Font" }
 size = 17
 
 [env]

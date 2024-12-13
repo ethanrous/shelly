@@ -30,33 +30,31 @@ autocmd({ "BufLeave", "FocusLost" }, {
 	end,
 })
 
--- Set the number column "on" for all buffers (except NvimTree)
 autocmd("BufEnter", {
 	pattern = "*",
 	callback = function()
-		vim.cmd("set number")
 		local harpoon = require("harpoon")
 
 		local bufname = vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf())
-		if string.find(bufname, ":/") then
+		if
+			bufname == ""
+			or vim.o.buftype ~= ""
+			or bufname == "."
+			or string.find(bufname, ":/")
+			or string.find(bufname, "node_modules")
+		then
 			return
 		end
 
-		if bufname ~= "" and vim.o.buftype == "" then
-			local item = harpoon:list().config.create_list_item(harpoon:list().config)
-			harpoon:list():remove(item)
-			if Starts_with(item.value, "/Users/") then
-				return
-			end
-			harpoon:list():prepend()
-			harpoon:list():select(1)
-		end
+		vim.cmd("set number")
 
-		-- vim.api.nvim_set_hl(0, "DapBreakpoint", { fg = "#eaeaeb", bg = "#ffffff" })
-		-- vim.api.nvim_set_hl(0, "DapLogPoint", { fg = "#eaeaeb", bg = "#ffffff" })
-		-- vim.api.nvim_set_hl(0, "DapStopped", { fg = "#eaeaeb", bg = "#ffffff" })
-		-- update_hl("Visual", { fg = "#000000", bg = "#ffffff" })
-		-- update_hl("Normal", { fg = "#ffffff" })
+		local item = harpoon:list().config.create_list_item(harpoon:list().config)
+		harpoon:list():remove(item)
+		if Starts_with(item.value, "/Users/") then
+			return
+		end
+		harpoon:list():prepend()
+		harpoon:list():select(1)
 	end,
 })
 
@@ -90,7 +88,7 @@ end
 
 -- autocmd("ModeChanged", {
 -- 	callback = function()
--- 		vim.cmd("redraw")
+-- 		require("codecompanion.config").strategies.inline.keymaps.reject_change()
 -- 	end,
 -- })
 

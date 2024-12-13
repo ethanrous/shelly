@@ -1,46 +1,38 @@
-local function configureTheme(name)
-	vim.cmd("colorscheme " .. name)
-
-	local function onBufEnter()
-		vim.opt.termguicolors = true
-		vim.wo.fillchars = "eob: "
-		vim.cmd("silent! syntax enable")
-		vim.cmd("silent! hi Normal guibg=NONE ctermbg=NONE")
-		vim.cmd("silent! hi EndOfBuffer guibg=NONE ctermbg=NONE")
-
-		-- Line numbers highlight fg
-		vim.cmd("silent! hi LineNr guifg=#b4befe")
-	end
-
-	local augroup = vim.api.nvim_create_augroup("ThemeConfig", {})
-	vim.api.nvim_create_autocmd("BufEnter", {
-		group = augroup,
-		callback = onBufEnter,
-	})
-end
+Colors = {
+	Base = "#232136",
+	Surface = "#2a273f",
+	Overlay = "#393552",
+	Muted = "#6e6a86",
+	Subtle = "#908caa",
+	Text = "#e0def4",
+	Love = "#eb6f92",
+	Gold = "#f6c177",
+	Rose = "#ea9a97",
+	Pine = "#3e8fb0",
+	PineMuted = "#345B78",
+	Foam = "#9ccfd8",
+	Iris = "#c4a7e7",
+	HighlightLow = "#2a283e",
+	HighlightMed = "#44415a",
+	HighlightHigh = "#56526e",
+}
 
 return {
-	-- {
-	-- 	"shaunsingh/nord.nvim",
-	-- },
-	-- {
-	-- 	"folke/tokyonight.nvim",
-	-- 	config = function()
-	-- 		configureTheme("tokyonight")
-	-- 	end,
-	-- 	lazy = false,
-	-- 	priority = 1000,
-	-- 	name = "tokyonight",
-	-- 	opts = {},
-	-- },
 	{
 		"rose-pine/neovim",
 		name = "rose-pine",
 		lazy = false,
 		priority = 1000,
-		-- config = function()
-		-- 	configureTheme("rose-pine")
-		-- end,
+		config = function()
+			require("rose-pine").setup({
+				variant = "moon",
+				dark_variant = "moon",
+				groups = {
+					border = "pine",
+				},
+			})
+			vim.cmd("colorscheme rose-pine-moon")
+		end,
 	},
 
 	-- Illuminate words like the one you are hovering
@@ -60,6 +52,11 @@ return {
 			})
 		end,
 		event = "BufEnter",
+	},
+
+	{
+		"nvim-lualine/lualine.nvim",
+		dependencies = { "nvim-tree/nvim-web-devicons" },
 	},
 
 	-- Highlight color codes with their code #ff00ff

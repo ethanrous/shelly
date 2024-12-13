@@ -92,4 +92,22 @@ return {
 			require("mini.surround").setup()
 		end,
 	},
+
+	{
+		"echasnovski/mini.diff",
+		version = false,
+		config = function()
+			require("mini.diff").setup()
+		end,
+	},
+
+	{
+		"echasnovski/mini.misc",
+		version = false,
+		config = function()
+			vim.keymap.set("n", "<leader>wz", function()
+				require("mini.misc").zoom()
+			end, { silent = true })
+		end,
+	},
 }

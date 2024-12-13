@@ -1,6 +1,6 @@
 return {
 	"stevearc/conform.nvim",
-	-- event = { "BufReadPre", "BufNewFile" },
+	lazy = false,
 	config = function()
 		local conform = require("conform")
 
@@ -18,6 +18,7 @@ return {
 				markdown = { "prettier" },
 				graphql = { "prettier" },
 				bash = { "shfmt" },
+				zsh = { "shfmt" },
 				lua = { "stylua" },
 				python = { "isort", "black" },
 				go = { "gofmt", "goimports" },
@@ -31,13 +32,5 @@ return {
 		conform.formatters.shfmt = {
 			prepend_args = { "-i", "4" },
 		}
-
-		-- vim.keymap.set("n", "<LEADER>f", function()
-		-- 	conform.format({
-		-- 		lsp_fallback = true,
-		-- 		async = false,
-		-- 		timeout_ms = 500,
-		-- 	})
-		-- end, { desc = "Format file or range (in visual mode)" })
 	end,
 }

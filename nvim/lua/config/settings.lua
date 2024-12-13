@@ -2,6 +2,9 @@ local opt = vim.opt
 local g = vim.g
 local o = vim.o
 
+g.node_host_prog = "~/.nvm/versions/node/v22.11.0/lib/node_modules"
+g.sass_recommended_style = 0
+
 -- General settings
 opt.autoread = true
 opt.autoindent = true
@@ -23,7 +26,6 @@ opt.mouse = "a"
 opt.number = true
 opt.ruler = false
 opt.scrolloff = 20
-opt.shiftwidth = 4
 
 -- Danny. Why. Why would you use this. I hate it.
 -- opt.showmatch = true
@@ -34,14 +36,18 @@ opt.smartcase = true
 opt.smartindent = true
 opt.smarttab = true
 opt.softtabstop = 4
+opt.shiftwidth = 4
+opt.tabstop = 4
 opt.splitright = true
 opt.swapfile = false
-opt.tabstop = 4
 opt.title = true
 opt.ttimeoutlen = 0
 opt.undofile = true
-opt.cursorline = true
 opt.inccommand = "nosplit"
+
+o.cursorline = true
+opt.cursorline = true
+o.cursorlineopt = "both"
 
 o.showmode = false
 o.breakindent = true

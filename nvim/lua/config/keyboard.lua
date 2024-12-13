@@ -95,41 +95,6 @@ end, { silent = true })
 -- TODO - https://neovim.io/doc/user/quickref.html#Q_to
 
 -- Debugging --
-vim.keymap.set("n", "<A-b>", function()
-	require("dap").toggle_breakpoint()
-end, { silent = true })
-
--- Continue / Run to Cursor
-vim.keymap.set("n", "<A-c>", function()
-	require("dap").continue()
-end, { silent = true })
-vim.keymap.set("n", "<A-S-c>", function()
-	require("dap").run_to_cursor()
-end, { silent = true })
-
-vim.keymap.set("n", "<A-r>", function()
-	require("dap").run_last()
-end, { silent = true })
-
-vim.keymap.set("n", "<leader>so", function()
-	require("dap").up()
-end, { silent = true })
-
-vim.keymap.set("n", "<leader>si", function()
-	require("dap").down()
-end, { silent = true })
-
-vim.keymap.set("n", "<A-n>", function()
-	require("dap").step_over()
-end, { silent = true })
-
-vim.keymap.set("n", "<leader>SO", function()
-	require("dap").step_out()
-end, { silent = true })
-
-vim.keymap.set("n", "<leader>SI", function()
-	require("dap").step_into()
-end, { silent = true })
 
 vim.keymap.set("n", "<LEADER>ff", function()
 	-- require("conform").format({
@@ -163,3 +128,8 @@ vim.keymap.set("v", "<leader>gs", function()
 	local r = vim.fn.getregion(vim.fn.getpos("v"), vim.fn.getpos("."))
 	vim.cmd("silent !~/shelly/zsh/source/gsearch " .. r[1])
 end, { silent = true })
+
+-- vim.keymap.set("n", "<leader>fg", function()
+-- 	require("telescope").extensions.live_grep_args.live_grep_args()
+-- 	-- callTelescope(require("telescope.builtin").live_grep)
+-- end, { silent = true })

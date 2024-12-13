@@ -5,6 +5,7 @@ return {
 		config = function()
 			local oil = require("oil")
 			oil.setup({
+				show_hidden = true,
 				use_default_keymaps = false,
 				delete_to_trash = true,
 				skip_confirm_for_simple_edits = true,

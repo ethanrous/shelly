@@ -1,3 +1,4 @@
+#!/bin/zsh
 
 # This is the entry point for reading the zsh configuration.
 # It sources all files in ~/shelly/zsh_conf/ and ~/shelly/zsh_machine_$HOST
@@ -8,6 +9,10 @@ count=0
 for f in $SHELLY/zsh/source/*
 do
     ((count++))
+	if [[ $SHELLY_DEBUG == "true" ]]; then
+		echo "SOURCING $f"
+	fi
+
     source $f
 done
 
@@ -20,8 +25,17 @@ if [ ! -f $machine_specific_path ]; then
         touch $machine_specific_path && echo "Created machine specific config at $machine_specific_path"
     fi
 else
+	if [[ $SHELLY_DEBUG == "true" ]]; then
+		echo "SOURCING $machine_specific_path"
+	fi
+
     source $machine_specific_path && ((count++))
 fi
+
+if [[ $SHELLY_DEBUG == "true" ]]; then
+	echo "Sourced $count files"
+fi
+
 
 if [[ $TMUX == "" ]]; then
     ss=(${(f)"$(tmux list-sessions)"})

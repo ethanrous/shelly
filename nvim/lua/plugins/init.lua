@@ -1,10 +1,9 @@
 return {
 	"nvim-lua/plenary.nvim", -- Necessary dependency
-	"nvim-tree/nvim-web-devicons", -- Cool icons
 	"farmergreg/vim-lastplace", -- Remember last cursor place
 	"nvim-lua/popup.nvim", -- Necessary dependency
 	"christoomey/vim-tmux-navigator",
-	"tpope/vim-sleuth", -- Automatically adjust tab size
+	-- "tpope/vim-sleuth", -- Automatically adjust tab size
 
 	-- Case sensitive search and replace
 	{
@@ -20,15 +19,17 @@ return {
 
 	-- Markdown previewer
 	{
-		"iamcco/markdown-preview.nvim",
-		cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
-		build = "cd app && yarn install",
-		init = function()
-			vim.g.mkdp_filetypes = { "markdown" }
-		end,
-		ft = { "markdown" },
+		"MeanderingProgrammer/render-markdown.nvim",
+		-- dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.nvim' }, -- if you use the mini.nvim suite
+		dependencies = {
+			"nvim-treesitter/nvim-treesitter",
+			-- "echasnovski/mini.icons"
+		}, -- if you use standalone mini plugins
+		-- dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' }, -- if you prefer nvim-web-devicons
+		---@module 'render-markdown'
+		---@type render.md.UserConfig
+		opts = {},
 	},
-
 	-- Highlights for
 	-- TODO: test
 	-- FIX: test

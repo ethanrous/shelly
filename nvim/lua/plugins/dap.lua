@@ -1,16 +1,54 @@
 return {
 	{
 		"mfussenegger/nvim-dap",
+		dependencies = { "mfussenegger/nvim-dap-python", "leoluz/nvim-dap-go" },
 		config = function()
-			require("dap").adapters.delve = {
-				type = "server",
-				port = "${port}",
-				executable = {
-					command = "dlv",
-					args = { "dap", "-l", "127.0.0.1:${port}" },
+			local dap = require("dap")
+			dap.set_log_level("TRACE")
+
+			require("dap-python").setup("python3")
+			require("dap-go")
+
+			dap.adapters.delve = function(callback, config)
+				local delve_args = { "debug", "--log-output=delve.log" }
+				if config.mode == "remote" and config.request == "attach" then
+					callback({
+						type = "server",
+						host = config.host or "127.0.0.1",
+						port = config.port or "38697",
+					})
+				else
+					callback({
+						type = "server",
+						port = "${port}",
+						executable = {
+							command = "dlv",
+							args = {
+								"dap",
+								"-l",
+								"127.0.0.1:${port}",
+								"debug",
+								"--log",
+								"--log-dest=./build/logs/go-dlv.log",
+							},
+							detached = vim.fn.has("win32") == 0,
+						},
+					})
+				end
+			end
+
+			dap.configurations.python = {
+				{
+					type = "python",
+					request = "launch",
+					name = "Launch file",
+					program = "${file}",
+					pythonPath = function()
+						return "/usr/bin/python3"
+					end,
 				},
 			}
-			require("dap").configurations.go = {
+			dap.configurations.go = {
 				{
 					type = "delve",
 					request = "launch",
@@ -20,7 +58,10 @@ return {
 					showLog = true,
 					logFile = vim.fn.getcwd() .. "/build/logs/go-dap.log",
 					logLevel = "DEBUG",
-					env = { CONFIG_NAME = "TEST", APP_ROOT = vim.fn.getcwd() },
+					env = {
+						APP_ROOT = vim.fn.getcwd(),
+						WEBLENS_LOG_FILE = "./build/logs/weblens-test.log",
+					},
 				},
 				{
 					type = "delve",
@@ -29,8 +70,14 @@ return {
 					name = "Run weblens CORE",
 					showLog = true,
 					logFile = vim.fn.getcwd() .. "/build/logs/go-dap.log",
-					logLevel = "DEBUG",
-					env = { CONFIG_NAME = "DEBUG-CORE", APP_ROOT = vim.fn.getcwd() },
+					env = {
+						CONFIG_NAME = "DEBUG-CORE",
+						APP_ROOT = vim.fn.getcwd(),
+						PKG_CONFIG_PATH = "/opt/homebrew/Cellar/vips/8.16.0/lib/pkgconfig/",
+						CGO_CFLAGS_ALLOW = "-Xpreprocessor",
+						WEBLENS_LOG_FILE = "./build/logs/weblens.log",
+						LOG_LEVEL = "trace",
+					},
 				},
 				{
 					type = "delve",
@@ -38,11 +85,43 @@ return {
 					name = "Attach to weblens CORE",
 					waitFor = "weblens",
 					showLog = true,
-					logFile = vim.fn.getcwd() .. "/build/logs/debug-weblens-core.log",
-					logLevel = "DEBUG",
-					env = { CONFIG_NAME = "DEBUG-CORE", APP_ROOT = vim.fn.getcwd() },
 				},
 			}
+			vim.keymap.set("n", "<leader>db", function()
+				dap.toggle_breakpoint()
+			end, { silent = true })
+
+			-- Continue / Run to Cursor
+			vim.keymap.set("n", "<leader>dc", function()
+				dap.continue()
+			end, { silent = true })
+			vim.keymap.set("n", "<A-S-c>", function()
+				dap.run_to_cursor()
+			end, { silent = true })
+
+			vim.keymap.set("n", "<A-r>", function()
+				dap.run_last()
+			end, { silent = true })
+
+			vim.keymap.set("n", "<leader>so", function()
+				dap.up()
+			end, { silent = true })
+
+			vim.keymap.set("n", "<leader>si", function()
+				dap.down()
+			end, { silent = true })
+
+			vim.keymap.set("n", "<A-n>", function()
+				dap.step_over()
+			end, { silent = true })
+
+			vim.keymap.set("n", "<leader>SO", function()
+				dap.step_out()
+			end, { silent = true })
+
+			vim.keymap.set("n", "<leader>SI", function()
+				dap.step_into()
+			end, { silent = true })
 		end,
 	},
 	{
@@ -92,7 +171,7 @@ return {
 				dapui.toggle()
 			end, { noremap = true, silent = true })
 
-			vim.keymap.set({ "n", "i" }, "<A-v>", function()
+			vim.keymap.set("n", "<leader>dv", function()
 				dapui.eval()
 			end, { noremap = true, silent = true })
 		end,

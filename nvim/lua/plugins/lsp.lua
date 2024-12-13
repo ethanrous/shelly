@@ -67,7 +67,7 @@ local make_client_capabilities = lsp.protocol.make_client_capabilities
 function lsp.protocol.make_client_capabilities()
 	local caps = make_client_capabilities()
 	if not (caps.workspace or {}).didChangeWatchedFiles then
-		vim.notify("lsp capability didChangeWatchedFiles is already disabled", vim.log.levels.WARN)
+		-- vim.notify("lsp capability didChangeWatchedFiles is already disabled", vim.log.levels.WARN)
 	else
 		caps.workspace.didChangeWatchedFiles = nil
 	end
@@ -103,6 +103,26 @@ return {
 			local capabilities = vim.lsp.protocol.make_client_capabilities()
 			capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
 
+			-- local null_ls = require("null-ls")
+			-- local cspell = require("cspell")
+			-- local config = {
+			-- 	config_file_preferred_name = "cspell.json",
+			-- 	cspell_config_dirs = { "~/.config/" },
+			-- 	diagnostics_postprocess = function(diagnostic)
+			-- 		diagnostic.severity = vim.diagnostic.severity.HINT
+			-- 	end,
+			-- }
+			--
+			-- null_ls.setup({
+			-- 	log_level = "warn",
+			-- 	fallback_severity = vim.diagnostic.severity.HINT,
+			--
+			-- 	sources = {
+			-- 		cspell.diagnostics.with({ config = config }),
+			-- 		cspell.code_actions.with({ config = config }),
+			-- 	},
+			-- })
+
 			require("mason-lspconfig").setup_handlers({
 				function(server_name) -- default handler (optional)
 					require("lspconfig")[server_name].setup({
@@ -129,6 +149,24 @@ return {
 				["bashls"] = function()
 					require("lspconfig")["bashls"].setup({})
 				end,
+				["cssls"] = function()
+					require("lspconfig")["cssls"].setup({
+						settings = {
+							less = {
+								validate = true,
+							},
+							scss = {
+								validate = true,
+								lint = {
+									unknownAtRules = "ignore",
+								},
+							},
+							css = {
+								validate = true,
+							},
+						},
+					})
+				end,
 				["golangci_lint_ls"] = function()
 					require("lspconfig")["golangci_lint_ls"].setup({
 						capabilities = capabilities,
@@ -154,13 +192,13 @@ return {
 						},
 					})
 				end,
-				["clangd"] = function()
-					require("lspconfig")["clangd"].setup({
-						on_attach = function(client, bufnr)
-							navbuddy.attach(client, bufnr)
-						end,
-					})
-				end,
+				-- ["clangd"] = function()
+				-- 	require("lspconfig")["clangd"].setup({
+				-- 		on_attach = function(client, bufnr)
+				-- 			navbuddy.attach(client, bufnr)
+				-- 		end,
+				-- 	})
+				-- end,
 				["ts_ls"] = function()
 					local inlayHints = {
 						includeInlayEnumMemberValueHints = true,
@@ -193,6 +231,17 @@ return {
 							},
 						},
 					})
+					require("lspconfig")["cssmodules_ls"].setup({
+						-- provide your on_attach to bind keymappings
+						-- on_attach = custom_on_attach,
+						on_attach = function(client)
+							-- avoid accepting `definitionProvider` responses from this LSP
+							-- client.server_capabilities.definitionProvider = false
+						end,
+						init_options = {
+							camelCase = false,
+						},
+					})
 				end,
 			})
 		end,
@@ -208,9 +257,19 @@ return {
 			-- LSP Support
 			"williamboman/mason.nvim",
 			"williamboman/mason-lspconfig.nvim",
+			"davidmh/cspell.nvim",
+			"nvimtools/none-ls.nvim",
+			"nvimtools/none-ls-extras.nvim",
 		},
 		event = "BufEnter",
-		opts = { inlay_hints = { enabled = true } },
+		opts = {
+			inlay_hints = { enabled = true },
+			servers = {
+				clangd = {
+					mason = false,
+				},
+			},
+		},
 	},
 
 	-- Rust config

@@ -5,8 +5,10 @@ return {
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 			"nvim-telescope/telescope-live-grep-args.nvim",
+			"nvim-telescope/telescope-ui-select.nvim",
 		},
 		config = function()
+			local telescope = require("telescope")
 			local actions = require("telescope.actions")
 			local callTelescope = function(input)
 				-- local theme = require("telescope.themes").get_dropdown()
@@ -31,8 +33,7 @@ return {
 			end, { silent = true })
 
 			vim.keymap.set("n", "<leader>fg", function()
-				require("telescope").extensions.live_grep_args.live_grep_args()
-				-- callTelescope(require("telescope.builtin").live_grep)
+				telescope.extensions.live_grep_args.live_grep_args()
 			end, { silent = true })
 
 			vim.keymap.set("n", "<leader>tc", function()
@@ -58,10 +59,6 @@ return {
 				})
 			end, { silent = true })
 
-			-- vim.keymap.set("n", "<leader>ff", function()
-			-- 	callTelescope(require("telescope.builtin").find_files)
-			-- end, { silent = true })
-
 			vim.keymap.set("n", "gt", function()
 				callTelescope(require("telescope.builtin").lsp_type_definitions)
 			end, { silent = true })
@@ -71,7 +68,7 @@ return {
 			end, { silent = true })
 
 			local lga_actions = require("telescope-live-grep-args.actions")
-			require("telescope").setup({
+			telescope.setup({
 				extensions = {
 					live_grep_args = {
 						auto_quoting = true, -- enable/disable auto-quoting
@@ -88,6 +85,11 @@ return {
 						-- theme = "dropdown", -- use dropdown theme
 						-- theme = { }, -- use own theme spec
 						-- layout_config = { mirror=true }, -- mirror preview pane
+					},
+					["ui-select"] = {
+						require("telescope.themes").get_dropdown({
+							-- even more opts
+						}),
 					},
 				},
 
@@ -137,7 +139,8 @@ return {
 				-- file_ignore_patterns = { ".git/", "node_modules/", "vendor/", "swag/", "docs/" },
 			})
 
-			require("telescope").load_extension("live_grep_args")
+			telescope.load_extension("live_grep_args")
+			telescope.load_extension("ui-select")
 		end,
 	},
 	{
@@ -157,8 +160,9 @@ return {
 			{
 				"<A-e>",
 				function()
-					require("telescope").extensions.smart_open.smart_open()
+					require("telescope").extensions.smart_open.smart_open({ cwd_only = true })
 				end,
+				mode = { "n", "v" },
 				desc = "Smart open files",
 			},
 		},

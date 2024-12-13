@@ -19,10 +19,11 @@ rm -rf ~/.config/nvim
 ln -s $SHELLY/nvim ~/.config/nvim
 
 tmuxName="tmux-$(uname).conf"
-if [[ "$( ls -i $SHELLY/tmux/$tmuxName | awk '{print $1}' )" != "$( ls -i ~/.tmux.conf | awk '{print $1}' )" ]]; then
+if [[ "$( ls -i $SHELLY/tmux/$tmuxName | awk '{print $1}' )" != "$( ls -i ~/.config/tmux/tmux.conf | awk '{print $1}' )" ]]; then
     echo "tmux.conf is not the same as the one in shelly, linking from shelly..."
-    rm -f ~/.tmux.conf
-    ln $SHELLY/tmux/$tmuxName ~/.tmux.conf
+    rm -f ~/.config/tmux/tmux.conf
+    ln $SHELLY/tmux/$tmuxName ~/.config/tmux/tmux.conf
+ 
 fi
 
 if [[ ! -L ~/.config/alacritty ]] || [[ ! -e ~/.config/alacritty ]]; then

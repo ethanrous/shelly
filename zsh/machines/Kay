@@ -3,10 +3,28 @@
 alias lucy='ssh root@lucy'
 alias du='gdu'
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+nvm() {
+    unset -f nvm
+    if [[ -z $NVM_DIR ]]; then
+        export NVM_DIR="$HOME/.nvm"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
+        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
+    fi
+    nvm $@
+}
+unset NVM_DIR
 
+colorscript() {
+    ~/repos/external/shell-color-scripts/colorscript.sh $@
+}
+
+fix_vips() {
+    vipsVersion=$(ls /opt/homebrew/Cellar/vips/)
+    echo "Fixing vips version $vipsVersion"
+    ln -s /opt/homebrew/Cellar/vips/$vipsVersion/lib/pkgconfig/vips.pc /opt/homebrew/lib/pkgconfig/vips.pc
+}
+
+alias start-docker='open -a Docker'
 
 export EDITOR='nvim'
 export COLOR='magenta'
@@ -17,28 +35,20 @@ add_to_path() {
     fi
 }
 
-if [[ ":$PATH:" != *":$HOME/.cargo/bin:"* ]]; then
-    export PATH=$PATH:$HOME/.cargo/bin
-fi
-if [[ ":$PATH:" != *":/Library/Frameworks/Python.framework/Versions/3.10/bin:"* ]]; then
-    export PATH=$PATH:/Library/Frameworks/Python.framework/Versions/3.10/bin
-fi
-if [[ ":$PATH:" != *":/opt/homebrew/bin:"* ]]; then
-    export PATH=$PATH:/opt/homebrew/bin
-fi
-if [[ ":$PATH:" != *":/Users/ethan/go/bin:"* ]]; then
-    export PATH=$PATH:/Users/ethan/go/bin
-fi
-if [[ ":$PATH:" != *":/Users/ethan/go/bin:"* ]]; then
-    export PATH=$PATH:/Users/ethan/go/bin
-fi
-
+add_to_path "$HOME/.cargo/bin"
+add_to_path "/Library/Frameworks/Python.framework/Versions/3.10/bin"
+add_to_path "/opt/homebrew/bin"
+add_to_path "/Users/ethan/go/bin"
 add_to_path "/Users/ethan/Library/Python/3.10/bin"
 
 # Make tmux play nice with emacs keybindings
 bindkey -e
 
 export CPATH="/opt/homebrew/include/"
+
+if ! pgrep ollama-copilot >/dev/null; then
+    ollama-copilot >/dev/null 2>&1 &
+fi
 
 #PATH=$PATH:$(/usr/local/go/bin/go env GOPATH)/bin
 #PATH="$PATH:/usr/local/mysql/bin"
