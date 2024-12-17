@@ -22,6 +22,7 @@ tmuxName="tmux-$(uname).conf"
 if [[ "$( ls -i $SHELLY/tmux/$tmuxName | awk '{print $1}' )" != "$( ls -i ~/.config/tmux/tmux.conf | awk '{print $1}' )" ]]; then
     echo "tmux.conf is not the same as the one in shelly, linking from shelly..."
     rm -f ~/.config/tmux/tmux.conf
+	mkdir -p ~/.config/tmux
     ln $SHELLY/tmux/$tmuxName ~/.config/tmux/tmux.conf
  
 fi
