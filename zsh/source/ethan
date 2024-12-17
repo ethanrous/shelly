@@ -123,6 +123,10 @@ port() {
     lsof -n -i4TCP:$1 | grep LISTEN
 }
 
+kill-ollama() {
+	pkill ollama-copilot
+}
+
 if which ollama-copilot >/dev/null; then
     if ! pgrep ollama-copilot >/dev/null; then
         echo "Launching ollama-copilot"
