@@ -11,7 +11,7 @@ option_as_alt = "Both"
 
 [font]
 normal = { family = "JetBrainsMonoNerdFont" }
-size = 13
+size = 15
 
 [env]
 TERM = "xterm-256color"

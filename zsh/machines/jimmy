@@ -10,6 +10,8 @@ export PATH=$PATH:/home/linuxbrew/.linuxbrew/bin
 export EDITOR='nvim'
 export COLOR='magenta'
 
+bindkey -e
+
 if [[ $ALACRITTY != true ]] then
 	alacritty&; disown && exit	
 fi
