@@ -4,12 +4,11 @@
 alias dps="sudo docker ps --format \"table {{.ID}} \t{{.Status}} \t{{.Names}}\""
 alias sbp="source $SHELLY/zsh/zsh_main"
 alias ebrc="cd $SHELLY && em ."
-alias v='lsd -lth'
-alias va='lsd -ltAh'
+alias v='ls -l'
+alias va='ls -la'
 alias n='ping 1.1.1.1'
 alias whoamip='curl -s ifconfig.me'
 alias ip='ifconfig | grep 10.10.1'
-alias dd='docker exec -it'
 alias pathls='echo $PATH | tr ":" "\n"'
 alias sync="$SHELLY/zsh/setup.zsh"
 
@@ -38,109 +37,24 @@ function run_cmd() {
   fi
 }
 
+dock() {
+	docker exec -it $1 bash
+}
+
 cat() {
     run_cmd /bin/cat ${@: -1}
 }
 
-lsd() {
+ls() {
     # $1 is the options for lsd, use $2
-    if [[ -f /usr/local/bin/lsd ]]; then
-      run_cmd lsd $1 ${@: -1}
+    if which eza >/dev/null 2>&1; then
+      run_cmd eza $1 ${@: -1}
     else
       run_cmd ls $1 ${@: -1}
     fi
 }
 
-copy_to_lucy() {
-  # Copy from $1 local path to remote $2 on lucy
-  # Do NOT include root@lucy:/... in either argument
-  if [[ $HOST == "lucy" ]]; then
-    cp -r $1 $2
-  else
-    scp -r $1 root@lucy:$2
-  fi
-}
-
-copy_from_lucy() {
-  # Copy from $1 lucy path local $2
-  # Do NOT include root@lucy:/... in either argument
-  if [[ $HOST == "lucy" ]]; then
-    cp -r $1 $2
-  else
-    scp -r root@lucy:$1 $2
-  fi
-}
-
-cat_lucy() {
-  # Cat on lucy
-  if [[ $HOST == "lucy" ]]; then
-    cat $1
-  else
-    cat root@lucy:$1
-  fi
-}
-
-# Old - using git now, which I should have been doing all along
-# pullsh() {
-#   cat_output=$(for file in $SHELLY/zsh/zsh_*; do cat $file; done)
-#   local_sha=$(echo $cat_output | shasum)
-#   remote_sha=$(cat_lucy /mnt/user/config/shell/shelly/hash)
-#   if [[ "$local_sha" == "$remote_sha" ]]; then
-#     echo "Already up to date"
-#   else
-#     echo "Pulling changes"
-#     copy_from_lucy /mnt/user/config/shell/shelly ~
-#   fi
-#   sbp
-# }
-# 
-# pushsh() {
-#   # Update SHA
-#   cat_output=$(for file in ~/shelly/zsh_*; do cat $file; done)
-#   local_sha=$(echo $cat_output | shasum)
-#   echo $local_sha > ~/shelly/hash
-# 
-#   if [[ $local_sha == $(cat_lucy /mnt/user/config/shell/shelly/hash) ]]; then
-#     echo "Remote and local hash already match"
-#   else
-#     echo "New hash: $local_sha"
-#     echo $local_sha > ~/shelly/hash
-#     copy_to_lucy ~/shelly /mnt/user/config/shell/
-#   fi
-# }
-
-diff() {
-    thing1=$1
-    thing2=$2
-    if [[ -f "$thing1" || "$thing1" =~ ^([^@]+@)?([^:]+):(.*)$ ]]; then
-        thing1=$(cat $thing1)
-    fi
-    if [[ -f "$thing2" || "$thing2" =~ ^([^@]+@)?([^:]+):(.*)$ ]]; then
-        thing2=$(cat $thing2)
-    fi
-    /usr/bin/diff <(echo "$thing1") <(echo "$thing2")
-}
-
 alias em="$EDITOR"
-# em() {
-#   if [[ -z "${SSH_CONNECTION}" || "$2" == "--local" ]]; then
-#     $EDITOR "$1"
-#   else
-#     client=$(cut -d' ' -f1 <<<"$SSH_CONNECTION")
-#     server=$(cut -d' ' -f3 <<<"$SSH_CONNECTION")
-#     proj=$(realpath $1)
-#     if [ -f $proj ]; then
-#       proj=$(dirname "$proj")
-#     fi
-#     remote_command="/usr/local/bin/code --folder-uri "vscode-remote://ssh-remote+$HOST$proj""
-#     full_command="ssh ethan@$client $remote_command"
-#     if [[ "$2" == "--cmd" ]]; then
-#       echo $remote_command
-#     else
-#       eval $full_command
-#     fi
-#   fi
-# }
 
 search() {
   DIR=""
@@ -209,17 +123,17 @@ port() {
     lsof -n -i4TCP:$1 | grep LISTEN
 }
 
-# Again, should have been using git all along
-# shelly-sync() {
-#     if [[ `git -C ~/shelly status --porcelain` ]]; then
-#         git -C ~/shelly add . && git -C ~/shelly commit -m "sync from $HOST" && git -C ~/shelly push
-#     else
-#         echo "No changes to push"
-#     fi
-# 
-#     echo "Pulling changes..."
-#     git -C ~/shelly pull 1>/dev/null
-# }
+if which ollama-copilot >/dev/null; then
+    if ! pgrep ollama-copilot >/dev/null; then
+        echo "Launching ollama-copilot"
+		export OLLAMA_HOST="lucy.arcticnet:11439"
+		mkdir -p ~/.config/logs
+        ollama-copilot >~/.config/logs/ollama.log 2>&1 &
+
+        # Detatch from new process
+        disown
+    fi
+fi
 
 # Danger??
 ulimit -n 4096

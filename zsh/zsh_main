@@ -37,7 +37,7 @@ if [[ $SHELLY_DEBUG == "true" ]]; then
 fi
 
 
-if [[ $TMUX == "" ]]; then
+if [[ $TMUX == "" ]] &&  which tmux; then
     ss=(${(f)"$(tmux list-sessions)"})
     if [[ ${#ss[*]} == 0 ]]; then
         tmux new

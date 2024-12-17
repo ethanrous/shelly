@@ -3,6 +3,7 @@
 alias lucy='ssh root@lucy'
 alias du='gdu'
 
+# Wrap nvm in setup function so initial shell load doesn't take forever
 nvm() {
     unset -f nvm
     if [[ -z $NVM_DIR ]]; then
@@ -45,12 +46,3 @@ add_to_path "/Users/ethan/Library/Python/3.10/bin"
 bindkey -e
 
 export CPATH="/opt/homebrew/include/"
-
-if ! pgrep ollama-copilot >/dev/null; then
-    ollama-copilot >/dev/null 2>&1 &
-fi
-
-#PATH=$PATH:$(/usr/local/go/bin/go env GOPATH)/bin
-#PATH="$PATH:/usr/local/mysql/bin"
-#PATH="$PATH:/Library/Frameworks/Python.framework/Versions/3.10/bin"
-#PATH="$PATH:/opt/homebrew/Cellar/mongosh/1.8.0/bin"

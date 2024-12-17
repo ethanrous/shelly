@@ -81,22 +81,6 @@ function Dump(o)
 	end
 end
 
--- autocmd("FileType", {
--- 	pattern = { "qf" },
--- 	command = [[nnoremap <buffer> <CR> <CR>:cclose<CR>]],
--- })
-
--- autocmd("ModeChanged", {
--- 	callback = function()
--- 		require("codecompanion.config").strategies.inline.keymaps.reject_change()
--- 	end,
--- })
-
--- autocmd({ "BufWritePost" }, {
--- 	pattern = "*.go",
--- 	command = "!swag fmt %",
--- })
-
 usercmd("Swag", function()
 	vim.cmd("!swag fmt %")
 end, { nargs = 0 })
