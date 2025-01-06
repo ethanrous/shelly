@@ -129,7 +129,6 @@ return {
 
 			-- Snippets
 			"L3MON4D3/LuaSnip",
-			"rafamadriz/friendly-snippets",
 		},
 		version = "v0.7.6",
 		opts = {
@@ -156,6 +155,9 @@ return {
 				default = { "lsp", "path", "snippets", "buffer" },
 				-- optionally disable cmdline completions
 				-- cmdline = {},
+			},
+			signature = {
+				enabled = true,
 			},
 		},
 	},

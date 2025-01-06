@@ -31,8 +31,17 @@ export EDITOR='nvim'
 export COLOR='magenta'
 
 add_to_path() {
+    if [[ $2 == true ]]; then
+        if [[ $SHELLY_DEBUG == true ]]; then
+            echo "Overriding PATH entry $1 to be at top"
+        fi
+        export PATH=$(echo $PATH | sed -r -e "s|${1}:?||g")
+    fi
     if [[ ":$PATH:" != *":$1:"* ]]; then
-        export PATH=$PATH:$1
+        if [[ $SHELLY_DEBUG == true ]]; then
+            echo "Adding $1 to PATH"
+        fi
+        export PATH=$1:$PATH
     fi
 }
 
@@ -41,6 +50,9 @@ add_to_path "/Library/Frameworks/Python.framework/Versions/3.10/bin"
 add_to_path "/opt/homebrew/bin"
 add_to_path "/Users/ethan/go/bin"
 add_to_path "/Users/ethan/Library/Python/3.10/bin"
+add_to_path "/opt/homebrew/bin" true
+add_to_path "/opt/homebrew/sbin" true
+add_to_path "/opt/homebrew/opt/python@3.12/libexec/bin" true
 
 # Make tmux play nice with emacs keybindings
 bindkey -e

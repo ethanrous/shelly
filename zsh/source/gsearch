@@ -1,6 +1,4 @@
-#!/bin/zsh
-
-gsearch () {
+gsearch() {
     TLD=".com"
     os="$(uname)"
     CHROME_BIN=""
@@ -13,10 +11,10 @@ gsearch () {
         exit 1
     fi
     encoded=$(python $SHELLY/py/urlencode.py "$1")
-    if [[ ! -z "$encoded" ]] then
-      url="https://www.google${TLD}/search?q=$encoded"
-      "${CHROME_BIN}" "${url}" &> /dev/null
+    if [[ ! -z "$encoded" ]]; then
+        url="https://www.google${TLD}/search?q=$encoded"
+        "${CHROME_BIN}" "${url}" &>/dev/null
     fi
 }
 
-gsearch $1
+# export -f gsearch
