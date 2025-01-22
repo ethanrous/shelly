@@ -1,8 +1,27 @@
 #!/bin/zsh
 
+# Make sure to source shelly when new shell is launched
 if [ ! -f ~/.zshrc ]; then
     echo "making ~/.zshrc"
-    echo "source ~/shelly/zsh/zsh_main" > ~/.zshrc
+    echo "source ~/shelly/zsh/zsh_main" >~/.zshrc
+fi
+
+isMac=false
+if [[ "$(uname)" == "Darwin" ]]; then
+    isMac=true
+fi
+
+if ! which cargo &>/dev/null; then
+    echo "Installing Rust"
+    curl https://sh.rustup.rs -sSf | sh
+fi
+
+# Install homebrew
+if $isMac && ! which brew &>/dev/null; then
+    echo "Installing homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+    brew install eza btop neovim nvm wezterm
 fi
 
 if [[ "$SHELLY" == "" ]]; then
@@ -18,28 +37,31 @@ fi
 rm -rf ~/.config/nvim
 ln -s $SHELLY/nvim ~/.config/nvim
 
-tmuxName="tmux-$(uname).conf"
-if [[ "$( ls -i $SHELLY/tmux/$tmuxName | awk '{print $1}' )" != "$( ls -i ~/.config/tmux/tmux.conf | awk '{print $1}' )" ]]; then
-    echo "tmux.conf is not the same as the one in shelly, linking from shelly..."
-    rm -f ~/.config/tmux/tmux.conf
-	mkdir -p ~/.config/tmux
-    ln $SHELLY/tmux/$tmuxName ~/.config/tmux/tmux.conf
- 
-fi
+linkConfigFile() {
+    src=$1
+    dest=$2
 
-if [[ ! -L ~/.config/alacritty ]] || [[ ! -e ~/.config/alacritty ]]; then
-    rm -rf ~/.config/alacritty
-    echo "Linking ~/.config/alacritty"
-    ln -s $SHELLY/alacritty ~/.config/alacritty
-fi
+    if [[ ! -e $dest ]] || [[ "$(/bin/ls -i $src | awk '{print $1}')" != "$(/bin/ls -i $dest | awk '{print $1}')" ]]; then
+        echo "Linking $dest..."
+        rm -f $dest
+        mkdir -p $(dirname $dest)
+        ln $src $dest
 
-alacrittyName="alacritty-$(uname).toml"
-if [[ "$( ls -i $SHELLY/alacritty/$alacrittyName | awk '{print $1}' )" != "$( ls -i ~/.config/alacritty/alacritty.toml | awk '{print $1}' )" ]]; then
-    echo "Using $alacrittyName as alacritty config, linking..."
-    rm -f ~/.config/alacritty/alacritty.toml
-    ln $SHELLY/alacritty/$alacrittyName ~/.config/alacritty/alacritty.toml
-fi
+    fi
+}
+
+tmuxName=tmux-$(uname).conf
+tmuxPath=~/.config/tmux/tmux.conf
+linkConfigFile $SHELLY/tmux/$tmuxName $tmuxPath
+
+alacrittyName=alacritty-$(uname).toml
+alacrittyPath=~/.config/alacritty/alacritty.toml
+linkConfigFile $SHELLY/alacritty/$alacrittyName $alacrittyPath
+
+weztermName=wezterm.lua
+weztermPath=~/.config/wezterm/wezterm.lua
+linkConfigFile $SHELLY/wezterm/$weztermName $weztermPath
 
 if [[ $TMUX != "" ]]; then
-    tmux source-file ~/.tmux.conf
+    tmux source-file $tmuxPath
 fi

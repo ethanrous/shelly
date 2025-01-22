@@ -6,12 +6,11 @@
 export SHELLY=$HOME/shelly
 
 count=0
-for f in $SHELLY/zsh/source/*
-do
+for f in $SHELLY/zsh/source/*; do
     ((count++))
-	if [[ $SHELLY_DEBUG == "true" ]]; then
-		echo "SOURCING $f"
-	fi
+    if [[ $SHELLY_DEBUG == "true" ]]; then
+        echo "SOURCING $f"
+    fi
 
     source $f
 done
@@ -24,34 +23,34 @@ if [ ! -f $machine_specific_path ]; then
     if [[ $a == "y" ]]; then
         touch $machine_specific_path && echo "Created machine specific config at $machine_specific_path"
     fi
+    sync
 else
-	if [[ $SHELLY_DEBUG == "true" ]]; then
-		echo "SOURCING $machine_specific_path"
-	fi
+    if [[ $SHELLY_DEBUG == "true" ]]; then
+        echo "SOURCING $machine_specific_path"
+    fi
 
     source $machine_specific_path && ((count++))
 fi
 
 if [[ $SHELLY_DEBUG == "true" ]]; then
-	echo "Sourced $count files"
+    echo "Sourced $count files"
 fi
 
-
-if [[ $TMUX == "" ]] &&  which tmux; then
-    ss=(${(f)"$(tmux list-sessions)"})
-    if [[ ${#ss[*]} == 0 ]]; then
-        tmux new
-    elif [[ ${#ss[*]} == 1 ]]; then
-        tmux attach
-    else
-        echo "Multiple tmux sessions found. Choose one:"
-        tmux list-sessions
-        read -k 1 session
-        if [[ $session == $'\n' ]]; then
-            echo "Not attaching to tmux..."
-        else
-            tmux attach -t $session    
-        fi
-    fi
-fi
-
+# if [[ tmux == "" ]] &&  which tmux; then
+#     ss=(${(f)"$(tmux list-sessions)"})
+#     if [[ ${#ss[*]} == 0 ]]; then
+#         tmux new
+#     elif [[ ${#ss[*]} == 1 ]]; then
+#         tmux attach
+#     else
+#         echo "Multiple tmux sessions found. Choose one:"
+#         tmux list-sessions
+#         read -k 1 session
+#         if [[ $session == $'\n' ]]; then
+#             echo "Not attaching to tmux..."
+#         else
+#             tmux attach -t $session
+#         fi
+#     fi
+# fi
+#
