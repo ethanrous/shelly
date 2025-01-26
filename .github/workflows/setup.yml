@@ -8,4 +8,6 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - run: ./zsh/setup.zsh
+      - run: |
+          source ./zsh/zsh_main
+          ./zsh/setup.zsh
