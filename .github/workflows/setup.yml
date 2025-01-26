@@ -11,3 +11,4 @@ jobs:
       - run: |
           source ./zsh/zsh_main
           ./zsh/setup.zsh
+        shell: zsh {0}
