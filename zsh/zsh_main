@@ -3,7 +3,7 @@
 # This is the entry point for reading the zsh configuration.
 # It sources all files in ~/shelly/zsh_conf/ and ~/shelly/zsh_machine_$HOST
 
-export SHELLY=$HOME/shelly
+export SHELLY=$(dirname ${0:a:h})
 
 count=0
 for f in $SHELLY/zsh/source/*; do
