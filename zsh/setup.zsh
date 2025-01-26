@@ -21,7 +21,7 @@ if $isMac && ! which brew &>/dev/null; then
     echo "Installing homebrew..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-    brew install eza btop neovim nvm wezterm
+    brew install eza btop neovim nvm wezterm ripgrep
 fi
 
 if [[ "$SHELLY" == "" ]]; then

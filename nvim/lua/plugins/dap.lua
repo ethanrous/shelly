@@ -99,7 +99,7 @@ return {
 				dap.run_to_cursor()
 			end, { silent = true })
 
-			vim.keymap.set("n", "<A-r>", function()
+			vim.keymap.set("n", "<leader>dr", function()
 				dap.run_last()
 			end, { silent = true })
 

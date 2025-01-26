@@ -97,11 +97,11 @@ end, { silent = true })
 -- Debugging --
 
 vim.keymap.set("n", "<LEADER>ff", function()
-	-- require("conform").format({
-	-- 	lsp_fallback = true,
-	-- 	async = true,
-	-- 	timeout_ms = 500,
-	-- })
+	-- local buf_name = vim.api.nvim_buf_get_name(0)
+	-- if buf_name:sub(-#".tsx") == ".tsx" then
+	-- 	vim.cmd("silent OrganizeImports")
+	-- end
+
 	vim.cmd("silent update")
 end, { silent = true })
 
