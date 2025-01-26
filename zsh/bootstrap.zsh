@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-echo "BOOTSTRAPPING SHLLY"
+echo "BOOTSTRAPPING SEHLLY"
 
 if ! which brew &>/dev/null; then
     # Install homebrew
@@ -11,17 +11,17 @@ if ! which brew &>/dev/null; then
 fi
 
 if [[ ! -e ~/.ssh/ ]]; then
-    ssh-keygen -t ecdsa -b 521
+    mkdir -p ~/.ssh/
+    ssh-keygen -t ecdsa -b 521 -f $HOME/.ssh/id_ecdsa -N ""
+    printf "\n"
     cat ~/.ssh/id_ecdsa.pub
-
-    printf "\n\n Add above key to github...\n"
-    read -sk1 "?Press any key when finished to continue: "
+    printf "\n"
+    read -sk1 "?Add above key to Github. Press any key when finished to continue... "
+    printf "\n"
 fi
 
 if [[ ! -e ~/shelly ]]; then
     git clone git@github.com:ethanrous/shelly.git ~/shelly
 fi
 
-cd ~/shelly
-source ./zsh/zsh_main
-./zsh/setup.zsh
+printf "BOOTSTRAPPING COMPLETE. To complete shelly setup:\n\n$ source ~/shelly/zsh/zsh_main && ~/shelly/zsh/setup.zsh\n\n"
