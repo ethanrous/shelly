@@ -1,0 +1,11 @@
+name: Test Setup
+
+on:
+  workflow_dispatch
+
+jobs:
+  setup-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./zsh/setup.zsh
