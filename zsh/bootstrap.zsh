@@ -1,5 +1,7 @@
 #!/bin/zsh
 
+echo "BOOTSTRAPPING SHLLY"
+
 if ! which brew &>/dev/null; then
     # Install homebrew
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
