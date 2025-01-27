@@ -21,7 +21,7 @@ if [[ ! -e ~/.ssh/ ]]; then
 fi
 
 if [[ ! -e ~/shelly ]]; then
-    git clone git@github.com:ethanrous/shelly.git ~/shelly
+    git clone https://github.com/ethanrous/shelly.git ~/shelly
 fi
 
 printf "BOOTSTRAPPING COMPLETE. To complete shelly setup:\n\n$ source ~/shelly/zsh/zsh_main && ~/shelly/zsh/setup.zsh\n\n"
