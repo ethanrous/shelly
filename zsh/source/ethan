@@ -127,6 +127,33 @@ kill-ollama() {
 	pkill ollama-copilot
 }
 
+# Wrap nvm in setup function so initial shell load doesn't take forever
+nvm() {
+    unset -f nvm
+    if [[ -z $NVM_DIR ]]; then
+        export NVM_DIR="$HOME/.nvm"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
+        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
+    fi
+    nvm $@
+}
+unset NVM_DIR
+
+add_to_path() {
+    if [[ $2 == true ]]; then
+        if [[ $SHELLY_DEBUG == true ]]; then
+            echo "Overriding PATH entry $1 to be at top"
+        fi
+        export PATH=$(echo $PATH | sed -r -e "s|${1}:?||g")
+    fi
+    if [[ ":$PATH:" != *":$1:"* ]]; then
+        if [[ $SHELLY_DEBUG == true ]]; then
+            echo "Adding $1 to PATH"
+        fi
+        export PATH=$1:$PATH
+    fi
+}
+
 if which ollama-copilot >/dev/null; then
     if ! pgrep ollama-copilot >/dev/null; then
         echo "Launching ollama-copilot"

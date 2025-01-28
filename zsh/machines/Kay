@@ -3,18 +3,6 @@
 alias lucy='ssh root@lucy'
 alias du='gdu'
 
-# Wrap nvm in setup function so initial shell load doesn't take forever
-nvm() {
-    unset -f nvm
-    if [[ -z $NVM_DIR ]]; then
-        export NVM_DIR="$HOME/.nvm"
-        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
-        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
-    fi
-    nvm $@
-}
-unset NVM_DIR
-
 colorscript() {
     ~/repos/external/shell-color-scripts/colorscript.sh $@
 }
@@ -29,21 +17,6 @@ alias start-docker='open -a Docker'
 
 export EDITOR='nvim'
 export COLOR='magenta'
-
-add_to_path() {
-    if [[ $2 == true ]]; then
-        if [[ $SHELLY_DEBUG == true ]]; then
-            echo "Overriding PATH entry $1 to be at top"
-        fi
-        export PATH=$(echo $PATH | sed -r -e "s|${1}:?||g")
-    fi
-    if [[ ":$PATH:" != *":$1:"* ]]; then
-        if [[ $SHELLY_DEBUG == true ]]; then
-            echo "Adding $1 to PATH"
-        fi
-        export PATH=$1:$PATH
-    fi
-}
 
 add_to_path "$HOME/.cargo/bin"
 add_to_path "/Library/Frameworks/Python.framework/Versions/3.10/bin"
