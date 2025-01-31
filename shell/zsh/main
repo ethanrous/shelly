@@ -35,22 +35,3 @@ fi
 if [[ $SHELLY_DEBUG == "true" ]]; then
     echo "Sourced $count files"
 fi
-
-# if [[ tmux == "" ]] &&  which tmux; then
-#     ss=(${(f)"$(tmux list-sessions)"})
-#     if [[ ${#ss[*]} == 0 ]]; then
-#         tmux new
-#     elif [[ ${#ss[*]} == 1 ]]; then
-#         tmux attach
-#     else
-#         echo "Multiple tmux sessions found. Choose one:"
-#         tmux list-sessions
-#         read -k 1 session
-#         if [[ $session == $'\n' ]]; then
-#             echo "Not attaching to tmux..."
-#         else
-#             tmux attach -t $session
-#         fi
-#     fi
-# fi
-#

@@ -1,9 +1,0 @@
-# /bin/zsh
-
-export EDITOR='nano'
-export COLOR='red'
-alias ls=''
-unalias ls
-
-PATH="$PATH:/bin"
-export PATH

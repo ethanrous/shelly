@@ -36,12 +36,23 @@ return {
 		version = false,
 		config = function()
 			local notify = require("mini.notify")
-			notify.setup()
+			notify.setup({
+				window = {
+					config = {
+						border = "solid",
+					},
+				},
+			})
+
 			vim.notify = notify.make_notify({
 				ERROR = { duration = 5000 },
 				WARN = { duration = 4000 },
 				INFO = { duration = 2000 },
 			})
+
+			vim.keymap.set({ "v", "n" }, "<leader>sh", function()
+				notify.show_history()
+			end, { silent = true })
 		end,
 	},
 

@@ -53,14 +53,26 @@ return {
 		end,
 	},
 
-	-- {
-	-- 	"nvim-tree/nvim-tree.lua",
-	-- 	config = function()
-	-- 		require("nvim-tree").setup({
-	-- 			update_focused_file = {
-	-- 				enable = true,
-	-- 			},
-	-- 		})
-	-- 	end,
-	-- },
+	{
+		"nvim-tree/nvim-tree.lua",
+		config = function()
+			vim.keymap.set("n", "<leader>gt", function()
+				local exp = require("nvim-tree.core").get_explorer()
+				print(exp)
+				require("nvim-tree.api").tree.toggle({
+					path = "<args>",
+					find_file = false,
+					update_root = false,
+					focus = true,
+				})
+				require("nvim-tree.api").tree.resize({ width = 50 })
+			end, { silent = true })
+
+			require("nvim-tree").setup({
+				update_focused_file = {
+					enable = true,
+				},
+			})
+		end,
+	},
 }

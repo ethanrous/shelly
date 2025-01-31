@@ -72,5 +72,6 @@ require("lualine").setup({
 	extensions = {
 		"oil",
 		"nvim-dap-ui",
+		"nvim-tree"
 	},
 })

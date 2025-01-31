@@ -78,50 +78,37 @@ end
 return {
 	-- LSP
 	{
+		"mfussenegger/nvim-jdtls",
+		lazy = true,
+	},
+	{
 		"neovim/nvim-lspconfig",
 		config = function()
-			local navbuddy = require("nvim-navbuddy")
+			require("nvim-navbuddy")
 			require("mason").setup()
 			require("mason-lspconfig").setup({
 				ensure_installed = {
-					"ts_ls",
 					"gopls",
 					"golangci_lint_ls",
 					"lua_ls",
 					"bashls",
-					"cssls",
-					"eslint",
 					"html",
 					"jsonls",
 					"pyright",
 					"yamlls",
 					"svelte",
-					"tailwindcss",
 					"rust_analyzer",
+
+					"jdtls",
+
+					"ts_ls",
+					"tailwindcss",
+					"volar",
+					"eslint",
+					"cssls",
 				},
 			})
 			local capabilities = vim.lsp.protocol.make_client_capabilities()
-			-- capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
-
-			-- local null_ls = require("null-ls")
-			-- local cspell = require("cspell")
-			-- local config = {
-			-- 	config_file_preferred_name = "cspell.json",
-			-- 	cspell_config_dirs = { "~/.config/" },
-			-- 	diagnostics_postprocess = function(diagnostic)
-			-- 		diagnostic.severity = vim.diagnostic.severity.HINT
-			-- 	end,
-			-- }
-			--
-			-- null_ls.setup({
-			-- 	log_level = "warn",
-			-- 	fallback_severity = vim.diagnostic.severity.HINT,
-			--
-			-- 	sources = {
-			-- 		cspell.diagnostics.with({ config = config }),
-			-- 		cspell.code_actions.with({ config = config }),
-			-- 	},
-			-- })
 
 			require("mason-lspconfig").setup_handlers({
 				function(server_name) -- default handler (optional)
@@ -148,6 +135,31 @@ return {
 				end,
 				["bashls"] = function()
 					require("lspconfig")["bashls"].setup({})
+				end,
+				["jdtls"] = function()
+					-- local config = {
+					-- 	cmd = {
+					-- 		vim.fn.stdpath 'data' .. '/mason/packages/jdtls/jdtls',
+					-- 	},
+					-- 	root_dir = vim.fs.dirname(vim.fs.find({ 'gradlew', '.git', 'mvnw' }, { upward = true })[1]),
+					-- 	settings = {
+					-- 		java = {
+					-- 			configuration = {
+					-- 				-- See https://github.com/eclipse/eclipse.jdt.ls/wiki/Running-the-JAVA-LS-server-from-the-command-line#initialize-request
+					-- 				-- And search for `interface RuntimeOption`
+					-- 				-- The `name` is NOT arbitrary, but must match one of the elements from `enum ExecutionEnvironment` in the link above
+					-- 				runtimes = {
+					-- 					{
+					-- 						name = "JavaSE-21",
+					-- 						path =
+					-- 						"REDACTED",
+					-- 					},
+					-- 				}
+					-- 			}
+					-- 		}
+					-- 	}
+					-- }
+					-- require('jdtls').start_or_attach(config)
 				end,
 				["cssls"] = function()
 					require("lspconfig")["cssls"].setup({
@@ -192,13 +204,6 @@ return {
 						},
 					})
 				end,
-				-- ["clangd"] = function()
-				-- 	require("lspconfig")["clangd"].setup({
-				-- 		on_attach = function(client, bufnr)
-				-- 			navbuddy.attach(client, bufnr)
-				-- 		end,
-				-- 	})
-				-- end,
 				["ts_ls"] = function()
 					local inlayHints = {
 						includeInlayEnumMemberValueHints = true,
@@ -212,6 +217,7 @@ return {
 					require("lspconfig")["ts_ls"].setup({
 						capabilities = capabilities,
 						on_attach = on_attach,
+						filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue" },
 						settings = {
 							javascript = {
 								inlayHints = inlayHints,
@@ -230,7 +236,18 @@ return {
 								description = "Organize Imports",
 							},
 						},
+						init_options = {
+							plugins = { -- I think this was my breakthrough that made it work
+								{
+									name = "@vue/typescript-plugin",
+									location = vim.fn.stdpath("data")
+										.. "/mason/packages/vue-language-server/node_modules/@vue/language-server",
+									languages = { "vue" },
+								},
+							},
+						},
 					})
+					require("lspconfig")["volar"].setup({})
 					require("lspconfig")["cssmodules_ls"].setup({
 						-- provide your on_attach to bind keymappings
 						-- on_attach = custom_on_attach,

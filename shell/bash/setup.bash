@@ -1,9 +1,16 @@
 #!/bin/zsh
 
+if [[ "$SHELLY" == "" ]]; then
+    echo "\$SHELLY is not set, load the shelly environment first"
+    exit 1
+fi
+
 # Make sure to source shelly when new shell is launched
-if [ ! -f ~/.zshrc ]; then
-    echo "making ~/.zshrc"
-    echo "source ~/shelly/zsh/zsh_main" >~/.zshrc
+if [ ! -f ~/.bashrc ]; then
+    echo "making ~/.bashrc"
+
+	echo "export SHELL_NAME=bash" > ~/.bashrc
+    echo "source $SHELLY/shell/common/auto-loader.bash" >> ~/.bashrc
 fi
 
 isMac=false
@@ -22,11 +29,6 @@ if $isMac && ! which brew &>/dev/null; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
     brew install eza btop neovim nvm wezterm ripgrep
-fi
-
-if [[ "$SHELLY" == "" ]]; then
-    echo "\$SHELLY is not set, load the shelly environment first"
-    exit 1
 fi
 
 if [ ! -d ~/.config ]; then

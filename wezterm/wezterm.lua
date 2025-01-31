@@ -127,7 +127,20 @@ config.keys = {
 	},
 }
 
+for i = 1, 8 do
+	-- CTRL+ALT + number to activate that tab
+	table.insert(config.keys, {
+		key = tostring(i),
+		mods = "LEADER",
+		action = wezterm.action.ActivateTab(i - 1),
+	})
+end
+
 config.harfbuzz_features = { "calt=0", "clig=0", "liga=0" }
+
+function string.starts(String, Start)
+	return string.sub(String, 1, string.len(Start)) == Start
+end
 
 local function tab_title(tab_info)
 	local title = tab_info.tab_title
@@ -137,19 +150,21 @@ local function tab_title(tab_info)
 	end
 	-- Otherwise, use the title from the active pane
 	-- in that tab
-	for str in string.gmatch(tab_info.active_pane.title, "([^ ]+)") do
-		if str ~= " " then
-			title = str
-			break
+	if not tab_info.active_pane or not tab_info.active_pane.title then
+		title = "???"
+	elseif string.starts(tab_info.active_pane.title, "[No Name]") then
+		title = "nvim"
+	else
+		for str in string.gmatch(tab_info.active_pane.title, "([^ ]+)") do
+			if str ~= " " then
+				title = str
+				break
+			end
 		end
 	end
+
 	return "[" .. tab_info.tab_index + 1 .. "] " .. title
 end
-
--- wezterm.on("format-tab-title", function(tab, tabs, panes, cnf, hover, max_width)
--- 	local title = tab_title(tab)
--- 	return title
--- end)
 
 wezterm.on("format-tab-title", function(tab, tabs, panes, cnf, hover, max_width)
 	local edge_background = "#232136"

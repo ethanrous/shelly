@@ -1,0 +1,14 @@
+#!/bin/zsh
+
+autoload -Uz vcs_info
+precmd() { vcs_info }
+
+zstyle ':vcs_info:git:*' formats '%F{red}(%b)%f '
+
+setopt PROMPT_SUBST
+PROMPT='[%F{$COLOR}%t %m%f] %11F%~%f ${vcs_info_msg_0_}%f$ '
+
+if [[ $SHELLY_DEBUG == "true" ]]; then
+	echo "Set Prompt $PROMPT"
+fi
+

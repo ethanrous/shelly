@@ -10,21 +10,8 @@ vim.keymap.set({ "n", "v" }, "<Right>", "<Nop>", { silent = true, noremap = true
 
 -- Text Manipulation --
 
--- Stop from moving back a space when exiting insert mode.
--- I'm sure this is a crime somewhere, but it bugs the hell out of me so... I'm doing it.
--- vim.keymap.set("i", "<Esc>", "<C-[>`^", { silent = true })
-
--- Ctrl + k: "Delete line"
-vim.keymap.set("n", "<C-k>", "dd", { silent = true, noremap = true })
-
--- Ctrl + k: "Delete line"
-vim.keymap.set("i", "<C-k>", "<C-[>`^Di<Right>", { silent = true, nowait = true })
-
 -- in visual mode, d: "Delete to register k"
 vim.keymap.set("v", "d", '"kd', { silent = true, nowait = true })
-
--- Ctrl + y: Emulate emacs yank
-vim.keymap.set({ "i", "n" }, "<C-y>", "<Esc>pi<Right>", { silent = true, noremap = true })
 
 -- Shift + Alt + Down: "Duplicate Selection"
 vim.keymap.set("v", "<S-A-Down>", "y']i<Down><CR><Up><Esc>p", { silent = true })
@@ -36,17 +23,12 @@ end, { expr = true, noremap = true, silent = true })
 
 -- General Navigation o7 --
 
--- Ctrl + e: emulate emacs goto end of line
-vim.keymap.set("i", "<C-e>", "<Esc>A", { silent = true })
-vim.keymap.set("n", "<C-e>", "$", { silent = true })
-
 -- Duplicate line
 vim.keymap.set({ "i", "n" }, "<A-S-Down>", "<Esc>mcyyp`cj", { silent = true })
 vim.keymap.set({ "i", "n" }, "<A-S-j>", '<Esc>mc"kyy"kp`cj', { silent = true })
 vim.keymap.set("v", "<A-S-j>", '"ky\']"kp', { silent = true })
 
 vim.keymap.set("x", "p", [["_dP]]) -- Paste without yanking
--- vim.keymap.set("n", "p", '"0p', { silent = true })
 
 -- Go [b]ack / go... [v]orward ??
 vim.keymap.set("n", "gb", "<C-o>", { silent = true })
@@ -97,12 +79,7 @@ end, { silent = true })
 -- Debugging --
 
 vim.keymap.set("n", "<LEADER>ff", function()
-	-- local buf_name = vim.api.nvim_buf_get_name(0)
-	-- if buf_name:sub(-#".tsx") == ".tsx" then
-	-- 	vim.cmd("silent OrganizeImports")
-	-- end
-
-	vim.cmd("silent update")
+	vim.api.nvim_command("silent write")
 end, { silent = true })
 
 vim.keymap.set("n", "<LEADER>FF", function()

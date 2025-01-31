@@ -44,9 +44,9 @@ return {
 				require("telescope.builtin").grep_string()
 			end, { silent = true })
 
-			vim.keymap.set("n", "<leader>gt", function()
-				require("telescope.builtin").builtin()
-			end, { silent = true })
+			-- vim.keymap.set("n", "<leader>gt", function()
+			-- 	require("telescope.builtin").builtin()
+			-- end, { silent = true })
 
 			vim.keymap.set("n", "<leader>gh", function()
 				require("telescope.builtin").highlights()

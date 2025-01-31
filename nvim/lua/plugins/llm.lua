@@ -3,7 +3,7 @@ return {
 		"zbirenbaum/copilot.lua",
 		event = "InsertEnter",
 		config = function()
-			vim.g.copilot_proxy = "http://localhost:11435"
+			vim.g.copilot_proxy = "https://chat.arcticio.net"
 			vim.g.copilot_proxy_strict_ssl = false
 			-- vim.g.copilot_proxy = "http://lucy.arcticnet:11439"
 			require("copilot").setup({
