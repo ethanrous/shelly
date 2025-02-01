@@ -59,6 +59,7 @@ return {
 				yaml = { "prettier" },
 				markdown = { "prettier" },
 				graphql = { "prettier" },
+				sh = { "shfmt" },
 				bash = { "shfmt" },
 				zsh = { "shfmt" },
 				lua = { "stylua" },

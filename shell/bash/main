@@ -4,7 +4,7 @@
 # It sources all files in ~/shelly/shell/bash/source/
 
 count=0
-for f in $SHELLY/shell/bash/source/*; do
+for f in "$SHELLY"/shell/bash/source/*; do
     ((count++))
     if [[ $SHELLY_DEBUG == "true" ]]; then
         echo "SOURCING $f"

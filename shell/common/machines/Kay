@@ -1,0 +1,33 @@
+#!/bin/zsh
+
+alias lucy='ssh root@lucy'
+alias du='gdu'
+
+colorscript() {
+    ~/repos/external/shell-color-scripts/colorscript.sh $@
+}
+
+fix_vips() {
+    vipsVersion=$(ls /opt/homebrew/Cellar/vips/)
+    echo "Fixing vips version $vipsVersion"
+    ln -s /opt/homebrew/Cellar/vips/$vipsVersion/lib/pkgconfig/vips.pc /opt/homebrew/lib/pkgconfig/vips.pc
+}
+
+alias start-docker='open -a Docker'
+
+export EDITOR='nvim'
+export COLOR='magenta'
+
+add_to_path "$HOME/.cargo/bin"
+add_to_path "/Library/Frameworks/Python.framework/Versions/3.10/bin"
+add_to_path "/opt/homebrew/bin"
+add_to_path "/Users/ethan/go/bin"
+add_to_path "/Users/ethan/Library/Python/3.10/bin"
+add_to_path "/opt/homebrew/bin" true
+add_to_path "/opt/homebrew/sbin" true
+add_to_path "/opt/homebrew/opt/python@3.12/libexec/bin" true
+
+# Make tmux play nice with emacs keybindings
+bindkey -e
+
+export CPATH="/opt/homebrew/include/"
