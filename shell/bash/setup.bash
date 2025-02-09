@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 
 if [[ "$SHELLY" == "" ]]; then
 	echo "\$SHELLY is not set, load the shelly environment first"

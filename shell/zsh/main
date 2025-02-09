@@ -3,10 +3,8 @@
 # This is the entry point for reading the zsh configuration.
 # It sources all files in ~/shelly/zsh_conf/ and ~/shelly/zsh_machine_$HOST
 
-export SHELLY=$(dirname ${0:a:h})
-
 count=0
-for f in $SHELLY/zsh/source/*; do
+for f in "$SHELLY"/shell/zsh/source/*; do
     ((count++))
     if [[ $SHELLY_DEBUG == "true" ]]; then
         echo "SOURCING $f"
@@ -15,23 +13,3 @@ for f in $SHELLY/zsh/source/*; do
     source $f
 done
 
-machine_specific_path="$SHELLY/zsh/machines/$HOST"
-if [ ! -f $machine_specific_path ]; then
-    echo "No config found for this \$HOST ($HOST). Create one? (y/[n])"
-
-    read -sk a
-    if [[ $a == "y" ]]; then
-        touch $machine_specific_path && echo "Created machine specific config at $machine_specific_path"
-    fi
-    sync
-else
-    if [[ $SHELLY_DEBUG == "true" ]]; then
-        echo "SOURCING $machine_specific_path"
-    fi
-
-    source $machine_specific_path && ((count++))
-fi
-
-if [[ $SHELLY_DEBUG == "true" ]]; then
-    echo "Sourced $count files"
-fi
