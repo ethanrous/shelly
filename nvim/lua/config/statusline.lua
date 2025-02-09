@@ -47,6 +47,27 @@ local function getRepoName()
 	return reponame
 end
 
+local function fugitive_head()
+	return " " .. vim.fn.FugitiveHead()
+end
+
+local get_location = function()
+	if vim.v.hlsearch == 0 then
+		local cursor = vim.api.nvim_win_get_cursor(0)
+		return string.format("%d:%d", cursor[1], cursor[2])
+	end
+
+	local search = vim.fn.searchcount()
+	return string.format("%d/%d", search.current, search.total)
+end
+
+local fugitive_blame = {
+	sections = {
+		lualine_c = { fugitive_head },
+	},
+	filetypes = { "fugitive", "fugitiveblame" },
+}
+
 require("lualine").setup({
 	options = {
 		theme = lineColors,
@@ -59,7 +80,7 @@ require("lualine").setup({
 		lualine_b = { { "filename", path = 1 } },
 		lualine_c = { "filetype" },
 		lualine_x = { "diagnostics" },
-		lualine_y = { "location" },
+		lualine_y = { get_location },
 		lualine_z = { { "diff", colored = false }, "branch" },
 	},
 	inactive_sections = {
@@ -70,8 +91,12 @@ require("lualine").setup({
 		lualine_z = { { "diff", colored = false }, "branch" },
 	},
 	extensions = {
+		fugitive_blame,
 		"oil",
 		"nvim-dap-ui",
-		"nvim-tree"
+		"nvim-tree",
+		"quickfix",
+		"lazy",
+		"fugitive",
 	},
 })

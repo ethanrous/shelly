@@ -128,7 +128,7 @@ return {
 			"onsails/lspkind.nvim",
 
 			-- Snippets
-			"L3MON4D3/LuaSnip",
+			-- "L3MON4D3/LuaSnip",
 		},
 		version = "v0.7.6",
 		opts = {
@@ -140,7 +140,7 @@ return {
 					"select_prev",
 				},
 				["<A-l>"] = {
-					"select_and_accept",
+					"accept",
 				},
 				["<A-Tab>"] = {
 					function(cmp)
@@ -152,7 +152,7 @@ return {
 				},
 			},
 			sources = {
-				default = { "lsp", "path", "snippets", "buffer" },
+				default = { "lsp", "path", "buffer" },
 				-- optionally disable cmdline completions
 				-- cmdline = {},
 			},

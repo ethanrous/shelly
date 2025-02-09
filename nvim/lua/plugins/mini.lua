@@ -104,13 +104,13 @@ return {
 		end,
 	},
 
-	{
-		"echasnovski/mini.diff",
-		version = false,
-		config = function()
-			require("mini.diff").setup()
-		end,
-	},
+	-- {
+	-- 	"echasnovski/mini.diff",
+	-- 	version = false,
+	-- 	config = function()
+	-- 		require("mini.diff").setup()
+	-- 	end,
+	-- },
 
 	{
 		"echasnovski/mini.misc",
@@ -120,5 +120,20 @@ return {
 				require("mini.misc").zoom()
 			end, { silent = true })
 		end,
+	},
+
+	{
+		"ggandor/leap.nvim",
+		config = function()
+			local leap = require("leap")
+			-- leap.create_default_mappings()
+			leap.opts.equivalence_classes = { " \t\r\n", "([{", ")]}", "'\"`" }
+			vim.keymap.set({ "n", "x", "o" }, "f", "<Plug>(leap-forward)")
+			vim.keymap.set({ "n", "x", "o" }, "F", "<Plug>(leap-backward)")
+			-- vim.keymap.set({ "n", "x", "o" }, "gs", "<Plug>(leap-from-window)")
+		end,
+		dependencies = {
+			"tpope/vim-repeat",
+		},
 	},
 }

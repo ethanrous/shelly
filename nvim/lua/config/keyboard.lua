@@ -36,38 +36,10 @@ vim.keymap.set("n", "gv", "<C-i>", { silent = true })
 
 -- Window/Buffer Control --
 vim.keymap.set({ "i", "n" }, "<C-w><C-l>", "<Esc>:vert split<CR>", { silent = true })
-vim.keymap.set({ "i", "n" }, "<A-s>", function()
-	local harpoon = require("harpoon")
-	if harpoon.ui.win_id ~= nil then
-		vim.api.nvim_feedkeys("\x0d", "m", false)
-		return
-	end
-
-	if harpoon:list()._length > 1 then
-		harpoon:list():select(2)
-		return
-	end
-
-	local key = vim.api.nvim_replace_termcodes("<C-^>", true, false, true)
-	vim.api.nvim_feedkeys(key, "n", false)
-end)
-
--- Save + exit --
-vim.keymap.set({ "i", "n" }, "<C-q>", "<Esc>:wqa<CR>", { silent = true })
--- vim.keymap.set("n", "xx", ":update<CR>", { silent = true })
 
 -- Move lines fast
 vim.keymap.set({ "v", "n" }, "<A-j>", "10j", { silent = true })
 vim.keymap.set({ "v", "n" }, "<A-k>", "10k", { silent = true })
-
--- Git --
-vim.keymap.set({ "n", "v" }, "<LEADER>gd", function()
-	require("diffview").open()
-end, { silent = true })
-
-vim.keymap.set({ "n", "v" }, "<LEADER>gc", function()
-	require("diffview").close()
-end, { silent = true })
 
 -- Selection --
 -- Enter puts you in insert mode and makes a newline below or above you
@@ -105,8 +77,3 @@ vim.keymap.set("v", "<leader>gs", function()
 	local r = vim.fn.getregion(vim.fn.getpos("v"), vim.fn.getpos("."))
 	vim.cmd("silent !~/shelly/zsh/source/gsearch " .. r[1])
 end, { silent = true })
-
--- vim.keymap.set("n", "<leader>fg", function()
--- 	require("telescope").extensions.live_grep_args.live_grep_args()
--- 	-- callTelescope(require("telescope.builtin").live_grep)
--- end, { silent = true })

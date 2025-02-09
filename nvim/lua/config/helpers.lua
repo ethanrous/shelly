@@ -39,6 +39,7 @@ autocmd("BufEnter", {
 		if
 			bufname == ""
 			or vim.o.buftype ~= ""
+			or vim.bo.filetype == ""
 			or bufname == "."
 			or string.find(bufname, ":/")
 			or string.find(bufname, "node_modules")
@@ -58,12 +59,31 @@ autocmd("BufEnter", {
 	end,
 })
 
+--Open quickfix and help windows to the right instead of below
+autocmd("FileType", {
+	pattern = { "qf", "help" },
+	callback = function()
+		vim.cmd("wincmd L")
+	end,
+})
+
 -- Highlight yanked text
 autocmd("TextYankPost", {
 	callback = function()
 		vim.highlight.on_yank()
 	end,
 	desc = "Briefly highlight yanked text",
+})
+
+autocmd("CursorMoved", {
+	group = vim.api.nvim_create_augroup("auto-hlsearch", { clear = true }),
+	callback = function()
+		if vim.v.hlsearch == 1 and vim.fn.searchcount().exact_match == 0 then
+			vim.schedule(function()
+				vim.cmd.nohlsearch()
+			end)
+		end
+	end,
 })
 
 function Dump(o)
@@ -85,12 +105,11 @@ usercmd("Swag", function()
 	vim.cmd("!swag fmt %")
 end, { nargs = 0 })
 
-usercmd("Help", function(args)
-	if not args["args"] then
-		return
-	end
-	vim.cmd("vert help " .. args["args"])
-end, { nargs = 1 })
+usercmd("Cppath", function()
+	local path = vim.fn.expand("%:p")
+	vim.fn.setreg("+", path)
+	vim.notify('Copied "' .. path .. '" to the clipboard!')
+end, {})
 
 function Region_to_text(region)
 	local text = ""
@@ -109,4 +128,15 @@ end
 
 function Ends_with(str, ending)
 	return ending == "" or str:sub(-#ending) == ending
+end
+
+function Close_win_if_open(filetype)
+	for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+		local bufnr = vim.api.nvim_win_get_buf(win)
+		if vim.bo[bufnr].filetype == filetype then
+			vim.api.nvim_win_close(win, false)
+			return true
+		end
+	end
+	return false
 end

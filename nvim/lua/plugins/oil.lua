@@ -58,7 +58,7 @@ return {
 		config = function()
 			vim.keymap.set("n", "<leader>gt", function()
 				local exp = require("nvim-tree.core").get_explorer()
-				print(exp)
+				Close_win_if_open("fugitiveblame")
 				require("nvim-tree.api").tree.toggle({
 					path = "<args>",
 					find_file = false,

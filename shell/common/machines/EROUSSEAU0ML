@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export USE_CCACHE=1
+
 add_to_path "$HOME/.cargo/bin"
 add_to_path "/Library/Frameworks/Python.framework/Versions/3.10/bin"
 add_to_path "/opt/homebrew/bin"

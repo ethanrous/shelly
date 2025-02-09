@@ -17,7 +17,6 @@ opt.expandtab = false
 opt.exrc = true
 opt.fileencoding = "utf-8"
 opt.hidden = true
-opt.hlsearch = false
 opt.ignorecase = true
 opt.incsearch = true
 
@@ -59,6 +58,7 @@ g.mapleader = " "
 opt.number = true
 opt.relativenumber = true
 
+opt.diffopt = "internal,filler,closeoff,indent-heuristic,linematch:60,algorithm:histogram"
 -- o.guicursor = "n-v-c-sm:block,ci-ve:ver25,r-cr-o:hor20,i:block-blinkoff400-blinkon350"
 -- o.guicursor = "n-v-c-sm-i:block,ci-ve:ver25,r-cr-o:hor20"
 

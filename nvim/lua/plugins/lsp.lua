@@ -78,12 +78,9 @@ end
 return {
 	-- LSP
 	{
-		"mfussenegger/nvim-jdtls",
-		lazy = true,
-	},
-	{
 		"neovim/nvim-lspconfig",
 		config = function()
+			local lspconfig = require("lspconfig")
 			require("nvim-navbuddy")
 			require("mason").setup()
 			require("mason-lspconfig").setup({
@@ -106,19 +103,20 @@ return {
 					"volar",
 					"eslint",
 					"cssls",
+					"clangd",
 				},
 			})
 			local capabilities = vim.lsp.protocol.make_client_capabilities()
 
 			require("mason-lspconfig").setup_handlers({
 				function(server_name) -- default handler (optional)
-					require("lspconfig")[server_name].setup({
+					lspconfig[server_name].setup({
 						capabilities = capabilities,
 						on_attach = on_attach,
 					})
 				end,
 				["lua_ls"] = function()
-					require("lspconfig")["lua_ls"].setup({
+					lspconfig["lua_ls"].setup({
 						capabilities = capabilities,
 						on_attach = on_attach,
 						settings = {
@@ -134,35 +132,12 @@ return {
 					})
 				end,
 				["bashls"] = function()
-					require("lspconfig")["bashls"].setup({})
-				end,
-				["jdtls"] = function()
-					-- local config = {
-					-- 	cmd = {
-					-- 		vim.fn.stdpath 'data' .. '/mason/packages/jdtls/jdtls',
-					-- 	},
-					-- 	root_dir = vim.fs.dirname(vim.fs.find({ 'gradlew', '.git', 'mvnw' }, { upward = true })[1]),
-					-- 	settings = {
-					-- 		java = {
-					-- 			configuration = {
-					-- 				-- See https://github.com/eclipse/eclipse.jdt.ls/wiki/Running-the-JAVA-LS-server-from-the-command-line#initialize-request
-					-- 				-- And search for `interface RuntimeOption`
-					-- 				-- The `name` is NOT arbitrary, but must match one of the elements from `enum ExecutionEnvironment` in the link above
-					-- 				runtimes = {
-					-- 					{
-					-- 						name = "JavaSE-21",
-					-- 						path =
-					-- 						"REDACTED",
-					-- 					},
-					-- 				}
-					-- 			}
-					-- 		}
-					-- 	}
-					-- }
-					-- require('jdtls').start_or_attach(config)
+					lspconfig["bashls"].setup({
+						on_attach = on_attach,
+					})
 				end,
 				["cssls"] = function()
-					require("lspconfig")["cssls"].setup({
+					lspconfig["cssls"].setup({
 						settings = {
 							less = {
 								validate = true,
@@ -180,13 +155,13 @@ return {
 					})
 				end,
 				["golangci_lint_ls"] = function()
-					require("lspconfig")["golangci_lint_ls"].setup({
+					lspconfig["golangci_lint_ls"].setup({
 						capabilities = capabilities,
 						on_attach = on_attach,
 					})
 				end,
 				["gopls"] = function()
-					require("lspconfig")["gopls"].setup({
+					lspconfig["gopls"].setup({
 						capabilities = capabilities,
 						on_attach = on_attach,
 						settings = {
@@ -214,7 +189,7 @@ return {
 						includeInlayPropertyDeclarationTypeHints = true,
 						includeInlayVariableTypeHints = false,
 					}
-					require("lspconfig")["ts_ls"].setup({
+					lspconfig["ts_ls"].setup({
 						capabilities = capabilities,
 						on_attach = on_attach,
 						filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue" },
@@ -247,8 +222,8 @@ return {
 							},
 						},
 					})
-					require("lspconfig")["volar"].setup({})
-					require("lspconfig")["cssmodules_ls"].setup({
+					lspconfig["volar"].setup({})
+					lspconfig["cssmodules_ls"].setup({
 						-- provide your on_attach to bind keymappings
 						-- on_attach = custom_on_attach,
 						on_attach = function(client)
@@ -257,6 +232,19 @@ return {
 						end,
 						init_options = {
 							camelCase = false,
+						},
+					})
+				end,
+				["clangd"] = function()
+					lspconfig["clangd"].setup({
+						on_attach = on_attach,
+						cmd = {
+							"clangd",
+							"-j=8",
+							"--background-index",
+							"--suggest-missing-includes",
+							"--clang-tidy",
+							"--header-insertion=iwyu",
 						},
 					})
 				end,
@@ -288,13 +276,7 @@ return {
 			},
 		},
 	},
-
-	-- Rust config
-	-- {
-	-- 	"mrcjkb/rustaceanvim",
-	-- 	version = "^4",
-	-- 	ft = { "rust" },
-	-- },
+	{ "mfussenegger/nvim-jdtls" },
 
 	-- Go config
 	{
