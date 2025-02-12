@@ -1,21 +1,29 @@
-local stdPalete = {
-	a = { bg = Colors.Pine, fg = Colors.Text, gui = "bold" },
-	b = { bg = Colors.PineMuted, fg = Colors.Text },
-	c = { bg = Colors.Surface, fg = Colors.Text },
+local function get_hl(name)
+	local thing = vim.api.nvim_get_hl(0, { name = name, link = false })
+	return {
+		fg = string.format("%x", thing.fg),
+		bg = string.format("%x", thing.bg),
+	}
+end
 
-	x = { bg = Colors.Surface, fg = Colors.Text },
-	y = { bg = Colors.PineMuted, fg = Colors.Text },
-	z = { bg = Colors.Pine, fg = Colors.Text, gui = "bold" },
+local stdPalete = {
+	a = get_hl("TermCursor"),
+	b = get_hl("TelescopeSelection"),
+	c = get_hl("StatusLine"),
+
+	x = get_hl("StatusLine"),
+	y = get_hl("StatusLine"),
+	z = get_hl("TelescopeSelection"),
 }
 
 local dullPalete = {
-	a = { bg = Colors.Surface, fg = Colors.Muted, gui = "bold" },
-	b = { bg = Colors.Surface, fg = Colors.Muted },
-	c = { bg = Colors.Surface, fg = Colors.Muted },
+	a = get_hl("StatusLineNC"),
+	b = get_hl("StatusLineNC"),
+	c = get_hl("StatusLineNC"),
 
-	x = { bg = Colors.Surface, fg = Colors.Muted },
-	y = { bg = Colors.Surface, fg = Colors.Muted },
-	z = { bg = Colors.Surface, fg = Colors.Muted, gui = "bold" },
+	x = get_hl("StatusLineNC"),
+	y = get_hl("StatusLineNC"),
+	z = get_hl("StatusLineNC"),
 }
 
 local lineColors = {

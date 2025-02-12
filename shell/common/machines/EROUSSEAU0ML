@@ -11,4 +11,5 @@ add_to_path "/opt/homebrew/bin" true
 add_to_path "/opt/homebrew/sbin" true
 add_to_path "/opt/homebrew/opt/python@3.12/libexec/bin" true
 add_to_path "/Users/erousseau/.local/share/nvim/mason/bin"
+add_to_path "/Users/erousseau/Library/pnpm/nodejs_current/bin"
 

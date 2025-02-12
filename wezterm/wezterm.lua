@@ -24,23 +24,29 @@ config.show_new_tab_button_in_tab_bar = false
 config.window_decorations = "RESIZE"
 config.tab_max_width = 50
 
+-- local background = "#232136",
+local c_jeans = "#262f3e"
+local c_thunder = "#425974"
+local c_smoke = "#bebec3"
+local c_white = "#e5e5eb"
+
 config.colors = {
-	background = "#232136",
-	foreground = "#ffffff",
-	cursor_bg = "#ffffff",
+	background = c_jeans,
+	foreground = c_white,
+	cursor_bg = c_white,
 	cursor_border = "#3e8fb0",
 
 	tab_bar = {
-		background = "#232136",
+		background = c_jeans,
 		-- The active tab is the one that has focus in the window
 
 		active_tab = {
 			bg_color = "#345B78",
-			fg_color = "#ffffff",
+			fg_color = c_white,
 		},
 		inactive_tab = {
-			bg_color = "#232136",
-			fg_color = "#ffffff",
+			bg_color = c_jeans,
+			fg_color = c_white,
 		},
 	},
 	ansi = {
@@ -167,13 +173,14 @@ local function tab_title(tab_info)
 end
 
 wezterm.on("format-tab-title", function(tab, tabs, panes, cnf, hover, max_width)
-	local edge_background = "#232136"
-	local background = "#232136"
+	-- local edge_background = "#232136"
+	local edge_background = c_jeans
+	local background = c_jeans
 	local foreground = "#808080"
 
 	if tab.is_active then
-		background = "#345B78"
-		foreground = "#ffffff"
+		background = c_thunder
+		foreground = c_smoke
 	elseif hover then
 		background = "#3b3052"
 		foreground = "#909090"

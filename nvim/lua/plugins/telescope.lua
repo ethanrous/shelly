@@ -29,7 +29,7 @@ return {
 			end, { silent = true })
 
 			vim.keymap.set("n", "gd", function()
-				callTelescope(require("telescope.builtin").lsp_definitions)
+				require("telescope.builtin").lsp_definitions()
 			end, { silent = true })
 
 			vim.keymap.set("n", "<leader>fg", function()

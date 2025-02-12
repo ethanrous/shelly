@@ -17,9 +17,48 @@ Colors = {
 	HighlightHigh = "#56526e",
 }
 
+-- vim.api.nvim_set_hl(0, "TelescopeMatching", { link = "another-group" })
+-- 	TelescopeMatching = { fg = Text, bg = Pine },
+-- 	TelescopeSelection = { fg = Foam, bg = Base, bold = true },
+--
+-- 	TelescopePromptPrefix = { fg = Subtle, bg = Surface },
+-- 	TelescopePromptCounter = { fg = Subtle, bg = Surface },
+-- 	TelescopePromptNormal = { fg = Subtle, bg = Surface },
+-- 	TelescopePromptBorder = { bg = Surface, fg = Surface },
+-- 	TelescopePromptTitle = { bg = Surface, fg = Subtle },
+--
+-- 	TelescopeResultsNormal = { bg = Surface, fg = Text },
+-- 	TelescopeResultsBorder = { bg = Surface, fg = Surface },
+-- 	TelescopeResultsTitle = { fg = Subtle },
+-- 	TelescopeResultsVariable = { fg = Subtle },
+-- 	Directory = { fg = Muted },
+--
+-- 	TelescopeSelectionCaret = { fg = Subtle, bg = Base },
+--
+-- 	TelescopePreviewNormal = { bg = Base },
+-- 	TelescopePreviewBorder = { bg = Surface, fg = Surface },
+-- 	TelescopePreviewTitle = { bg = Surface, fg = Subtle },
+--
+-- 	NormalFloat = { bg = Surface, fg = Subtle },
+-- 	FloatBorder = { fg = Surface, bg = Surface },
+-- 	LspSignatureActiveParameter = { fg = Text, bg = Pine, bold = true },
+--
+-- 	DapUIPlayPause = { fg = Pine, bg = Surface },
+-- 	DapUIRestartNC = { fg = Pine, bg = Surface },
+-- 	DapUIPlayPauseNC = { fg = Pine, bg = Surface },
+-- 	DapUIStepOutNC = { fg = Pine, bg = Surface },
+-- 	DapUIUnavailableNC = { fg = Subtle, bg = Surface },
+--
+-- 	HarpoonWindow = { fg = Pine, bg = Pine },
+-- 	HarpoonBorder = { fg = Pine, bg = Pine },
+--
+-- 	OilDir = { fg = Foam },
+-- }
+
 return {
 	{
 		"rose-pine/neovim",
+		enabled = false,
 		name = "rose-pine",
 		lazy = false,
 		priority = 1000,
@@ -32,6 +71,14 @@ return {
 				},
 			})
 			vim.cmd("colorscheme rose-pine-moon")
+		end,
+	},
+	-- Custom Popup windows for certian actions (rename, etc.)
+	{
+		"CosmicNvim/cosmic-ui",
+		requires = { "MunifTanjim/nui.nvim", "nvim-lua/plenary.nvim" },
+		config = function()
+			require("cosmic-ui").setup()
 		end,
 	},
 
@@ -62,7 +109,8 @@ return {
 	-- Highlight color codes with their code #ff00ff
 	{
 		"norcalli/nvim-colorizer.lua",
-		config = true,
-		event = "VimEnter",
+		config = function()
+			require("colorizer").setup()
+		end,
 	},
 }

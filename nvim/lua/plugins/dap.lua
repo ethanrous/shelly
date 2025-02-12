@@ -158,10 +158,6 @@ return {
 				},
 			})
 
-			require("neodev").setup({
-				library = { plugins = { "nvim-dap-ui" }, types = true },
-			})
-
 			local dap = require("dap")
 			dap.listeners.before.attach.dapui_config = function()
 				dapui.open()
