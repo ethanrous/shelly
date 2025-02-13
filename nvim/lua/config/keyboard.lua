@@ -51,7 +51,8 @@ vim.keymap.set({ "v", "n" }, "<A-k>", "10k", { silent = true })
 -- Debugging --
 
 vim.keymap.set("n", "<LEADER>ff", function()
-	vim.api.nvim_command("silent write")
+	vim.cmd("silent write")
+	-- vim.schedule(Format_hunks)
 end, { silent = true })
 
 vim.keymap.set("n", "<LEADER>FF", function()

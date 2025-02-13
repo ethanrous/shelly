@@ -284,77 +284,34 @@ return {
 									},
 								},
 							},
-							settings = {
-								typescript = {
-									inlayHints = {
-										enumMemberValues = {
-											enabled = true,
-										},
-										functionLikeReturnTypes = {
-											enabled = true,
-										},
-										propertyDeclarationTypes = {
-											enabled = true,
-										},
-										parameterTypes = {
-											enabled = true,
-											suppressWhenArgumentMatchesName = true,
-										},
-										variableTypes = {
-											enabled = true,
-										},
-									},
-								},
-							},
-						})
-					end,
-					["ts_ls"] = function()
-						local mason_packages = vim.fn.stdpath("data") .. "/mason/packages"
-						local volar_path = mason_packages .. "/vue-language-server/node_modules/@vue/language-server"
-
-						require("lspconfig").ts_ls.setup({
-							-- NOTE: To enable hybridMode, change HybrideMode to true above and uncomment the following filetypes block.
-
-							-- filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue" },
-							init_options = {
-								plugins = {
-									{
-										name = "@vue/typescript-plugin",
-										location = volar_path,
-										languages = { "vue" },
-									},
-								},
-							},
-							settings = {
-								typescript = {
-									inlayHints = {
-										includeInlayParameterNameHints = "all",
-										includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-										includeInlayFunctionParameterTypeHints = true,
-										includeInlayVariableTypeHints = true,
-										includeInlayVariableTypeHintsWhenTypeMatchesName = true,
-										includeInlayPropertyDeclarationTypeHints = true,
-										includeInlayFunctionLikeReturnTypeHints = true,
-										includeInlayEnumMemberValueHints = true,
-									},
-								},
-							},
-						})
-					end,
-					["clangd"] = function()
-						lspconfig["clangd"].setup({
-							on_attach = on_attach,
-							cmd = {
-								"clangd",
-								"-j=8",
-								"--background-index",
-								"--suggest-missing-includes",
-								"--clang-tidy",
-								"--header-insertion=iwyu",
-							},
-						})
-					end,
-				},
+						},
+					})
+					lspconfig["volar"].setup({})
+					lspconfig["cssmodules_ls"].setup({
+						-- provide your on_attach to bind keymappings
+						-- on_attach = custom_on_attach,
+						on_attach = function(client)
+							-- avoid accepting `definitionProvider` responses from this LSP
+							-- client.server_capabilities.definitionProvider = false
+						end,
+						init_options = {
+							camelCase = false,
+						},
+					})
+				end,
+				["clangd"] = function()
+					lspconfig["clangd"].setup({
+						on_attach = on_attach,
+						cmd = {
+							"clangd",
+							"-j=8",
+							"--background-index",
+							"--suggest-missing-includes",
+							"--clang-tidy",
+							"--enable-config",
+						},
+					})
+				end,
 			})
 		end,
 	},

@@ -1,4 +1,4 @@
-local function format_hunks()
+function Format_hunks()
 	local ignore_filetypes = { "lua" }
 	local format = require("conform").format
 
@@ -30,13 +30,14 @@ local function format_hunks()
 			-- nvim_buf_get_lines uses zero-based indexing -> subtract from last
 			local last_hunk_line = vim.api.nvim_buf_get_lines(0, last - 2, last - 1, true)[1]
 			local range = { start = { start, 0 }, ["end"] = { last - 1, last_hunk_line:len() } }
-			format({ range = range, async = true, lsp_fallback = true }, function()
+			format({ range = range, async = false, lsp_fallback = true }, function()
 				format_range()
 			end)
 		end
 	end
 
 	format_range()
+	vim.api.nvim_command("silent write")
 end
 
 return {
@@ -66,14 +67,19 @@ return {
 				python = { "isort", "black" },
 				go = { "gofmt", "goimports" },
 			},
+
+			format_on_save = {
+				timeout_ms = 1000,
+				lsp_format = "fallback",
+			},
 		})
 
-		vim.api.nvim_create_autocmd("BufWritePre", {
-			pattern = "*",
-			callback = function(args)
-				format_hunks()
-			end,
-		})
+		-- vim.api.nvim_create_autocmd("BufWritePre", {
+		-- 	pattern = "*",
+		-- 	callback = function(args)
+		-- 		format_hunks()
+		-- 	end,
+		-- })
 		conform.formatters.shfmt = {
 			prepend_args = { "-i", "4" },
 		}
