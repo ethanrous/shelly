@@ -174,9 +174,11 @@ end
 local hlgroups = {
 	-- Common
 	Normal = { fg = c_smoke, bg = c_jeans },
-	NormalFloat = { fg = c_smoke, bg = c_ocean },
+	-- NormalFloat = { fg = c_smoke, bg = c_ocean },
+	NormalFloat = { fg = c_smoke, bg = c_jeans },
 	NormalNC = { link = "Normal" },
-	ColorColumn = { bg = c_deepsea },
+	-- ColorColumn = { bg = c_deepsea },
+	ColorColumn = { bg = c_deepsea }, -- This controls the lsp hover window background color
 	Conceal = { fg = c_smoke },
 	Cursor = { fg = c_space, bg = c_white },
 	CursorColumn = { bg = c_ocean },
@@ -199,7 +201,7 @@ local hlgroups = {
 	FoldColumn = { fg = c_steel },
 	Folded = { fg = c_steel, bg = c_ocean },
 	-- FloatBorder = { fg = c_smoke, bg = c_ocean },
-	FloatBorder = { fg = c_ocean, bg = c_ocean },
+	FloatBorder = { fg = c_aqua, bg = c_jeans },
 	FloatShadow = { bg = c_shadow, blend = 70 },
 	FloatShadowThrough = { link = "None" },
 	HealthSuccess = { fg = c_tea },
@@ -213,7 +215,8 @@ local hlgroups = {
 	MsgSeparator = { link = "StatusLine" },
 	MatchParen = { bg = c_thunder, bold = true },
 	NonText = { fg = c_steel },
-	Pmenu = { fg = c_smoke, bg = c_ocean },
+	-- Pmenu = { fg = c_smoke, bg = c_ocean },
+	Pmenu = { fg = c_smoke, bg = c_jeans },
 	PmenuSbar = { bg = c_deepsea },
 	PmenuSel = { fg = c_white, bg = c_thunder },
 	PmenuThumb = { bg = c_orange },
@@ -566,14 +569,14 @@ local hlgroups = {
 	fugitiveUntrackedHeading = { fg = c_lavender, bold = true },
 
 	-- telescope
-	TelescopeNormal = { link = "NormalFloat" },
-	TelescopePromptNormal = { bg = c_deepsea },
+	TelescopeNormal = { link = "Normal" },
+	TelescopePromptNormal = { bg = c_jeans },
 	TelescopeTitle = { fg = c_space, bg = c_turquoise, bold = true },
 	TelescopePromptTitle = { fg = c_space, bg = c_yellow, bold = true },
 	-- TelescopeBorder = { fg = c_smoke, bg = c_ocean },
-	TelescopeBorder = { link = "FloatBorder" },
+	TelescopeBorder = { fg = c_aqua, bg = c_jeans },
 	-- TelescopePromptBorder = { fg = c_smoke, bg = c_deepsea },
-	TelescopePromptBorder = { fg = c_deepsea, bg = c_deepsea },
+	TelescopePromptBorder = { fg = c_aqua, bg = c_jeans },
 	TelescopeSelection = { fg = c_smoke, bg = c_thunder },
 	TelescopeMultiIcon = { fg = c_pigeon, bold = true },
 	TelescopeMultiSelection = { bg = c_thunder, bold = true },
@@ -735,9 +738,9 @@ local hlgroups = {
 	StatusLineHeader = { fg = c_jeans, bg = c_pigeon },
 	StatusLineHeaderModified = { fg = c_jeans, bg = c_ochre },
 
-	-- }}}2
+	HarpoonCurrentFile = { link = "Search" },
 
-	-- Extra {{{2
+	-- Extra
 	Yellow = { fg = c_yellow },
 	Earth = { fg = c_earth },
 	Orange = { fg = c_orange },
@@ -765,14 +768,25 @@ local hlgroups = {
 	Ocean = { fg = c_ocean },
 	Space = { fg = c_space },
 	Black = { fg = c_black },
-	-- }}}2
-}
--- }}}1
 
--- Set highlight groups {{{1
+	CosmicPopupBorder = { fg = c_aqua, bg = c_jeans },
+	CosmicPopupInput = { fg = c_smoke, bg = c_jeans },
+
+	IlluminatedWordText = { bg = c_thunder, underline = false },
+	IlluminatedWordRead = { bg = c_thunder, underline = false },
+	IlluminatedWordWrite = { bg = c_thunder, underline = false },
+
+	-- https://github.com/folke/noice.nvim?tab=readme-ov-file#-highlight-groups
+	NoicePopupmenu = { link = "NormalFloat" },
+	NoicePopupmenuBorder = { link = "FloatBorder" },
+	NoiceCmdlinePopup = { link = "NormalFloat" },
+	NoiceCmdlinePopupBorder = { link = "FloatBorder" },
+	NoiceCmdlineIcon = { link = "FloatBorder" },
+}
+
+-- Set highlight groups
 for hlgroup_name, hlgroup_attr in pairs(hlgroups) do
 	vim.api.nvim_set_hl(0, hlgroup_name, hlgroup_attr)
 end
--- }}}1
 
 -- vim:ts=2:sw=2:sts=2:fdm=marker:fdl=0

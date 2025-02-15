@@ -6,13 +6,13 @@ return {
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 			"nvim-telescope/telescope-live-grep-args.nvim",
-			"nvim-telescope/telescope-ui-select.nvim",
+			-- "nvim-telescope/telescope-ui-select.nvim",
 		},
 		config = function()
 			local telescope = require("telescope")
 			local actions = require("telescope.actions")
 			local callTelescope = function(input)
-				-- local theme = require("telescope.themes").get_dropdown()
+				-- local theme = require("telescope.themes").get_dropdown()teles
 				-- input(theme)
 				input()
 			end
@@ -89,17 +89,20 @@ return {
 						-- theme = { }, -- use own theme spec
 						-- layout_config = { mirror=true }, -- mirror preview pane
 					},
-					["ui-select"] = {
-						require("telescope.themes").get_dropdown({
-							-- even more opts
-						}),
-					},
+					-- ["ui-select"] = {
+					-- 	require("telescope.themes").get_dropdown({
+					-- 		-- even more opts
+					-- 	}),
+					-- },
 				},
 
 				defaults = {
+					borderchars = { "─", "│", "─", "│", "┌", "┐", "┘", "└" },
+					sorting_strategy = "ascending",
 					layout_strategy = "flex",
 					layout_config = {
 						horizontal = {
+							prompt_position = "top",
 							width = 0.90,
 							height = 0.90,
 							preview_width = 0.5,
@@ -143,7 +146,7 @@ return {
 			})
 
 			telescope.load_extension("live_grep_args")
-			telescope.load_extension("ui-select")
+			-- telescope.load_extension("ui-select")
 		end,
 	},
 	{

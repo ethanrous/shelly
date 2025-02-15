@@ -50,9 +50,7 @@ return {
 				INFO = { duration = 2000 },
 			})
 
-			vim.keymap.set({ "v", "n" }, "<leader>sh", function()
-				notify.show_history()
-			end, { silent = true })
+
 		end,
 	},
 

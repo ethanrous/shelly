@@ -54,7 +54,6 @@ Colors = {
 --
 -- 	OilDir = { fg = Foam },
 -- }
-
 return {
 	{
 		"rose-pine/neovim",
@@ -78,7 +77,36 @@ return {
 		"CosmicNvim/cosmic-ui",
 		requires = { "MunifTanjim/nui.nvim", "nvim-lua/plenary.nvim" },
 		config = function()
-			require("cosmic-ui").setup()
+			require("cosmic-ui").setup({
+				-- default border to use
+				-- 'single', 'double', 'rounded', 'solid', 'shadow'
+				border_style = "solid",
+
+				-- rename popup settings
+				rename = {
+					border = {
+						highlight = "CosmicPopupBorder",
+						style = "single",
+						title = " Rename ",
+						title_align = "left",
+						title_hl = "CosmicPopupBorder",
+					},
+					prompt = "> ",
+					prompt_hl = "CosmicPopupBorder",
+				},
+
+				code_actions = {
+					min_width = nil,
+					border = {
+						bottom_hl = "FloatBorder",
+						highlight = "FloatBorder",
+						style = "single",
+						title = "Code Actions",
+						title_align = "center",
+						title_hl = "FloatBorder",
+					},
+				},
+			})
 		end,
 	},
 
@@ -95,6 +123,7 @@ return {
 				min_count_to_highlight = 2,
 				filetypes_denylist = {
 					"NvimTree",
+					"harpoon",
 				},
 			})
 		end,

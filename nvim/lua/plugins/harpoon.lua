@@ -5,6 +5,8 @@ return {
 		dependencies = { "nvim-lua/plenary.nvim" },
 		config = function()
 			local harpoon = require("harpoon")
+			local Extensions = require("harpoon.extensions")
+			local Path = require("plenary.path")
 			harpoon.setup()
 
 			vim.keymap.set("n", "<A-a>", function()
@@ -19,8 +21,14 @@ return {
 					return
 				end
 
-				harpoon.ui:toggle_quick_menu(harpoon:list())
+				harpoon.ui:toggle_quick_menu(harpoon:list(), {
+					border = "single",
+				})
 				vim.api.nvim_feedkeys("j", "n", false)
+
+				vim.o.cursorline = true
+				-- vim.api.nvim_set_hl(0, "CursorLine", { link = "Search" })
+				vim.cmd("set winhighlight=CursorLine:Search")
 			end)
 
 			vim.keymap.set("n", "<A-w>", function()

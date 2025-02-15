@@ -1,43 +1,15 @@
--- vim.diagnostic.config({
--- 	virtual_text = {
--- 		hl_mode = "blend",
--- 		format = function(diagnostic)
--- 			local lines = vim.split(diagnostic.message, "\n")
--- 			return lines[1]
--- 		end,
--- 		virt_text_pos = "eol",
--- 		-- virt_text_win_col = 100,
--- 	},
--- 	signs = true,
--- 	update_in_insert = true,
--- 	float = {
--- 		source = "always",
--- 		border = "rounded",
--- 		focusable = false,
--- 	},
--- 	severity_sort = true,
--- })
-
--- local toggle_inlay_hint = function()
--- 	local is_enabled = vim.lsp.inlay_hint.is_enabled()
--- 	vim.lsp.inlay_hint.enable(not is_enabled)
--- end
-
--- local ts_organize_imports = function()
--- 	local params = {
--- 		command = "_typescript.organizeImports",
--- 		arguments = { vim.api.nvim_buf_get_name(0) },
--- 		title = "",
--- 	}
--- 	vim.lsp.buf.execute_command(params)
--- end
-
 -- LSP
 local on_attach = function(_, bufnr)
 	local opts = { buffer = bufnr, remap = false }
 
-	vim.keymap.set("n", "gh", vim.lsp.buf.hover, opts)
-	vim.keymap.set("n", "<LEADER>r", vim.lsp.buf.rename, opts)
+	vim.keymap.set("n", "gh", require("noice.lsp").hover, opts)
+	vim.keymap.set("n", "<LEADER>r", function()
+		require("cosmic-ui").rename({
+			win_options = {
+				winhighlight = "Normal:CosmicPopupInput",
+			},
+		})
+	end, opts)
 	vim.keymap.set("n", "gE", vim.diagnostic.open_float, opts)
 	vim.keymap.set("n", "ge", vim.diagnostic.goto_next, { silent = true })
 	vim.keymap.set("n", "<LEADER>d", vim.diagnostic.open_float, { silent = true })
@@ -196,61 +168,6 @@ return {
 							},
 						})
 					end,
-					-- ["ts_ls"] = function()
-					-- 	local inlayHints = {
-					-- 		includeInlayEnumMemberValueHints = true,
-					-- 		includeInlayFunctionLikeReturnTypeHints = true,
-					-- 		includeInlayFunctionParameterTypeHints = true,
-					-- 		includeInlayParameterNameHints = "all",
-					-- 		includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-					-- 		includeInlayPropertyDeclarationTypeHints = true,
-					-- 		includeInlayVariableTypeHints = false,
-					-- 	}
-					-- 	lspconfig["ts_ls"].setup({
-					-- 		capabilities = capabilities,
-					-- 		on_attach = on_attach,
-					-- 		filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue" },
-					-- 		settings = {
-					-- 			javascript = {
-					-- 				inlayHints = inlayHints,
-					-- 			},
-					-- 			typescript = {
-					-- 				inlayHints = inlayHints,
-					-- 				referencesCodeLens = {
-					-- 					enabled = true,
-					-- 					includeImports = false,
-					-- 				},
-					-- 			},
-					-- 		},
-					-- 		commands = {
-					-- 			OrganizeImports = {
-					-- 				ts_organize_imports,
-					-- 				description = "Organize Imports",
-					-- 			},
-					-- 		},
-					-- 		init_options = {
-					-- 			plugins = { -- I think this was my breakthrough that made it work
-					-- 				{
-					-- 					name = "@vue/typescript-plugin",
-					-- 					location = vim.fn.stdpath("data")
-					-- 						.. "/mason/packages/vue-language-server/node_modules/@vue/language-server",
-					-- 					languages = { "vue" },
-					-- 				},
-					-- 			},
-					-- 		},
-					-- 	})
-					-- 	lspconfig["cssmodules_ls"].setup({
-					-- 		-- provide your on_attach to bind keymappings
-					-- 		-- on_attach = custom_on_attach,
-					-- 		on_attach = function(client)
-					-- 			-- avoid accepting `definitionProvider` responses from this LSP
-					-- 			-- client.server_capabilities.definitionProvider = false
-					-- 		end,
-					-- 		init_options = {
-					-- 			camelCase = false,
-					-- 		},
-					-- 	})
-					-- end,
 					["volar"] = function()
 						lspconfig["volar"].setup({
 							-- filetypes = {"typescript", "javascript", "javascriptreact", "typescriptreact", "vue",},
@@ -284,34 +201,77 @@ return {
 									},
 								},
 							},
-						},
-					})
-					lspconfig["volar"].setup({})
-					lspconfig["cssmodules_ls"].setup({
-						-- provide your on_attach to bind keymappings
-						-- on_attach = custom_on_attach,
-						on_attach = function(client)
-							-- avoid accepting `definitionProvider` responses from this LSP
-							-- client.server_capabilities.definitionProvider = false
-						end,
-						init_options = {
-							camelCase = false,
-						},
-					})
-				end,
-				["clangd"] = function()
-					lspconfig["clangd"].setup({
-						on_attach = on_attach,
-						cmd = {
-							"clangd",
-							"-j=8",
-							"--background-index",
-							"--suggest-missing-includes",
-							"--clang-tidy",
-							"--enable-config",
-						},
-					})
-				end,
+							settings = {
+								typescript = {
+									inlayHints = {
+										enumMemberValues = {
+											enabled = true,
+										},
+										functionLikeReturnTypes = {
+											enabled = true,
+										},
+										propertyDeclarationTypes = {
+											enabled = true,
+										},
+										parameterTypes = {
+											enabled = true,
+											suppressWhenArgumentMatchesName = true,
+										},
+										variableTypes = {
+											enabled = true,
+										},
+									},
+								},
+							},
+						})
+					end,
+					["ts_ls"] = function()
+						local mason_packages = vim.fn.stdpath("data") .. "/mason/packages"
+						local volar_path = mason_packages .. "/vue-language-server/node_modules/@vue/language-server"
+
+						require("lspconfig").ts_ls.setup({
+							-- NOTE: To enable hybridMode, change HybrideMode to true above and uncomment the following filetypes block.
+
+							-- filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue" },
+							init_options = {
+								plugins = {
+									{
+										name = "@vue/typescript-plugin",
+										location = volar_path,
+										languages = { "vue" },
+									},
+								},
+							},
+							settings = {
+								typescript = {
+									inlayHints = {
+										includeInlayParameterNameHints = "all",
+										includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+										includeInlayFunctionParameterTypeHints = true,
+										includeInlayVariableTypeHints = true,
+										includeInlayVariableTypeHintsWhenTypeMatchesName = true,
+										includeInlayPropertyDeclarationTypeHints = true,
+										includeInlayFunctionLikeReturnTypeHints = true,
+										includeInlayEnumMemberValueHints = true,
+									},
+								},
+							},
+						})
+					end,
+					["clangd"] = function()
+						lspconfig["clangd"].setup({
+							on_attach = on_attach,
+							cmd = {
+								"clangd",
+								"-j=8",
+								"--background-index",
+								"--suggest-missing-includes",
+								"--clang-tidy",
+								"--header-insertion=iwyu",
+							},
+						})
+					end,
+				},
 			})
 		end,
 	},

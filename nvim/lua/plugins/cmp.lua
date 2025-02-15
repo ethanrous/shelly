@@ -157,7 +157,7 @@ return {
 				-- cmdline = {},
 			},
 			signature = {
-				enabled = true,
+				enabled = false,
 			},
 		},
 	},
@@ -189,5 +189,116 @@ return {
 				{ path = "${3rd}/luv/library", words = { "vim%.uv" } },
 			},
 		},
+	},
+	{
+		"folke/noice.nvim",
+		dependencies = {
+			-- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
+			"MunifTanjim/nui.nvim",
+			-- OPTIONAL:
+			--   `nvim-notify` is only needed, if you want to use the notification view.
+			--   If not available, we use `mini` as the fallback
+			-- "rcarriga/nvim-notify",
+		},
+		config = function()
+			require("noice").setup({
+				lsp = {
+					-- override markdown rendering so that **cmp** and other plugins use **Treesitter**
+					override = {
+						["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+						["vim.lsp.util.stylize_markdown"] = true,
+						["cmp.entry.get_documentation"] = true, -- requires hrsh7th/nvim-cmp
+					},
+					signature = {
+						enabled = true,
+						throttle = 0,
+					},
+					hover = {
+						silent = true,
+					},
+				},
+
+				-- you can enable a preset for easier configuration
+				presets = {
+					bottom_search = true, -- use a classic bottom cmdline for search
+					command_palette = true, -- position the cmdline and popupmenu together
+					long_message_to_split = true, -- long messages will be sent to a split
+					inc_rename = false, -- enables an input dialog for inc-rename.nvim
+					lsp_doc_border = true, -- add a border to hover docs and signature help
+				},
+
+				cmdline = {
+					enabled = true,
+					format = {
+						-- conceal: (default=true) This will hide the text in the cmdline that matches the pattern.
+						-- view: (default is cmdline view)
+						-- opts: any options passed to the view
+						-- icon_hl_group: optional hl_group for the icon
+						-- title: set to anything or empty string to hide
+						-- icon_hl_group = "NoiceCmdlineIcon",
+						cmdline = { pattern = "^:", icon = "$", lang = "vim" },
+					},
+				},
+				commands = {
+					all = {
+						-- options for the message history that you get with `:Noice`
+						view = "popup",
+						opts = { enter = true, format = "details" },
+						filter = {},
+					},
+				},
+				views = {
+					hover = {
+						relative = "cursor",
+						anchor = "SW",
+						position = {
+							row = -1,
+							col = 0,
+						},
+						border = { style = "single" },
+						size = { max_width = 80 },
+					},
+					cmdline_popup = {
+						anchor = "NW",
+						position = {
+							row = "35%",
+							col = "50%",
+						},
+						border = {
+							style = "single",
+						},
+						size = {
+							width = 60,
+							height = "auto",
+						},
+					},
+					popup = {
+						border = {
+							style = "single",
+							padding = { 0, 1 },
+						},
+					},
+					cmdline_popupmenu = {
+						anchor = "NW",
+						position = {
+							row = "55%",
+							col = "50%",
+						},
+						size = {
+							width = 60,
+							height = 15,
+							max_height = 15,
+						},
+						border = {
+							style = "single",
+						},
+					},
+				},
+			})
+
+			vim.keymap.set({ "v", "n" }, "<leader>sh", function()
+				require("noice").cmd("all")
+			end, { silent = true })
+		end,
 	},
 }
