@@ -782,6 +782,10 @@ local hlgroups = {
 	NoiceCmdlinePopup = { link = "NormalFloat" },
 	NoiceCmdlinePopupBorder = { link = "FloatBorder" },
 	NoiceCmdlineIcon = { link = "FloatBorder" },
+
+	BlinkCmpMenuBorder = { link = "FloatBorder" },
+	BlinkCmpDocBorder = { link = "FloatBorder" },
+	BlinkCmpSignatureHelpBorder = { link = "FloatBorder" },
 }
 
 -- Set highlight groups

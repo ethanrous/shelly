@@ -123,41 +123,55 @@ return {
 	{
 		"saghen/blink.cmp",
 		lazy = false,
+		version = "*",
 		dependencies = {
 			-- Autocompletion
 			"onsails/lspkind.nvim",
-
-			-- Snippets
-			-- "L3MON4D3/LuaSnip",
+			"rafamadriz/friendly-snippets",
 		},
-		version = "v0.7.6",
 		opts = {
+			completion = {
+				menu = {
+					auto_show = function(ctx)
+						return ctx.mode ~= "cmdline" or not vim.tbl_contains({ "/", "?" }, vim.fn.getcmdtype())
+					end,
+					border = "single",
+					draw = { gap = 2, columns = { { "kind_icon" }, { "label", "label_description", gap = 1 } } },
+				},
+				documentation = { auto_show = true, auto_show_delay_ms = 0, window = { border = "single" } },
+				list = { selection = { preselect = true, auto_insert = false } },
+			},
+			sources = {
+				default = { "lsp", "path", "snippets", "buffer" },
+			},
+			signature = { enabled = true, window = { border = "single" } },
 			keymap = {
-				["<A-j>"] = {
-					"select_next",
-				},
-				["<A-k>"] = {
-					"select_prev",
-				},
-				["<A-l>"] = {
-					"accept",
-				},
+				preset = "default",
+				["<A-j>"] = { "select_next" },
+				["<A-k>"] = { "select_prev" },
+				["<A-l>"] = { "select_and_accept" },
+				["<C-d>"] = { "show_documentation" },
 				["<A-Tab>"] = {
 					function(cmp)
 						local copilot = require("copilot.suggestion")
 						if copilot.is_visible() then
 							copilot.accept()
 						end
+						return true
 					end,
 				},
-			},
-			sources = {
-				default = { "lsp", "path", "buffer" },
-				-- optionally disable cmdline completions
-				-- cmdline = {},
-			},
-			signature = {
-				enabled = false,
+				["<Tab>"] = {
+					function(cmp)
+						if cmp.snippet_active() then
+							return cmp.accept()
+						else
+							return cmp.select_and_accept()
+						end
+					end,
+					"snippet_forward",
+					"fallback",
+				},
+				["<S-Tab>"] = { "snippet_backward", "fallback" },
 			},
 		},
 	},
@@ -210,7 +224,7 @@ return {
 						["cmp.entry.get_documentation"] = true, -- requires hrsh7th/nvim-cmp
 					},
 					signature = {
-						enabled = true,
+						enabled = false,
 						throttle = 0,
 					},
 					hover = {
@@ -276,6 +290,7 @@ return {
 						border = {
 							style = "single",
 							padding = { 0, 1 },
+							size = { max_width = 80, max_height = 60 },
 						},
 					},
 					cmdline_popupmenu = {

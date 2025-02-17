@@ -79,11 +79,13 @@ return {
 					-- HTML
 					"html",
 					-- JavaScript/TypeScript
-					"ts_ls",
+					-- "ts_ls",
+					"vtsls",
 					"volar",
 					"tailwindcss",
 					"eslint",
 					"cssls",
+					"cssmodules-language-server",
 
 					-- C/C++
 					"clangd",
@@ -225,39 +227,67 @@ return {
 							},
 						})
 					end,
-					["ts_ls"] = function()
-						local mason_packages = vim.fn.stdpath("data") .. "/mason/packages"
-						local volar_path = mason_packages .. "/vue-language-server/node_modules/@vue/language-server"
-
-						require("lspconfig").ts_ls.setup({
-							-- NOTE: To enable hybridMode, change HybrideMode to true above and uncomment the following filetypes block.
-
-							-- filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue" },
-							init_options = {
-								plugins = {
-									{
-										name = "@vue/typescript-plugin",
-										location = volar_path,
-										languages = { "vue" },
-									},
-								},
+					["vtsls"] = function()
+						require("lspconfig").vtsls.setup({
+							filetypes = {
+								"javascript",
+								"javascriptreact",
+								"javascript.jsx",
+								"typescript",
+								"typescriptreact",
+								"typescript.tsx",
 							},
-							settings = {
-								typescript = {
-									inlayHints = {
-										includeInlayParameterNameHints = "all",
-										includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-										includeInlayFunctionParameterTypeHints = true,
-										includeInlayVariableTypeHints = true,
-										includeInlayVariableTypeHintsWhenTypeMatchesName = true,
-										includeInlayPropertyDeclarationTypeHints = true,
-										includeInlayFunctionLikeReturnTypeHints = true,
-										includeInlayEnumMemberValueHints = true,
-									},
-								},
-							},
+							{ "vtsls", "--stdio" },
+
+							on_attach = on_attach,
 						})
 					end,
+					["cssmodules_ls"] = function()
+						require("lspconfig").cssmodules_ls.setup({
+							filetypes = {
+								"javascriptreact",
+								"javascript.jsx",
+								"typescriptreact",
+								"typescript.tsx",
+							},
+
+							on_attach = function(client)
+								client.server_capabilities.definitionProvider = false
+								on_attach(client)
+							end,
+						})
+					end,
+					-- ["ts_ls"] = function()
+					-- 	local mason_packages = vim.fn.stdpath("data") .. "/mason/packages"
+					-- 	local volar_path = mason_packages .. "/vue-language-server/node_modules/@vue/language-server"
+					--
+					-- 	require("lspconfig").ts_ls.setup({
+					-- 		filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact" },
+					-- 		init_options = {
+					-- 			plugins = {
+					-- 				{
+					-- 					name = "@vue/typescript-plugin",
+					-- 					location = volar_path,
+					-- 					languages = { "vue" },
+					-- 				},
+					-- 			},
+					-- 		},
+					-- 		settings = {
+					-- 			typescript = {
+					-- 				inlayHints = {
+					-- 					includeInlayParameterNameHints = "all",
+					-- 					includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+					-- 					includeInlayFunctionParameterTypeHints = true,
+					-- 					includeInlayVariableTypeHints = true,
+					-- 					includeInlayVariableTypeHintsWhenTypeMatchesName = true,
+					-- 					includeInlayPropertyDeclarationTypeHints = true,
+					-- 					includeInlayFunctionLikeReturnTypeHints = true,
+					-- 					includeInlayEnumMemberValueHints = true,
+					-- 				},
+					-- 			},
+					-- 		},
+					-- 	})
+					-- end,
 					["clangd"] = function()
 						lspconfig["clangd"].setup({
 							on_attach = on_attach,
