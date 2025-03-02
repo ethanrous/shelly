@@ -121,13 +121,29 @@ return {
 	-- 	event = "InsertEnter",
 	-- },
 	{
+		"L3MON4D3/LuaSnip",
+		-- follow latest release.
+		version = "v2.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
+		-- install jsregexp (optional!).
+		build = "make install_jsregexp",
+		config = function()
+			-- Load my snippets
+			-- snip_loader.lazy_load()
+			-- require("luasnip.loaders.from_lua").load({ paths = "~/shelly/nvim/snippets/" })
+			require("../config.snippets")
+
+			-- Im 100% sure this is bad, and it can be achieved in a better way
+			-- but i couldn't find the proper way.
+		end,
+	},
+	{
 		"saghen/blink.cmp",
 		lazy = false,
 		version = "*",
 		dependencies = {
 			-- Autocompletion
 			"onsails/lspkind.nvim",
-			"rafamadriz/friendly-snippets",
+			-- "rafamadriz/friendly-snippets",
 		},
 		opts = {
 			completion = {
@@ -141,6 +157,7 @@ return {
 				documentation = { auto_show = true, auto_show_delay_ms = 0, window = { border = "single" } },
 				list = { selection = { preselect = true, auto_insert = false } },
 			},
+			snippets = { preset = "luasnip" },
 			sources = {
 				default = { "lsp", "path", "snippets", "buffer" },
 			},

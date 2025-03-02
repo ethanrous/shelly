@@ -131,6 +131,16 @@ config.keys = {
 		mods = "CMD",
 		action = wezterm.action.ActivatePaneDirection("Down"),
 	},
+	{
+		key = "?",
+		mods = "SHIFT|ALT",
+		action = wezterm.action.Search({ CaseInSensitiveString = "" }),
+	},
+	{
+		key = "u",
+		mods = "ALT",
+		action = wezterm.action.ActivateCopyMode,
+	},
 }
 
 for i = 1, 8 do
