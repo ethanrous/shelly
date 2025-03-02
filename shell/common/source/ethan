@@ -28,15 +28,15 @@ dock() {
 }
 
 cat() {
-    run_cmd /bin/cat ${@: -1}
+    run_cmd /bin/cat "${@: -1}"
 }
 
 ls() {
     # $1 is the options for lsd, use $2
     if which eza >/dev/null 2>&1; then
-      run_cmd eza $1 ${@: -1}
+      run_cmd eza "$1" "${@: -1}"
     else
-      run_cmd /usr/bin/ls $1 ${@: -1}
+      run_cmd /usr/bin/ls "$1" "${@: -1}"
     fi
 }
 
