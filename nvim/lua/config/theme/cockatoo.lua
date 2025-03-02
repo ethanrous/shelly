@@ -5,12 +5,11 @@
 -- License:      GPL-3.0
 -- Last Updated: Tue Aug 27 08:38:05 PM EDT 2024
 
--- Clear hlgroups and set colors_name {{{
+-- Clear hlgroups and set colors_name
 vim.cmd.hi("clear")
 vim.g.colors_name = "cockatoo"
--- }}}
 
--- Palette {{{
+-- Palette 
 -- stylua: ignore start
 local c_yellow
 local c_earth
@@ -743,6 +742,7 @@ local hlgroups = {
 	-- Extra
 	Yellow = { fg = c_yellow },
 	Earth = { fg = c_earth },
+	Red = { fg = c_wine },
 	Orange = { fg = c_orange },
 	Scarlet = { fg = c_scarlet },
 	Ochre = { fg = c_ochre },

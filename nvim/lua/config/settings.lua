@@ -64,3 +64,7 @@ opt.diffopt = "internal,filler,closeoff,indent-heuristic,linematch:60,algorithm:
 
 -- Toggle relative line numbering
 -- vim.cmd("command! ToggleRelLines set relativenumber!")
+
+vim.diagnostic.config({
+	float = { border = "single" },
+})

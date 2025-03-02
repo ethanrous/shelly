@@ -76,6 +76,13 @@ local fugitive_blame = {
 	filetypes = { "fugitive", "fugitiveblame" },
 }
 
+local get_recording_macro = function()
+	if vim.fn.reg_recording() ~= "" then
+		return "%#StatusLineDiagnosticError#" .. "󰏯 " .. vim.fn.reg_recording()
+	end
+	return ""
+end
+
 require("lualine").setup({
 	options = {
 		theme = lineColors,
@@ -88,7 +95,7 @@ require("lualine").setup({
 		lualine_b = { { "filename", path = 1 } },
 		lualine_c = { "filetype" },
 		lualine_x = { "diagnostics" },
-		lualine_y = { get_location },
+		lualine_y = { get_location, get_recording_macro },
 		lualine_z = { { "diff", colored = false }, "branch" },
 	},
 	inactive_sections = {

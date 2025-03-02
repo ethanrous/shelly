@@ -10,11 +10,17 @@ local on_attach = function(_, bufnr)
 			},
 		})
 	end, opts)
-	vim.keymap.set("n", "gE", vim.diagnostic.open_float, opts)
-	vim.keymap.set("n", "ge", vim.diagnostic.goto_next, { silent = true })
-	vim.keymap.set("n", "<LEADER>d", vim.diagnostic.open_float, { silent = true })
+
+	local diagnostic_float_opts = {
+		border = "single",
+	}
+	vim.keymap.set("n", "gE", function()
+		vim.diagnostic.open_float(diagnostic_float_opts)
+	end)
+	vim.keymap.set("n", "ge", function()
+		vim.diagnostic.goto_next(diagnostic_float_opts)
+	end, { silent = true })
 	vim.keymap.set({ "n", "i" }, "<A-S-d>", vim.diagnostic.goto_prev, { silent = true })
-	-- vim.keymap.set("n", "<LEADER>t", toggle_inlay_hint, opts)
 
 	vim.lsp.handlers["textDocument/hover"] = function(_, result, ctx, config)
 		config = config or {}

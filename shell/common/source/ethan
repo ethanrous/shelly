@@ -41,6 +41,9 @@ ls() {
 }
 
 alias em="$EDITOR"
+man() {
+	nvim -c ":Man $1 | :only"
+}
 
 search() {
   DIR=""
