@@ -55,6 +55,10 @@ vim.keymap.set("n", "<LEADER>ff", function()
 	-- vim.schedule(Format_hunks)
 end, { silent = true })
 
+vim.keymap.set("n", "<LEADER>lr", function()
+	vim.cmd("LspRestart")
+end, { silent = true })
+
 vim.keymap.set("n", "<LEADER>FF", function()
 	require("conform").format({
 		lsp_fallback = true,
