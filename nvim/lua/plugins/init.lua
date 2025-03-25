@@ -12,10 +12,10 @@ return {
 	},
 
 	-- Disable some features for big files
-	{
-		"LunarVim/bigfile.nvim",
-		event = { "FileReadPre", "BufReadPre", "BufEnter" },
-	},
+	-- {
+	-- 	"LunarVim/bigfile.nvim",
+	-- 	event = { "FileReadPre", "BufReadPre", "BufEnter" },
+	-- },
 
 	-- Markdown previewer
 	{

@@ -98,6 +98,11 @@ config.keys = {
 	},
 	{
 		key = "s",
+		mods = "CMD",
+		action = wezterm.action.ActivateLastTab,
+	},
+	{
+		key = "s",
 		mods = "CMD|SHIFT",
 		action = wezterm.action.SplitHorizontal({ domain = "CurrentPaneDomain" }),
 	},
@@ -141,6 +146,16 @@ config.keys = {
 		mods = "ALT",
 		action = wezterm.action.ActivateCopyMode,
 	},
+	{
+		key = "L",
+		mods = "CMD|SHIFT",
+		action = wezterm.action.ActivateTabRelative(1),
+	},
+	{
+		key = "H",
+		mods = "CMD|SHIFT",
+		action = wezterm.action.ActivateTabRelative(-1),
+	},
 }
 
 for i = 1, 8 do
@@ -162,7 +177,7 @@ local function tab_title(tab_info)
 	local title = tab_info.tab_title
 	-- if the tab title is explicitly set, take that
 	if title and #title > 0 then
-		return title
+		return "[" .. tab_info.tab_index + 1 .. "] " .. title
 	end
 	-- Otherwise, use the title from the active pane
 	-- in that tab

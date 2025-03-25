@@ -9,6 +9,7 @@ alias n='ping 1.1.1.1'
 alias whoamip='curl -s ifconfig.me'
 alias ip='ifconfig | grep 10.10.1'
 alias pathls='echo $PATH | tr ":" "\n"'
+alias tab='wezterm cli set-tab-title'
 
 alias sbp="source ~/.${SHELL_NAME}rc"
 alias sync="$SHELLY/shell/common/auto-loader.bash"

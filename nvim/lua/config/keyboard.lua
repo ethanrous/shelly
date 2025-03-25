@@ -24,9 +24,8 @@ end, { expr = true, noremap = true, silent = true })
 -- General Navigation o7 --
 
 -- Duplicate line
-vim.keymap.set({ "i", "n" }, "<A-S-Down>", "<Esc>mcyyp`cj", { silent = true })
 vim.keymap.set({ "i", "n" }, "<A-S-j>", '<Esc>mc"kyy"kp`cj', { silent = true })
-vim.keymap.set("v", "<A-S-j>", '"ky\']"kp', { silent = true })
+vim.keymap.set("v", "<A-S-j>", '"ky\']"kpV`]', { silent = true })
 
 vim.keymap.set("x", "p", [["_dP]]) -- Paste without yanking
 
@@ -58,6 +57,11 @@ end, { silent = true })
 vim.keymap.set("n", "<LEADER>lr", function()
 	vim.cmd("LspRestart")
 end, { silent = true })
+
+vim.keymap.set("n", "<LEADER>ln", function()
+	print(vim.o.rnu)
+	vim.o.rnu = not vim.o.rnu
+end)
 
 vim.keymap.set("n", "<LEADER>FF", function()
 	require("conform").format({

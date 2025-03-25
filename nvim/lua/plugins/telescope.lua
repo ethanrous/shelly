@@ -31,9 +31,7 @@ return {
 			end, { silent = true })
 
 			vim.keymap.set("n", "gd", function()
-				require("telescope.builtin").lsp_definitions({
-					file_ignore_patterns = { ".d.ts" },
-				})
+				require("telescope.builtin").lsp_definitions()
 			end, { silent = true })
 
 			vim.keymap.set("n", "<leader>fg", function()
@@ -76,6 +74,11 @@ return {
 				extensions = {
 					live_grep_args = {
 						auto_quoting = true, -- enable/disable auto-quoting
+						file_ignore_patterns = { "node_modules", "pnpm-lock.yaml", "package-lock.json" },
+						additional_args = function(_)
+							return { "--hidden" }
+						end,
+						hidden = true,
 						-- define mappings, e.g.
 						mappings = { -- extend mappings
 							i = {
