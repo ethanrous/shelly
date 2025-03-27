@@ -52,19 +52,19 @@ return {
 				},
 				strategies = {
 					chat = {
-						adapter = "ollama",
+						adapter = "Copilot",
 					},
 					inline = {
-						adapter = "ollama",
+						adapter = "Copilot",
 					},
 				},
 				adapters = {
 					ollama = function()
 						return require("codecompanion.adapters").extend("ollama", {
-							env = {
-								url = "http://lucy.arcticnet:11439",
-								-- api_key = "OLLAMA_API_KEY",
-							},
+							-- env = {
+							-- url = "http://lucy.arcticnet:11439",
+							-- api_key = "OLLAMA_API_KEY",
+							-- },
 							-- headers = {
 							-- 	["Content-Type"] = "application/json",
 							-- 	["Authorization"] = "Bearer ${api_key}",
@@ -74,6 +74,9 @@ return {
 							},
 							schema = { model = { default = "llama3.2:3b" } },
 						})
+					end,
+					Copilot = function()
+						return require("codecompanion.adapters").extend("Copilot", {})
 					end,
 				},
 			})

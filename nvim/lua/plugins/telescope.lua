@@ -1,13 +1,11 @@
 return {
 	{
 		"nvim-telescope/telescope.nvim",
-		-- branch = "master",
 		branch = "0.1.x",
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 			"nvim-telescope/telescope-live-grep-args.nvim",
-
-			-- "nvim-telescope/telescope-ui-select.nvim",
+			"nvim-telescope/telescope-ui-select.nvim",
 		},
 		config = function()
 			local telescope = require("telescope")
@@ -45,10 +43,6 @@ return {
 			vim.keymap.set("v", "<leader>fg", function()
 				require("telescope.builtin").grep_string()
 			end, { silent = true })
-
-			-- vim.keymap.set("n", "<leader>gt", function()
-			-- 	require("telescope.builtin").builtin()
-			-- end, { silent = true })
 
 			vim.keymap.set("n", "<leader>gh", function()
 				require("telescope.builtin").highlights()
@@ -94,11 +88,11 @@ return {
 						-- layout_config = { mirror=true }, -- mirror preview pane
 					},
 
-					-- ["ui-select"] = {
-					-- 	require("telescope.themes").get_dropdown({
-					-- 		-- even more opts
-					-- 	}),
-					-- },
+					["ui-select"] = {
+						require("telescope.themes").get_dropdown({
+							-- even more opts
+						}),
+					},
 				},
 
 				defaults = {
@@ -151,7 +145,7 @@ return {
 			})
 
 			telescope.load_extension("live_grep_args")
-			-- telescope.load_extension("ui-select")
+			telescope.load_extension("ui-select")
 		end,
 	},
 	{

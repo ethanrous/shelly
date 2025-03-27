@@ -81,6 +81,7 @@ return {
 
 					-- Java
 					"jdtls",
+					"gradle_ls",
 
 					-- HTML
 					"html",
@@ -306,6 +307,9 @@ return {
 								"--header-insertion=iwyu",
 							},
 						})
+					end,
+					["gradle_ls"] = function()
+						lspconfig["gradle_ls"].setup({})
 					end,
 				},
 			})

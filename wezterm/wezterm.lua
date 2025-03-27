@@ -1,5 +1,6 @@
 -- Pull in the wezterm API
 local wezterm = require("wezterm")
+local os = require("os")
 
 -- This will hold the configuration.
 local config = wezterm.config_builder()
@@ -173,32 +174,66 @@ function string.starts(String, Start)
 	return string.sub(String, 1, string.len(Start)) == Start
 end
 
+function string.ends(String, End)
+	return string.sub(String, string.len(String) - string.len(End) + 1) == End
+end
+
+function string.trim_prefix(String, Prefix)
+	if not string.starts(String, Prefix) then
+		return String
+	end
+	return string.sub(String, string.len(Prefix) + 1, string.len(String))
+end
+
+function string.delete_after(String, Delim)
+	local start = string.find(String, Delim)
+	if not start then
+		return String
+	end
+	return string.sub(String, 1, start - 1)
+end
+
+function string.basename(String)
+	local last = string.find(String, "/[^/]*$")
+	if not last then
+		return String
+	end
+	return string.sub(String, last + 1)
+end
+
+local function getTabIndexString(tab_info)
+	local indexName = "[" .. tab_info.tab_index + 1
+	if tab_info.active_pane.is_zoomed then
+		indexName = indexName .. "*"
+	end
+	indexName = indexName .. "] "
+	return indexName
+end
+
 local function tab_title(tab_info)
 	local title = tab_info.tab_title
 	-- if the tab title is explicitly set, take that
+
 	if title and #title > 0 then
-		return "[" .. tab_info.tab_index + 1 .. "] " .. title
-	end
-	-- Otherwise, use the title from the active pane
-	-- in that tab
-	if not tab_info.active_pane or not tab_info.active_pane.title then
-		title = "???"
-	elseif string.starts(tab_info.active_pane.title, "[No Name]") then
-		title = "nvim"
-	else
-		for str in string.gmatch(tab_info.active_pane.title, "([^ ]+)") do
-			if str ~= " " then
-				title = str
-				break
-			end
-		end
+		return getTabIndexString(tab_info) .. title
 	end
 
-	return "[" .. tab_info.tab_index + 1 .. "] " .. title
+	local dir = tab_info.active_pane.current_working_dir.file_path
+	local proc = tab_info.active_pane.foreground_process_name
+	if string.starts(dir, "/Users/erousseau/repos/") then
+		dir = string.trim_prefix(dir, "/Users/erousseau/repos/")
+		dir = string.delete_after(dir, "/")
+	end
+
+	proc = string.basename(proc)
+	if proc == "bash" then
+		proc = ""
+	end
+
+	return getTabIndexString(tab_info) .. string.basename(dir) .. " " .. proc
 end
 
 wezterm.on("format-tab-title", function(tab, tabs, panes, cnf, hover, max_width)
-	-- local edge_background = "#232136"
 	local edge_background = c_jeans
 	local background = c_jeans
 	local foreground = "#808080"
