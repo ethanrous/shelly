@@ -1,6 +1,7 @@
 local ls = require("luasnip")
 -- some shorthands...
 local snip = ls.snippet
+local fmt = require("luasnip.extras.fmt").fmta
 local node = ls.snippet_node
 local text = ls.text_node
 local insert = ls.insert_node
@@ -24,6 +25,19 @@ ls.add_snippets(nil, {
 			text({ "': true}\"" }),
 			insert(0),
 		}),
+		snip(
+			{
+				trig = "iferr",
+				namr = "If Error",
+				dscr = "If Error is not nil",
+			},
+			fmt(
+				[[if err != nil {
+	return <>
+}]],
+				{ insert(1, "err") }
+			)
+		),
 		snip({
 			trig = "date",
 			namr = "Date",

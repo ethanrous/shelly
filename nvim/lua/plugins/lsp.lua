@@ -64,7 +64,7 @@ return {
 				ensure_installed = {
 					-- Go
 					"gopls",
-					"golangci_lint_ls",
+					-- "golangci_lint_ls",
 					--
 					-- Lua
 					"lua_ls",
@@ -96,6 +96,9 @@ return {
 
 					-- C/C++
 					"clangd",
+
+					-- Docker
+					"hadolint",
 				},
 			})
 			local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -152,12 +155,12 @@ return {
 							},
 						})
 					end,
-					["golangci_lint_ls"] = function()
-						lspconfig["golangci_lint_ls"].setup({
-							capabilities = capabilities,
-							on_attach = on_attach,
-						})
-					end,
+					-- ["golangci_lint_ls"] = function()
+					-- 	lspconfig["golangci_lint_ls"].setup({
+					-- 		capabilities = capabilities,
+					-- 		on_attach = on_attach,
+					-- 	})
+					-- end,
 					["gopls"] = function()
 						lspconfig["gopls"].setup({
 							capabilities = capabilities,
@@ -264,37 +267,6 @@ return {
 							end,
 						})
 					end,
-					-- ["ts_ls"] = function()
-					-- 	local mason_packages = vim.fn.stdpath("data") .. "/mason/packages"
-					-- 	local volar_path = mason_packages .. "/vue-language-server/node_modules/@vue/language-server"
-					--
-					-- 	require("lspconfig").ts_ls.setup({
-					-- 		filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact" },
-					-- 		init_options = {
-					-- 			plugins = {
-					-- 				{
-					-- 					name = "@vue/typescript-plugin",
-					-- 					location = volar_path,
-					-- 					languages = { "vue" },
-					-- 				},
-					-- 			},
-					-- 		},
-					-- 		settings = {
-					-- 			typescript = {
-					-- 				inlayHints = {
-					-- 					includeInlayParameterNameHints = "all",
-					-- 					includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-					-- 					includeInlayFunctionParameterTypeHints = true,
-					-- 					includeInlayVariableTypeHints = true,
-					-- 					includeInlayVariableTypeHintsWhenTypeMatchesName = true,
-					-- 					includeInlayPropertyDeclarationTypeHints = true,
-					-- 					includeInlayFunctionLikeReturnTypeHints = true,
-					-- 					includeInlayEnumMemberValueHints = true,
-					-- 				},
-					-- 			},
-					-- 		},
-					-- 	})
-					-- end,
 					["clangd"] = function()
 						lspconfig["clangd"].setup({
 							on_attach = on_attach,
@@ -310,6 +282,16 @@ return {
 					end,
 					["gradle_ls"] = function()
 						lspconfig["gradle_ls"].setup({})
+					end,
+					dockerls = function()
+						lspconfig["dockerls"].setup({
+							on_attach = on_attach,
+						})
+					end,
+					docker_compose_language_service = function()
+						lspconfig["docker_compose_language_service"].setup({
+							on_attach = on_attach,
+						})
 					end,
 				},
 			})

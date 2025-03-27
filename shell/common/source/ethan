@@ -142,8 +142,8 @@ if which ollama-copilot >/dev/null; then
     fi
 fi
 
-export LDFLAGS="-L/opt/homebrew/lib"
-export CPPFLAGS="-I/opt/homebrew/include"
+# export LDFLAGS="-L/opt/homebrew/lib"
+# export CPPFLAGS="-I/opt/homebrew/include"
 
 # Danger??
 ulimit -n 4096

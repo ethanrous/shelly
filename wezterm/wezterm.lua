@@ -137,6 +137,16 @@ config.keys = {
 		mods = "CMD",
 		action = wezterm.action.ActivatePaneDirection("Down"),
 	},
+	-- {
+	-- 	key = "h",
+	-- 	mods = "CMD|SHIFT",
+	-- 	action = wezterm.action.RotatePanes("CounterClockwise"),
+	-- },
+	{
+		key = "b",
+		mods = "CMD",
+		action = wezterm.action.RotatePanes("Clockwise"),
+	},
 	{
 		key = "?",
 		mods = "SHIFT|ALT",
