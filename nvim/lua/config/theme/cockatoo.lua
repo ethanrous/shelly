@@ -173,9 +173,11 @@ end
 local hlgroups = {
 	-- Common
 	Normal = { fg = c_smoke, bg = c_jeans },
-	-- NormalFloat = { fg = c_smoke, bg = c_ocean },
+
 	NormalFloat = { fg = c_smoke, bg = c_jeans },
+
 	NormalNC = { link = "Normal" },
+	NormalSB = { link = "Normal" },
 	-- ColorColumn = { bg = c_deepsea },
 	ColorColumn = { bg = c_deepsea }, -- This controls the lsp hover window background color
 	Conceal = { fg = c_smoke },
@@ -377,6 +379,7 @@ local hlgroups = {
 	["@markup.emphasis"] = { fg = c_beige, bold = true, italic = true },
 	["@markup.underline"] = { underline = true },
 	["@keyword.operator"] = { link = "Operator" },
+	TreesitterContext = { bg = c_deepsea },
 
 	-- LSP semantic
 	["@lsp.type.enum"] = { link = "Type" },
@@ -726,6 +729,10 @@ local hlgroups = {
 	CopilotSuggestion = { fg = c_steel, italic = true },
 	CopilotAnnotation = { fg = c_steel, italic = true },
 
+	-- avante
+	-- AvantePopupHint = { fg = c_wine, bg = c_deepsea },
+	-- AvanteInlineHint = { fg = c_wine, bg = c_deepsea },
+
 	-- statusline plugin
 	StatusLineDiagnosticError = { fg = c_wine, bg = c_deepsea },
 	StatusLineDiagnosticHint = { fg = c_pigeon, bg = c_deepsea },
@@ -782,6 +789,7 @@ local hlgroups = {
 	NoiceCmdlinePopup = { link = "NormalFloat" },
 	NoiceCmdlinePopupBorder = { link = "FloatBorder" },
 	NoiceCmdlineIcon = { link = "FloatBorder" },
+	NoiceVirtualText = { bg = c_jeans, fg = c_jeans },
 
 	BlinkCmpMenuBorder = { link = "FloatBorder" },
 	BlinkCmpDocBorder = { link = "FloatBorder" },

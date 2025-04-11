@@ -24,9 +24,9 @@ return {
 				require("telescope.builtin").lsp_references({ include_declaration = false })
 			end, { silent = true })
 
-			vim.keymap.set("n", "gs", function()
-				callTelescope(require("telescope.builtin").lsp_document_symbols)
-			end, { silent = true })
+			-- vim.keymap.set("n", "gs", function()
+			-- 	callTelescope(require("telescope.builtin").lsp_document_symbols)
+			-- end, { silent = true })
 
 			vim.keymap.set("n", "gd", function()
 				require("telescope.builtin").lsp_definitions()

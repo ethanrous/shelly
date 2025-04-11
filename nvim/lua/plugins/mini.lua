@@ -49,8 +49,6 @@ return {
 				WARN = { duration = 4000 },
 				INFO = { duration = 2000 },
 			})
-
-
 		end,
 	},
 

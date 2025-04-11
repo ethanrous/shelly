@@ -1,5 +1,5 @@
 -- LSP
-local on_attach = function(_, bufnr)
+local on_attach = function(client, bufnr)
 	local opts = { buffer = bufnr, remap = false }
 
 	vim.keymap.set("n", "gh", require("noice.lsp").hover, opts)
@@ -21,6 +21,9 @@ local on_attach = function(_, bufnr)
 		vim.diagnostic.goto_next(diagnostic_float_opts)
 	end, { silent = true })
 	vim.keymap.set({ "n", "i" }, "<A-S-d>", vim.diagnostic.goto_prev, { silent = true })
+
+	require("nvim-navbuddy").attach(client, bufnr)
+	vim.keymap.set("n", "gs", require("nvim-navbuddy").open, { buffer = bufnr, remap = true })
 
 	vim.lsp.handlers["textDocument/hover"] = function(_, result, ctx, config)
 		config = config or {}

@@ -61,19 +61,19 @@ return {
 		build = ":TSUpdate",
 		event = "BufEnter",
 		dependencies = {
-			-- "nvim-treesitter/nvim-treesitter-context",
+			"nvim-treesitter/nvim-treesitter-context",
 			"nvim-treesitter/nvim-treesitter-textobjects",
 			"JoosepAlviste/nvim-ts-context-commentstring",
 		},
 	},
-	-- {
-	-- 	"nvim-treesitter/nvim-treesitter-context",
-	-- 	config = function()
-	-- 		require("treesitter-context").setup({
-	-- 			max_lines = 0,
-	-- 		})
-	-- 	end,
-	-- },
+	{
+		"nvim-treesitter/nvim-treesitter-context",
+		config = function()
+			require("treesitter-context").setup({
+				max_lines = 0,
+			})
+		end,
+	},
 
 	-- Tressitter text objects
 	{
