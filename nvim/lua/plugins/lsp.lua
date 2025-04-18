@@ -17,10 +17,12 @@ local on_attach = function(client, bufnr)
 	vim.keymap.set("n", "gE", function()
 		vim.diagnostic.open_float(diagnostic_float_opts)
 	end)
+
 	vim.keymap.set("n", "ge", function()
-		vim.diagnostic.goto_next(diagnostic_float_opts)
+		vim.diagnostic.jump({ count = 1, float = true })
 	end, { silent = true })
-	vim.keymap.set({ "n", "i" }, "<A-S-d>", vim.diagnostic.goto_prev, { silent = true })
+
+	vim.keymap.set("n", "<LEADER>li", require("vim.lsp.health").check, { silent = true })
 
 	require("nvim-navbuddy").attach(client, bufnr)
 	vim.keymap.set("n", "gs", require("nvim-navbuddy").open, { buffer = bufnr, remap = true })
@@ -298,6 +300,12 @@ return {
 					end,
 				},
 			})
+		end,
+	},
+	{
+		"dmmulroy/ts-error-translator.nvim",
+		config = function()
+			require("ts-error-translator").setup()
 		end,
 	},
 	{

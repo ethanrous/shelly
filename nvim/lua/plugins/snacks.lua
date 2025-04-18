@@ -12,14 +12,28 @@ return {
 				desc = "Toggle Scratch Buffer",
 			},
 			{
-				"<leader>S",
+				"<leader>s.",
 				function()
 					Snacks.scratch.select()
 				end,
 				desc = "Select Scratch Buffer",
 			},
+			{
+				"<leader>j.",
+				function()
+					Snacks.scratch({ ft = "json" })
+				end,
+				desc = "Open a json scratch buffer",
+			},
 		},
 		opts = {
+			styles = {
+				scratch = {
+					width = 0.5,
+					height = 0.75,
+					border = "single",
+				},
+			},
 			dashboard = {
 				width = 75,
 				preset = {
