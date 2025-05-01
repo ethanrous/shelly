@@ -75,6 +75,35 @@ autocmd("TextYankPost", {
 	desc = "Briefly highlight yanked text",
 })
 
+local function gotoHarpoon()
+	local harpoon = require("harpoon")
+	if harpoon:list()._length > 1 then
+		harpoon:list():select(1)
+	end
+end
+
+autocmd("BufReadPost", {
+	pattern = "*",
+	callback = function()
+		local mk = vim.api.nvim_buf_get_mark(0, ".")
+		if mk[1] == 0 then
+			print("No mark found")
+			return
+		end
+		print("Mark found")
+		vim.cmd("'.")
+	end,
+})
+
+autocmd("UIEnter", {
+	pattern = "*",
+	callback = function()
+		print("Welcome to Neovim!")
+
+		vim.defer_fn(gotoHarpoon, 1)
+	end,
+})
+
 autocmd("CursorMoved", {
 	group = vim.api.nvim_create_augroup("auto-hlsearch", { clear = true }),
 	callback = function()

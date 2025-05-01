@@ -1,4 +1,6 @@
 -- LSP
+local methods = vim.lsp.protocol.Methods
+
 local on_attach = function(client, bufnr)
 	local opts = { buffer = bufnr, remap = false }
 
@@ -24,8 +26,10 @@ local on_attach = function(client, bufnr)
 
 	vim.keymap.set("n", "<LEADER>li", require("vim.lsp.health").check, { silent = true })
 
-	require("nvim-navbuddy").attach(client, bufnr)
-	vim.keymap.set("n", "gs", require("nvim-navbuddy").open, { buffer = bufnr, remap = true })
+	if client:supports_method(methods.textDocument_documentSymbol) then
+		require("nvim-navbuddy").attach(client, bufnr)
+		vim.keymap.set("n", "gs", require("nvim-navbuddy").open, { buffer = bufnr, remap = true })
+	end
 
 	vim.lsp.handlers["textDocument/hover"] = function(_, result, ctx, config)
 		config = config or {}
@@ -34,7 +38,7 @@ local on_attach = function(client, bufnr)
 			return
 		end
 		local markdown_lines = vim.lsp.util.convert_input_to_markdown_lines(result.contents)
-		markdown_lines = vim.lsp.util.trim_empty_lines(markdown_lines)
+		markdown_lines = vim.split(markdown_lines, "", { trimempty = true })
 		if vim.tbl_isempty(markdown_lines) then
 			return
 		end
@@ -69,7 +73,7 @@ return {
 				ensure_installed = {
 					-- Go
 					"gopls",
-					-- "golangci_lint_ls",
+					"golangci_lint_ls",
 					--
 					-- Lua
 					"lua_ls",
@@ -160,12 +164,12 @@ return {
 							},
 						})
 					end,
-					-- ["golangci_lint_ls"] = function()
-					-- 	lspconfig["golangci_lint_ls"].setup({
-					-- 		capabilities = capabilities,
-					-- 		on_attach = on_attach,
-					-- 	})
-					-- end,
+					["golangci_lint_ls"] = function()
+						lspconfig["golangci_lint_ls"].setup({
+							capabilities = capabilities,
+							on_attach = on_attach,
+						})
+					end,
 					["gopls"] = function()
 						lspconfig["gopls"].setup({
 							capabilities = capabilities,

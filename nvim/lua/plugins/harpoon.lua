@@ -27,7 +27,6 @@ return {
 				vim.api.nvim_feedkeys("j", "n", false)
 
 				vim.o.cursorline = true
-				-- vim.api.nvim_set_hl(0, "CursorLine", { link = "Search" })
 				vim.cmd("set winhighlight=CursorLine:Search")
 			end)
 

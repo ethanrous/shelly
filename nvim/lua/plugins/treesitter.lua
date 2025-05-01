@@ -45,13 +45,13 @@ return {
 					enable = true,
 				},
 				incremental_selection = {
-					enable = true,
-					keymaps = {
-						init_selection = "gnn",
-						node_incremental = "grn",
-						scope_incremental = "grc",
-						node_decremental = "grm",
-					},
+					enable = false,
+					-- keymaps = {
+					-- 	init_selection = "gnn",
+					-- 	node_incremental = "grn",
+					-- 	scope_incremental = "grc",
+					-- 	node_decremental = "grm",
+					-- },
 				},
 			})
 
@@ -59,7 +59,7 @@ return {
 			parser_config.tsx.filetype_to_parsername = { "javascript", "typescript.tsx" }
 		end,
 		build = ":TSUpdate",
-		event = "BufEnter",
+		-- event = "BufEnter",
 		dependencies = {
 			"nvim-treesitter/nvim-treesitter-context",
 			"nvim-treesitter/nvim-treesitter-textobjects",

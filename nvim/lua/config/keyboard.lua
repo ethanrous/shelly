@@ -86,3 +86,9 @@ vim.keymap.set("v", "<leader>gs", function()
 	local r = vim.fn.getregion(vim.fn.getpos("v"), vim.fn.getpos("."))
 	vim.cmd("silent !~/shelly/zsh/source/gsearch " .. r[1])
 end, { silent = true })
+
+-- Remove conflicting keymaps --
+vim.keymap.del("n", "gri")
+vim.keymap.del("n", "grr")
+vim.keymap.del({ "n", "x" }, "gra")
+vim.keymap.del("n", "grn")
