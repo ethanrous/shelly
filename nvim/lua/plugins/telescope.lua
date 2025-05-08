@@ -28,9 +28,9 @@ return {
 			-- 	callTelescope(require("telescope.builtin").lsp_document_symbols)
 			-- end, { silent = true })
 
-			vim.keymap.set("n", "gd", function()
-				require("telescope.builtin").lsp_definitions()
-			end, { silent = true })
+			-- vim.keymap.set("n", "gd", function()
+			-- 	require("telescope.builtin").lsp_definitions()
+			-- end, { silent = true })
 
 			vim.keymap.set("n", "<leader>fg", function()
 				telescope.extensions.live_grep_args.live_grep_args()
