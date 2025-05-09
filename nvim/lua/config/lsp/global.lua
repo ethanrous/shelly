@@ -116,7 +116,7 @@ local function set_global_keymaps(client, bufnr)
 
 	-- Go to previous diagnostic
 	keymap.set({
-		key = "[d",
+		key = "gE",
 		cmd = function()
 			vim.diagnostic.jump({ count = -1 })
 		end,
@@ -126,7 +126,7 @@ local function set_global_keymaps(client, bufnr)
 
 	-- Go to next diagnostic
 	keymap.set({
-		key = "]d",
+		key = "ge",
 		cmd = function()
 			vim.diagnostic.jump({ count = 1 })
 		end,
@@ -165,16 +165,16 @@ end
 
 local function configure_diagnostics()
 	vim.diagnostic.config({
-		virtual_text = { current_line = true },
+		-- virtual_text = { current_line = true },
 		underline = true,
 		update_in_insert = true,
 		severity_sort = true,
 		signs = {
 			text = {
-				[vim.diagnostic.severity.ERROR] = "",
-				[vim.diagnostic.severity.WARN] = "",
-				[vim.diagnostic.severity.INFO] = "",
-				[vim.diagnostic.severity.HINT] = "",
+				[vim.diagnostic.severity.ERROR] = "E",
+				[vim.diagnostic.severity.WARN] = "W",
+				[vim.diagnostic.severity.INFO] = "I",
+				[vim.diagnostic.severity.HINT] = "H",
 			},
 		},
 		float = {
