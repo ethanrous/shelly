@@ -1,51 +1,4 @@
 -- LSP
-local methods = vim.lsp.protocol.Methods
-
-local on_attach = function(client, bufnr)
-	local opts = { buffer = bufnr, remap = false }
-
-	vim.keymap.set("n", "gh", require("noice.lsp").hover, opts)
-	vim.keymap.set("n", "<LEADER>r", function()
-		require("cosmic-ui").rename({
-			win_options = {
-				winhighlight = "Normal:CosmicPopupInput",
-			},
-		})
-	end, opts)
-
-	local diagnostic_float_opts = {
-		border = "single",
-	}
-	vim.keymap.set("n", "gE", function()
-		vim.diagnostic.open_float(diagnostic_float_opts)
-	end)
-
-	vim.keymap.set("n", "ge", function()
-		vim.diagnostic.jump({ count = 1, float = true })
-	end, { silent = true })
-
-	vim.keymap.set("n", "<LEADER>li", require("vim.lsp.health").check, { silent = true })
-
-	if client:supports_method(methods.textDocument_documentSymbol) then
-		require("nvim-navbuddy").attach(client, bufnr)
-		vim.keymap.set("n", "gs", require("nvim-navbuddy").open, { buffer = bufnr, remap = true })
-	end
-
-	vim.lsp.handlers["textDocument/hover"] = function(_, result, ctx, config)
-		config = config or {}
-		config.focus_id = ctx.method
-		if not (result and result.contents) then
-			return
-		end
-		local markdown_lines = vim.lsp.util.convert_input_to_markdown_lines(result.contents)
-		markdown_lines = vim.split(markdown_lines, "", { trimempty = true })
-		if vim.tbl_isempty(markdown_lines) then
-			return
-		end
-		return vim.lsp.util.open_floating_preview(markdown_lines, "markdown", config)
-	end
-end
-
 return {
 	-- {
 	-- 	"mason-org/mason.nvim",
@@ -79,11 +32,16 @@ return {
 	-- },
 	{
 		"mason-org/mason.nvim",
-		dependencies = { "mason-org/mason-lspconfig.nvim" },
+		dependencies = {
+			"mason-org/mason-lspconfig.nvim",
+			"neovim/nvim-lspconfig",
+		},
 		config = function()
 			require("mason").setup()
 			require("mason-lspconfig").setup({
 				ensure_installed = {
+					"vimls",
+
 					-- Go
 					"gopls",
 					"golangci_lint_ls",
@@ -102,29 +60,35 @@ return {
 					"rust_analyzer",
 
 					-- Java
-					"jdtls",
-					"gradle_ls",
+					-- "jdtls",
+					-- "gradle_ls",
 
 					-- HTML
 					"html",
 					-- JavaScript/TypeScript
 					-- "ts_ls",
+
 					"vtsls",
-					"volar",
+					"vuels",
+					-- "volar",
 					"tailwindcss",
 					"eslint",
 					"cssls",
-					"cssmodules-language-server",
+					-- "cssmodules-language-server",
 
 					-- C/C++
 					"clangd",
 
 					-- Docker
-					"hadolint",
+					-- "hadolint",
 				},
 				automatic_installation = true,
+				automatic_enable = false,
 			})
 		end,
+	},
+	{
+		"artemave/workspace-diagnostics.nvim",
 	},
 }
 

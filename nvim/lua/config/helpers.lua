@@ -87,10 +87,8 @@ autocmd("BufReadPost", {
 	callback = function()
 		local mk = vim.api.nvim_buf_get_mark(0, ".")
 		if mk[1] == 0 then
-			print("No mark found")
 			return
 		end
-		print("Mark found")
 		vim.cmd("'.")
 	end,
 })
@@ -98,7 +96,9 @@ autocmd("BufReadPost", {
 autocmd("UIEnter", {
 	pattern = "*",
 	callback = function()
-		print("Welcome to Neovim!")
+		if vim.bo.filetype == "lazy" then
+			return
+		end
 
 		vim.defer_fn(gotoHarpoon, 1)
 	end,

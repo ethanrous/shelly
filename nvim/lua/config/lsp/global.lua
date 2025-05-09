@@ -1,8 +1,10 @@
-local util = require("util")
+local keymap = require("util.keymap")
 
 local function set_global_keymaps(client, bufnr)
+	local lsp = vim.lsp
+
 	-- Restart LSP
-	util.set_keymap({
+	keymap.set({
 		key = "<leader>lr",
 		cmd = ":LspRestart<CR>",
 		desc = "Restart LSP server",
@@ -10,24 +12,24 @@ local function set_global_keymaps(client, bufnr)
 	})
 
 	-- Go to definition
-	util.set_keymap({
+	keymap.set({
 		key = "gd",
-		cmd = require("telescope.builtin").lsp_definitions,
+		cmd = lsp.buf.definition,
 		desc = "Go to definition",
 		bufnr = bufnr,
 	})
 
 	-- Go to type definition
-	util.set_keymap({
+	keymap.set({
 		key = "gt",
-		cmd = ":Telescope lsp_type_definitions<CR>",
+		cmd = lsp.buf.type_definition,
 		desc = "Go to type definition",
 		bufnr = bufnr,
 	})
 
 	if client:supports_method("textDocument/declaration") then
 		-- Go to declaration
-		util.set_keymap({
+		keymap.set({
 			key = "gD",
 			cmd = vim.lsp.buf.declaration,
 			desc = "Go to declaration",
@@ -36,15 +38,28 @@ local function set_global_keymaps(client, bufnr)
 	end
 
 	-- Float diagnostics
-	util.set_keymap({
+	keymap.set({
 		key = "<leader>D",
 		cmd = ":Telescope diagnostics bufnr=0<CR>",
 		desc = "Show diagnostics for current buffer",
 		bufnr = bufnr,
 	})
 
+	-- Populate diagnostics for whole workspace
+	keymap.set({
+		key = "<leader>gP",
+		cmd = function()
+			for _, cur_client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
+				require("workspace-diagnostics").populate_workspace_diagnostics(cur_client, bufnr)
+			end
+			vim.notify("INFO: Diagnostic populated")
+		end,
+		desc = "Populate diagnostics for whole workspace",
+		bufnr = bufnr,
+	})
+
 	-- Show hover information
-	util.set_keymap({
+	keymap.set({
 		key = "gh",
 		cmd = vim.lsp.buf.hover,
 		desc = "Show hover information",
@@ -52,7 +67,7 @@ local function set_global_keymaps(client, bufnr)
 	})
 
 	-- Go to implementation
-	util.set_keymap({
+	keymap.set({
 		key = "gi",
 		cmd = ":Telescope lsp_implementations<CR>",
 		desc = "Go to implementation",
@@ -60,7 +75,7 @@ local function set_global_keymaps(client, bufnr)
 	})
 
 	-- Show signature help
-	util.set_keymap({
+	keymap.set({
 		key = "<C-k>",
 		cmd = vim.lsp.buf.signature_help,
 		desc = "Show signature help",
@@ -68,7 +83,7 @@ local function set_global_keymaps(client, bufnr)
 	})
 
 	-- Rename symbol
-	util.set_keymap({
+	keymap.set({
 		key = "<leader>r",
 		cmd = vim.lsp.buf.rename,
 		desc = "Rename symbol",
@@ -76,7 +91,7 @@ local function set_global_keymaps(client, bufnr)
 	})
 
 	-- Code actions
-	util.set_keymap({
+	keymap.set({
 		key = "<leader>ca",
 		cmd = vim.lsp.buf.code_action,
 		desc = "Show code actions",
@@ -84,7 +99,7 @@ local function set_global_keymaps(client, bufnr)
 	})
 
 	-- Go to references
-	util.set_keymap({
+	keymap.set({
 		key = "gr",
 		cmd = ":Telescope lsp_references<CR>",
 		desc = "Go to references",
@@ -92,7 +107,7 @@ local function set_global_keymaps(client, bufnr)
 	})
 
 	-- Show line diagnostics in a floating window
-	util.set_keymap({
+	keymap.set({
 		key = "<leader>ld",
 		cmd = vim.diagnostic.open_float,
 		desc = "Show line diagnostics",
@@ -100,7 +115,7 @@ local function set_global_keymaps(client, bufnr)
 	})
 
 	-- Go to previous diagnostic
-	util.set_keymap({
+	keymap.set({
 		key = "[d",
 		cmd = function()
 			vim.diagnostic.jump({ count = -1 })
@@ -110,7 +125,7 @@ local function set_global_keymaps(client, bufnr)
 	})
 
 	-- Go to next diagnostic
-	util.set_keymap({
+	keymap.set({
 		key = "]d",
 		cmd = function()
 			vim.diagnostic.jump({ count = 1 })
@@ -120,12 +135,30 @@ local function set_global_keymaps(client, bufnr)
 	})
 
 	-- Format document
-	util.set_keymap({
+	keymap.set({
 		key = "<leader>fa",
 		cmd = function()
 			vim.lsp.buf.format({ async = true })
 		end,
 		desc = "Format document",
+		bufnr = bufnr,
+	})
+
+	keymap.set({
+		key = "<leader>li",
+		cmd = function()
+			vim.cmd("checkhealth vim.lsp")
+		end,
+		desc = "Check health of LSP",
+		bufnr = bufnr,
+	})
+
+	keymap.set({
+		key = "<leader>lh",
+		cmd = function()
+			lsp.inlay_hint.enable(not lsp.inlay_hint.is_enabled({}))
+		end,
+		desc = "Check health of LSP",
 		bufnr = bufnr,
 	})
 end
