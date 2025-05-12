@@ -540,11 +540,11 @@ local hlgroups = {
 	CmpVirtualText = { fg = c_steel, italic = true },
 
 	-- gitsigns
-	GitSignsAdd = { fg = c_tea_blend },
+	GitSignsAdd = { fg = c_tea },
 	GitSignsAddInline = { fg = c_tea, bg = c_tea_blend },
 	GitSignsAddLnInline = { fg = c_tea, bg = c_tea_blend },
 	GitSignsAddPreview = { link = "DiffAdded" },
-	GitSignsChange = { fg = c_lavender_blend },
+	GitSignsChange = { fg = c_earth },
 	GitSignsChangeInline = { fg = c_lavender, bg = c_lavender_blend },
 	GitSignsChangeLnInline = { fg = c_lavender, bg = c_lavender_blend },
 	GitSignsCurrentLineBlame = { fg = c_smoke, bg = c_smoke_blend },
@@ -745,6 +745,8 @@ local hlgroups = {
 	StatusLineHeaderModified = { fg = c_jeans, bg = c_ochre },
 
 	HarpoonCurrentFile = { link = "Search" },
+
+	NeoTreeGitUntracked = { fg = c_turquoise },
 
 	-- Extra
 	Yellow = { fg = c_yellow },

@@ -161,6 +161,13 @@ local function set_global_keymaps(client, bufnr)
 		desc = "Check health of LSP",
 		bufnr = bufnr,
 	})
+
+	keymap.set({
+		key = "<leader>gt",
+		cmd = ":Neotree<CR>",
+		desc = "Open NeoTree",
+		bufnr = bufnr,
+	})
 end
 
 local function configure_diagnostics()

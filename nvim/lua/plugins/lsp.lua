@@ -66,7 +66,7 @@ return {
 					-- HTML
 					"html",
 					-- JavaScript/TypeScript
-					-- "ts_ls",
+					"ts_ls",
 
 					"vtsls",
 					"vuels",

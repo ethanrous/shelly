@@ -1,3 +1,5 @@
+local keymap = require("util.keymap")
+
 return {
 	{
 		"stevearc/oil.nvim",
@@ -52,27 +54,88 @@ return {
 			)
 		end,
 	},
-
 	{
-		"nvim-tree/nvim-tree.lua",
+		"nvim-neo-tree/neo-tree.nvim",
 		config = function()
-			vim.keymap.set("n", "<leader>gt", function()
-				local exp = require("nvim-tree.core").get_explorer()
-				Close_win_if_open("fugitiveblame")
-				require("nvim-tree.api").tree.toggle({
-					path = "<args>",
-					find_file = false,
-					update_root = false,
-					focus = true,
-				})
-				require("nvim-tree.api").tree.resize({ width = 50 })
-			end, { silent = true })
+			require("neo-tree").setup({
+				default_component_configs = {
+					git_status = {
+						symbols = {
+							-- Change type
+							added = "", -- or "✚", but this is redundant info if you use git_status_colors on the name
+							modified = "", -- or "", but this is redundant info if you use git_status_colors on the name
+							deleted = "✖", -- this can only be used in the git_status source
+							renamed = "󰁕", -- this can only be used in the git_status source
+							-- Status type
+							untracked = "",
+							ignored = "",
+							unstaged = "󰄱",
+							staged = "",
+							conflict = "",
+						},
+					},
+				},
+				buffers = {
+					follow_current_file = { enabled = true },
+				},
+				filesystem = {
+					follow_current_file = {
+						enabled = true,
+						leave_dirs_open = true,
+					},
+					commands = {
+						avante_add_files = function(state)
+							local node = state.tree:get_node()
+							local filepath = node:get_id()
+							local relative_path = require("avante.utils").relative_path(filepath)
 
-			require("nvim-tree").setup({
-				update_focused_file = {
-					enable = true,
+							local sidebar = require("avante").get()
+
+							local open = sidebar:is_open()
+							-- ensure avante sidebar is open
+							if not open then
+								require("avante.api").ask()
+								sidebar = require("avante").get()
+							end
+
+							sidebar.file_selector:add_selected_file(relative_path)
+
+							-- remove neo tree buffer
+							if not open then
+								sidebar.file_selector:remove_selected_file("neo-tree filesystem [1]")
+							end
+						end,
+					},
+					window = {
+						mappings = {
+							["oa"] = "avante_add_files",
+							["P"] = { "toggle_preview", config = { use_float = true, use_image_nvim = true } },
+						},
+					},
 				},
 			})
 		end,
 	},
+	-- {
+	-- 	"nvim-tree/nvim-tree.lua",
+	-- 	config = function()
+	-- 		vim.keymap.set("n", "<leader>gt", function()
+	-- 			local exp = require("nvim-tree.core").get_explorer()
+	-- 			Close_win_if_open("fugitiveblame")
+	-- 			require("nvim-tree.api").tree.toggle({
+	-- 				path = "<args>",
+	-- 				find_file = false,
+	-- 				update_root = false,
+	-- 				focus = true,
+	-- 			})
+	-- 			require("nvim-tree.api").tree.resize({ width = 50 })
+	-- 		end, { silent = true })
+	--
+	-- 		require("nvim-tree").setup({
+	-- 			update_focused_file = {
+	-- 				enable = true,
+	-- 			},
+	-- 		})
+	-- 	end,
+	-- },
 }

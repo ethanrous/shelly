@@ -285,7 +285,7 @@ vim.lsp.config.htmlls = {
 -- }}}
 
 vim.lsp.enable({
-	-- "ts_ls",
+	"ts_ls",
 	"cssls",
 	"tailwindcssls",
 	"htmlls",
