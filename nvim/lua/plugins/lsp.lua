@@ -51,10 +51,14 @@ return {
 					-- Bash
 					"bashls",
 
+					-- JSON
 					"jsonls",
+
+					-- Python
 					"pyright",
+
+					-- YAML
 					"yamlls",
-					"svelte",
 
 					-- Rust
 					"rust_analyzer",

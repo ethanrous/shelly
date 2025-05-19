@@ -51,7 +51,7 @@ return {
 			-- Autocompletion
 			"onsails/lspkind.nvim",
 			-- "rafamadriz/friendly-snippets",
-			-- "Kaiser-Yang/blink-cmp-avante",
+			"Kaiser-Yang/blink-cmp-avante",
 		},
 		opts = {
 			completion = {
@@ -68,17 +68,16 @@ return {
 			snippets = { preset = "luasnip" },
 			cmdline = { enabled = false },
 			sources = {
-				default = { "lsp", "path", "snippets", "buffer" },
-				-- default = { "avante", "lsp", "path", "snippets", "buffer" },
-				-- providers = {
-				-- 	avante = {
-				-- 		module = "blink-cmp-avante",
-				-- 		name = "Avante",
-				-- 		opts = {
-				-- 			-- options for blink-cmp-avante
-				-- 		},
-				-- 	},
-				-- },
+				default = { "avante", "lsp", "path", "snippets", "buffer" },
+				providers = {
+					avante = {
+						module = "blink-cmp-avante",
+						name = "Avante",
+						opts = {
+							-- options for blink-cmp-avante
+						},
+					},
+				},
 			},
 
 			signature = { enabled = true, window = { border = "single" } },

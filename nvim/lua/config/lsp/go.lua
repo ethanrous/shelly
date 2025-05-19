@@ -9,3 +9,4 @@ vim.lsp.config.go = {
 }
 
 vim.lsp.enable("go")
+vim.lsp.enable("golangci_lint_ls")

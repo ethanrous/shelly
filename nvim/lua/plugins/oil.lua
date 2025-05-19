@@ -111,6 +111,10 @@ return {
 							["oa"] = "avante_add_files",
 							["P"] = { "toggle_preview", config = { use_float = true, use_image_nvim = true } },
 						},
+						fuzzy_finder_mappings = { -- define keymaps for filter popup window in fuzzy_finder_mode
+							["<A-j>"] = "move_cursor_down",
+							["<A-k>"] = "move_cursor_up",
+						},
 					},
 				},
 			})
