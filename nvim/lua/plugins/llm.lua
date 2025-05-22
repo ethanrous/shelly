@@ -35,6 +35,7 @@ return {
 		event = "VeryLazy",
 		version = false, -- set this if you want to always pull the latest change
 		opts = {
+			debug = true,
 			-- add any opts here
 			mode = "agentic",
 			provider = "copilot",
@@ -45,7 +46,7 @@ return {
 				auto_suggestions = false,
 			},
 			copilot = {
-				model = "gpt-4o",
+				model = "gpt-4.1",
 			},
 			mappings = {
 				sidebar = {
@@ -73,35 +74,37 @@ return {
 			--- The below dependencies are optional,
 			"echasnovski/mini.pick", -- for file_selector provider mini.pick
 			"nvim-telescope/telescope.nvim", -- for file_selector provider telescope
-			"hrsh7th/nvim-cmp", -- autocompletion for avante commands and mentions
-			"ibhagwan/fzf-lua", -- for file_selector provider fzf
-			"nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
 			"zbirenbaum/copilot.lua", -- for providers='copilot'
-			{
-				-- support for image pasting
-				"HakonHarnes/img-clip.nvim",
-				event = "VeryLazy",
-				opts = {
-					-- recommended settings
-					default = {
-						embed_image_as_base64 = false,
-						prompt_for_file_name = false,
-						drag_and_drop = {
-							insert_mode = true,
-						},
-						-- required for Windows users
-						use_absolute_path = true,
-					},
-				},
+			"OXY2DEV/markview.nvim",
+			-- {
+			-- 	-- support for image pasting
+			-- 	"HakonHarnes/img-clip.nvim",
+			-- 	event = "VeryLazy",
+			-- 	opts = {
+			-- 		-- recommended settings
+			-- 		default = {
+			-- 			embed_image_as_base64 = false,
+			-- 			prompt_for_file_name = false,
+			-- 			drag_and_drop = {
+			-- 				insert_mode = true,
+			-- 			},
+			-- 			-- required for Windows users
+			-- 			use_absolute_path = true,
+			-- 		},
+			-- 	},
+			-- },
+		},
+	},
+	{
+		"OXY2DEV/markview.nvim",
+		enabled = true,
+		lazy = false,
+		ft = { "markdown", "norg", "rmd", "org", "vimwiki", "Avante" },
+		opts = {
+			preview = {
+				filetypes = { "markdown", "norg", "rmd", "org", "vimwiki", "Avante" },
 			},
-			{
-				-- Make sure to set this up properly if you have lazy=true
-				"MeanderingProgrammer/render-markdown.nvim",
-				opts = {
-					file_types = { "markdown", "Avante" },
-				},
-				ft = { "markdown", "Avante" },
-			},
+			max_length = 99999,
 		},
 	},
 }

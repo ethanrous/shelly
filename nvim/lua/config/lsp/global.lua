@@ -168,25 +168,44 @@ local function set_global_keymaps(client, bufnr)
 		desc = "Open NeoTree",
 		bufnr = bufnr,
 	})
+
+	keymap.set({
+		key = "<leader>gs",
+		cmd = ":Neotree document_symbols<CR>",
+		desc = "Open NeoTree document_symbols",
+		bufnr = bufnr,
+	})
 end
 
 local function configure_diagnostics()
 	vim.diagnostic.config({
-		-- virtual_text = { current_line = true },
+		virtual_text = {
+			enabled = true,
+			prefix = function(diagnostic)
+				if diagnostic.severity == vim.diagnostic.severity.ERROR then
+					return "│×"
+				elseif diagnostic.severity == vim.diagnostic.severity.WARN then
+					return "│▲"
+				else
+					return "│•"
+				end
+			end,
+			suffix = "│",
+		},
 		underline = true,
-		update_in_insert = true,
-		severity_sort = true,
+		update_in_insert = true, -- Update diagnostics in insert mode
+		severity_sort = true, -- Sort by severity
+		float = {
+			border = "single", -- Match your diagnostic_float_opts style
+			source = "if_many", -- Show source of diagnostic
+		},
 		signs = {
 			text = {
-				[vim.diagnostic.severity.ERROR] = "E",
-				[vim.diagnostic.severity.WARN] = "W",
-				[vim.diagnostic.severity.INFO] = "I",
-				[vim.diagnostic.severity.HINT] = "H",
+				[vim.diagnostic.severity.ERROR] = " ×",
+				[vim.diagnostic.severity.WARN] = " ▲",
+				[vim.diagnostic.severity.HINT] = " •",
+				[vim.diagnostic.severity.INFO] = " •",
 			},
-		},
-		float = {
-			border = "rounded",
-			source = "if_many",
 		},
 	})
 end

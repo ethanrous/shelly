@@ -56,7 +56,6 @@ o.termguicolors = true
 g.mapleader = " "
 
 opt.number = true
-opt.relativenumber = true
 
 opt.diffopt = "internal,filler,closeoff,indent-heuristic,linematch:60,algorithm:histogram"
 -- o.guicursor = "n-v-c-sm:block,ci-ve:ver25,r-cr-o:hor20,i:block-blinkoff400-blinkon350"
@@ -68,24 +67,3 @@ opt.diffopt = "internal,filler,closeoff,indent-heuristic,linematch:60,algorithm:
 
 -- From https://github.com/yetone/avante.nvim?tab=readme-ov-file
 vim.opt.laststatus = 3
-
-vim.diagnostic.config({
-	virtual_text = {
-		-- severity = {
-		-- 	max = vim.diagnostic.severity.WARN,
-		-- },
-	},
-	-- virtual_lines = {
-	-- 	severity = {
-	-- 		min = vim.diagnostic.severity.ERROR,
-	-- 	},
-	-- },
-	signs = true, -- Show signs in the gutter
-	underline = true, -- Keep the underline highlighting
-	update_in_insert = true, -- Update diagnostics in insert mode
-	severity_sort = true, -- Sort by severity
-	float = {
-		border = "single", -- Match your diagnostic_float_opts style
-		source = "if_many", -- Show source of diagnostic
-	},
-})

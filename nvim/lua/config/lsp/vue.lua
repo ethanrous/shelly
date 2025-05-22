@@ -150,61 +150,61 @@ vim.lsp.config.ts_ls = {
 -- }}}
 
 -- Volar {{{
-vim.lsp.config.volar = {
-	filetypes = { "typescript", "javascript", "vue" },
-	init_options = {
-		typescript = {
-			tsdk = "/Users/erousseau/.local/share/nvim/mason/packages/vue-language-server/node_modules/typescript/lib",
-			-- tsdk = vim.fn.getcwd() .. "/node_modules/typescript/lib",
-		},
-		vue = {
-			hybridMode = false,
-		},
-		languageFeatures = {
-			implementation = true,
-			references = true,
-			definition = true,
-			typeDefinition = true,
-			callHierarchy = true,
-			hover = true,
-			rename = true,
-			renameFileRefactoring = true,
-			signatureHelp = true,
-			codeAction = true,
-			workspaceSymbol = true,
-			diagnostics = true,
-			semanticTokens = true,
-			completion = {
-				defaultTagNameCase = "both",
-				defaultAttrNameCase = "kebabCase",
-				getDocumentNameCasesRequest = false,
-				getDocumentSelectionRequest = false,
-			},
-		},
-	},
-	settings = {
-		typescript = {
-			inlayHints = {
-				enumMemberValues = {
-					enabled = true,
-				},
-				functionLikeReturnTypes = {
-					enabled = true,
-				},
-				propertyDeclarationTypes = {
-					enabled = true,
-				},
-				parameterTypes = {
-					enabled = true,
-					suppressWhenArgumentMatchesName = true,
-				},
-				variableTypes = {
-					enabled = true,
-				},
-			},
-		},
-	},
-}
+-- vim.lsp.config.volar = {
+-- 	filetypes = { "typescript", "javascript", "vue" },
+-- 	init_options = {
+-- 		typescript = {
+-- 			tsdk = "/Users/erousseau/.local/share/nvim/mason/packages/vue-language-server/node_modules/typescript/lib",
+-- 			-- tsdk = vim.fn.getcwd() .. "/node_modules/typescript/lib",
+-- 		},
+-- 		vue = {
+-- 			hybridMode = false,
+-- 		},
+-- 		languageFeatures = {
+-- 			implementation = true,
+-- 			references = true,
+-- 			definition = true,
+-- 			typeDefinition = true,
+-- 			callHierarchy = true,
+-- 			hover = true,
+-- 			rename = true,
+-- 			renameFileRefactoring = true,
+-- 			signatureHelp = true,
+-- 			codeAction = true,
+-- 			workspaceSymbol = true,
+-- 			diagnostics = true,
+-- 			semanticTokens = true,
+-- 			completion = {
+-- 				defaultTagNameCase = "both",
+-- 				defaultAttrNameCase = "kebabCase",
+-- 				getDocumentNameCasesRequest = false,
+-- 				getDocumentSelectionRequest = false,
+-- 			},
+-- 		},
+-- 	},
+-- 	settings = {
+-- 		typescript = {
+-- 			inlayHints = {
+-- 				enumMemberValues = {
+-- 					enabled = true,
+-- 				},
+-- 				functionLikeReturnTypes = {
+-- 					enabled = true,
+-- 				},
+-- 				propertyDeclarationTypes = {
+-- 					enabled = true,
+-- 				},
+-- 				parameterTypes = {
+-- 					enabled = true,
+-- 					suppressWhenArgumentMatchesName = true,
+-- 				},
+-- 				variableTypes = {
+-- 					enabled = true,
+-- 				},
+-- 			},
+-- 		},
+-- 	},
+-- }
 
 -- CSSls {{{
 vim.lsp.config.cssls = {
@@ -286,9 +286,10 @@ vim.lsp.config.htmlls = {
 
 vim.lsp.enable({
 	"ts_ls",
+	-- "volar",
+	"vuels",
 	"cssls",
 	"tailwindcssls",
 	"htmlls",
 	"eslint",
-	"volar",
 })

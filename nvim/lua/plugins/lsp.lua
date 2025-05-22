@@ -74,7 +74,7 @@ return {
 
 					"vtsls",
 					"vuels",
-					-- "volar",
+
 					"tailwindcss",
 					"eslint",
 					"cssls",

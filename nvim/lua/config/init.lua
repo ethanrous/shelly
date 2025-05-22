@@ -1,0 +1,6 @@
+require("config.settings")
+require("config.keyboard")
+require("config.highlight")
+require("config.lazy")
+require("config.helpers")
+require("config.snippets")

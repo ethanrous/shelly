@@ -58,6 +58,8 @@ return {
 		"nvim-neo-tree/neo-tree.nvim",
 		config = function()
 			require("neo-tree").setup({
+				close_if_last_window = true,
+
 				default_component_configs = {
 					git_status = {
 						symbols = {
@@ -75,8 +77,20 @@ return {
 						},
 					},
 				},
+				sources = {
+					"document_symbols",
+				},
 				buffers = {
 					follow_current_file = { enabled = true },
+				},
+				document_symbols = {
+					window = {
+						position = "float",
+						mappings = {
+							["<cr>"] = "open",
+							["<Tab>"] = "toggle_node",
+						},
+					},
 				},
 				filesystem = {
 					follow_current_file = {

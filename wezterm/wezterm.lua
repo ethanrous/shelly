@@ -1,6 +1,5 @@
 -- Pull in the wezterm API
 local wezterm = require("wezterm")
-local os = require("os")
 
 -- This will hold the configuration.
 local config = wezterm.config_builder()
@@ -19,34 +18,33 @@ config.window_padding = {
 }
 config.max_fps = 120
 
-config.tab_bar_at_bottom = true
+-- config.tab_bar_at_bottom = true
 config.use_fancy_tab_bar = false
 config.show_new_tab_button_in_tab_bar = false
 config.window_decorations = "RESIZE"
 config.tab_max_width = 50
 
 -- local background = "#232136",
-local c_jeans = "#262f3e"
-local c_thunder = "#425974"
-local c_smoke = "#bebec3"
+local background = "#0D1017"
 local c_white = "#e5e5eb"
+local blue = "#82aaff"
 
 config.colors = {
-	background = c_jeans,
+	background = background,
 	foreground = c_white,
 	cursor_bg = c_white,
-	cursor_border = "#3e8fb0",
 
 	tab_bar = {
-		background = c_jeans,
+		background = background,
 		-- The active tab is the one that has focus in the window
 
 		active_tab = {
-			bg_color = "#345B78",
-			fg_color = c_white,
+			bg_color = background,
+			fg_color = blue,
 		},
+
 		inactive_tab = {
-			bg_color = c_jeans,
+			bg_color = background,
 			fg_color = c_white,
 		},
 	},
@@ -212,11 +210,11 @@ function string.basename(String)
 end
 
 local function getTabIndexString(tab_info)
-	local indexName = "[" .. tab_info.tab_index + 1
+	local indexName = tab_info.tab_index + 1
 	if tab_info.active_pane.is_zoomed then
-		indexName = indexName .. "*"
+		indexName = "[" .. indexName .. "]"
 	end
-	indexName = indexName .. "] "
+	indexName = indexName .. " "
 	return indexName
 end
 
@@ -244,16 +242,13 @@ local function tab_title(tab_info)
 end
 
 wezterm.on("format-tab-title", function(tab, tabs, panes, cnf, hover, max_width)
-	local edge_background = c_jeans
-	local background = c_jeans
+	local edge_background = background
 	local foreground = "#808080"
 
 	if tab.is_active then
-		background = c_thunder
-		foreground = c_smoke
+		foreground = blue
 	elseif hover then
-		background = "#3b3052"
-		foreground = "#909090"
+		foreground = "#c0c0c0"
 	end
 
 	local edge_foreground = background

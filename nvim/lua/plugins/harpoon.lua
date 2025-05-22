@@ -27,7 +27,6 @@ return {
 				vim.api.nvim_feedkeys("j", "n", false)
 
 				vim.o.cursorline = true
-				vim.cmd("set winhighlight=CursorLine:Search")
 			end)
 
 			vim.keymap.set("n", "<A-w>", function()

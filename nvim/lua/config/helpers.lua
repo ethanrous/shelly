@@ -96,7 +96,7 @@ autocmd("BufReadPost", {
 autocmd("UIEnter", {
 	pattern = "*",
 	callback = function()
-		if vim.bo.filetype == "lazy" then
+		if vim.bo.filetype ~= "" then
 			return
 		end
 

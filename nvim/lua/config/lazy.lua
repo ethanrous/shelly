@@ -15,10 +15,14 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-require("lazy").setup("plugins", {
-	defaults = {
-		lazy = false, -- should plugins be lazy-loaded?
+require("lazy").setup({
+	{ import = "plugins" },
+}, {
+	ui = {
+		border = "single",
+		size = {
+			width = 0.95,
+			height = 0.9,
+		},
 	},
-
-	change_detection = { notify = false },
 })
