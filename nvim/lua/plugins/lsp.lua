@@ -35,6 +35,7 @@ return {
 		dependencies = {
 			"mason-org/mason-lspconfig.nvim",
 			"neovim/nvim-lspconfig",
+			"mfussenegger/nvim-jdtls",
 		},
 		config = function()
 			require("mason").setup()
@@ -64,8 +65,8 @@ return {
 					"rust_analyzer",
 
 					-- Java
-					-- "jdtls",
-					-- "gradle_ls",
+					"jdtls",
+					"gradle_ls",
 
 					-- HTML
 					"html",

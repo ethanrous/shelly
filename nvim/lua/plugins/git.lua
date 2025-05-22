@@ -14,25 +14,10 @@ return {
 	{
 		"sindrets/diffview.nvim",
 		config = function()
-			require("diffview").setup({
-				-- view = {
-				-- 	default = {
-				-- 		-- Config for changed files, and staged files in diff views.
-				-- 		layout = "diff2_horizontal",
-				-- 		disable_diagnostics = false, -- Temporarily disable diagnostics for diff buffers while in the view.
-				-- 		winbar_info = true, -- See |diffview-config-view.x.winbar_info|
-				-- 	},
-				-- 	merge_tool = {
-				-- 		-- Config for conflicted files in diff views during a merge or rebase.
-				-- 		layout = "diff4_mixed",
-				-- 		disable_diagnostics = true, -- Temporarily disable diagnostics for diff buffers while in the view.
-				-- 		winbar_info = true, -- See |diffview-config-view.x.winbar_info|
-				-- 	},
-				-- },
-			})
+			require("diffview").setup({})
 
 			vim.keymap.set({ "n", "v" }, "<LEADER>gd", function()
-				require("diffview").open()
+				require("diffview").open({})
 			end, { silent = true })
 
 			vim.keymap.set({ "n", "v" }, "<LEADER>gf", function()
@@ -50,7 +35,8 @@ return {
 			require("gitsigns").setup({
 				current_line_blame = true,
 				current_line_blame_opts = {
-					virt_text_pos = "right_align",
+					virt_text_pos = "eol",
+					virt_text_priority = 0,
 				},
 			})
 		end,
@@ -71,6 +57,29 @@ return {
 				end
 				Close_win_if_open("fugitiveblame")
 				require("neogit").open({ kind = "vsplit" })
+			end, { silent = true })
+		end,
+	},
+	{
+		"pwntester/octo.nvim",
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"nvim-telescope/telescope.nvim",
+			"nvim-tree/nvim-web-devicons",
+		},
+		config = function()
+			require("octo").setup({
+				-- integrations = {
+				-- 	telescope = true,
+				-- },
+			})
+
+			vim.keymap.set({ "n", "v" }, "<LEADER>gh", function()
+				if Close_win_if_open("octo") then
+					return
+				end
+				Close_win_if_open("fugitiveblame")
+				require("octo").open_hunk()
 			end, { silent = true })
 		end,
 	},

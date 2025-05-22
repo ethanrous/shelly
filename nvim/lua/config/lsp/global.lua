@@ -2,11 +2,15 @@ local keymap = require("util.keymap")
 
 local function set_global_keymaps(client, bufnr)
 	local lsp = vim.lsp
+	local builtin = require("telescope.builtin")
 
 	-- Restart LSP
 	keymap.set({
 		key = "<leader>lr",
-		cmd = ":LspRestart<CR>",
+		cmd = function()
+			vim.lsp.stop_client(vim.lsp.get_clients())
+			vim.cmd("edit")
+		end,
 		desc = "Restart LSP server",
 		bufnr = bufnr,
 	})
@@ -14,7 +18,8 @@ local function set_global_keymaps(client, bufnr)
 	-- Go to definition
 	keymap.set({
 		key = "gd",
-		cmd = lsp.buf.definition,
+		-- cmd = lsp.buf.definition,
+		cmd = builtin.lsp_definitions,
 		desc = "Go to definition",
 		bufnr = bufnr,
 	})
