@@ -16,7 +16,7 @@
 -- local function getRepoName()
 -- 	return reponame
 -- end
---
+
 local function fugitive_head()
 	return " " .. vim.fn.FugitiveHead()
 end
@@ -86,12 +86,6 @@ local function lint_progress()
 	return " " .. table.concat(linters, ", ")
 end
 
-local function location()
-	local line = vim.fn.line(".")
-	local col = vim.fn.charcol(".")
-	return line .. ":" .. col
-end
-
 return {
 	"nvim-lualine/lualine.nvim",
 	config = function()
@@ -114,7 +108,7 @@ return {
 				lualine_a = {
 					{
 						"filename",
-						path = 0,
+						path = 1,
 						symbols = {
 							modified = " ",
 							readonly = "",

@@ -78,20 +78,13 @@ return {
 					},
 				},
 				sources = {
+					"filesystem",
 					"document_symbols",
 				},
 				buffers = {
 					follow_current_file = { enabled = true },
 				},
-				document_symbols = {
-					window = {
-						position = "float",
-						mappings = {
-							["<cr>"] = "open",
-							["<Tab>"] = "toggle_node",
-						},
-					},
-				},
+
 				filesystem = {
 					follow_current_file = {
 						enabled = true,
@@ -128,6 +121,15 @@ return {
 						fuzzy_finder_mappings = { -- define keymaps for filter popup window in fuzzy_finder_mode
 							["<A-j>"] = "move_cursor_down",
 							["<A-k>"] = "move_cursor_up",
+						},
+					},
+				},
+				document_symbols = {
+					window = {
+						position = "float",
+						mappings = {
+							["<cr>"] = "open",
+							["<Tab>"] = "toggle_node",
 						},
 					},
 				},

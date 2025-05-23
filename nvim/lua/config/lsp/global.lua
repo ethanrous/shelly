@@ -19,7 +19,7 @@ local function set_global_keymaps(client, bufnr)
 	keymap.set({
 		key = "gd",
 		-- cmd = lsp.buf.definition,
-		cmd = builtin.lsp_definitions,
+		cmd = require("telescope.builtin").lsp_definitions,
 		desc = "Go to definition",
 		bufnr = bufnr,
 	})
@@ -27,8 +27,24 @@ local function set_global_keymaps(client, bufnr)
 	-- Go to type definition
 	keymap.set({
 		key = "gt",
-		cmd = lsp.buf.type_definition,
+		cmd = require("telescope.builtin").lsp_type_definitions,
 		desc = "Go to type definition",
+		bufnr = bufnr,
+	})
+
+	-- Go to references
+	keymap.set({
+		key = "gr",
+		cmd = require("telescope.builtin").lsp_references,
+		desc = "Go to references",
+		bufnr = bufnr,
+	})
+
+	-- Go to vue component references
+	keymap.set({
+		key = "<leader>vr",
+		cmd = FindVueFileReferences,
+		desc = "Go to references",
 		bufnr = bufnr,
 	})
 
@@ -100,14 +116,6 @@ local function set_global_keymaps(client, bufnr)
 		key = "<leader>ca",
 		cmd = vim.lsp.buf.code_action,
 		desc = "Show code actions",
-		bufnr = bufnr,
-	})
-
-	-- Go to references
-	keymap.set({
-		key = "gr",
-		cmd = ":Telescope lsp_references<CR>",
-		desc = "Go to references",
 		bufnr = bufnr,
 	})
 

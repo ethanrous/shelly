@@ -74,13 +74,13 @@ return {
 				-- },
 			})
 
-			vim.keymap.set({ "n", "v" }, "<LEADER>gh", function()
-				if Close_win_if_open("octo") then
-					return
-				end
-				Close_win_if_open("fugitiveblame")
-				require("octo").open_hunk()
-			end, { silent = true })
+			-- vim.keymap.set({ "n", "v" }, "<LEADER>gh", function()
+			-- 	if Close_win_if_open("octo") then
+			-- 		return
+			-- 	end
+			-- 	Close_win_if_open("fugitiveblame")
+			-- 	require("octo").open_hunk()
+			-- end, { silent = true })
 		end,
 	},
 }

@@ -25,6 +25,7 @@ config.window_decorations = "RESIZE"
 config.tab_max_width = 50
 
 -- local background = "#232136",
+local tabBarBackground = "#131621"
 local background = "#0D1017"
 local c_white = "#e5e5eb"
 local blue = "#82aaff"
@@ -35,17 +36,18 @@ config.colors = {
 	cursor_bg = c_white,
 
 	tab_bar = {
-		background = background,
+		-- background = tabBarBackground,
 		-- The active tab is the one that has focus in the window
+		background = background,
 
 		active_tab = {
-			bg_color = background,
 			fg_color = blue,
+			bg_color = background,
 		},
 
 		inactive_tab = {
-			bg_color = background,
 			fg_color = c_white,
+			bg_color = tabBarBackground,
 		},
 	},
 	ansi = {
@@ -242,11 +244,12 @@ local function tab_title(tab_info)
 end
 
 wezterm.on("format-tab-title", function(tab, tabs, panes, cnf, hover, max_width)
-	local edge_background = background
+	local edge_background = tabBarBackground
 	local foreground = "#808080"
 
 	if tab.is_active then
 		foreground = blue
+		edge_background = background
 	elseif hover then
 		foreground = "#c0c0c0"
 	end
@@ -259,7 +262,7 @@ wezterm.on("format-tab-title", function(tab, tabs, panes, cnf, hover, max_width)
 		{ Background = { Color = edge_background } },
 		{ Foreground = { Color = edge_foreground } },
 		{ Text = " " },
-		{ Background = { Color = background } },
+		{ Background = { Color = edge_background } },
 		{ Foreground = { Color = foreground } },
 		{ Text = title },
 		{ Background = { Color = edge_background } },

@@ -2,20 +2,15 @@ return {
 	"nvim-lua/plenary.nvim", -- Necessary dependency
 	"farmergreg/vim-lastplace", -- Remember last cursor place
 	"nvim-lua/popup.nvim", -- Necessary dependency
+
+	-- <C-{h/j/k/l}> between panes. Don't remove, even though no longer using tmux
 	"christoomey/vim-tmux-navigator",
-	-- "tpope/vim-sleuth", -- Automatically adjust tab size
 
 	-- Case sensitive search and replace
 	{
 		"tpope/vim-abolish",
 		event = "BufEnter",
 	},
-
-	-- Disable some features for big files
-	-- {
-	-- 	"LunarVim/bigfile.nvim",
-	-- 	event = { "FileReadPre", "BufReadPre", "BufEnter" },
-	-- },
 
 	-- Markdown previewer
 	{
