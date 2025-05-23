@@ -80,6 +80,7 @@ return {
 				sources = {
 					"filesystem",
 					"document_symbols",
+					"filesystem",
 				},
 				buffers = {
 					follow_current_file = { enabled = true },

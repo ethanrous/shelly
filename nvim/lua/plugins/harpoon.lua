@@ -41,10 +41,6 @@ return {
 				end
 
 				if harpoon:list()._length > 1 then
-					if vim.bo.filetype == "snacks_dashboard" then
-						harpoon:list():select(1)
-						return
-					end
 					harpoon:list():select(2)
 					return
 				end
