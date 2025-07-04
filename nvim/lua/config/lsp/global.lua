@@ -96,12 +96,12 @@ local function set_global_keymaps(client, bufnr)
 	})
 
 	-- Show signature help
-	keymap.set({
-		key = "<C-k>",
-		cmd = vim.lsp.buf.signature_help,
-		desc = "Show signature help",
-		bufnr = bufnr,
-	})
+	-- keymap.set({
+	-- 	key = "<C-k>",
+	-- 	cmd = vim.lsp.buf.signature_help,
+	-- 	desc = "Show signature help",
+	-- 	bufnr = bufnr,
+	-- })
 
 	-- Rename symbol
 	keymap.set({
@@ -188,6 +188,13 @@ local function set_global_keymaps(client, bufnr)
 		desc = "Open NeoTree document_symbols",
 		bufnr = bufnr,
 	})
+
+	keymap.set({
+		key = "<leader>bp",
+		cmd = ":1,9999bd | e#<CR>",
+		desc = "Open NeoTree document_symbols",
+		bufnr = bufnr,
+	})
 end
 
 local function configure_diagnostics()
@@ -211,6 +218,13 @@ local function configure_diagnostics()
 		float = {
 			border = "single", -- Match your diagnostic_float_opts style
 			source = "if_many", -- Show source of diagnostic
+			format = function(diagnostic)
+				local message = diagnostic.message
+				if diagnostic.source == "ts-plugin" or diagnostic.source == "ts" then
+					message = message:gsub("type '(.-)'.?", "type \n\n%1\n\n")
+				end
+				return message
+			end,
 		},
 		signs = {
 			text = {

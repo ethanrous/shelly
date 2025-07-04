@@ -15,3 +15,5 @@ for _, file in ipairs(vim.fn.readdir(lsp_path)) do
 		require(module_name)
 	end
 end
+
+vim.cmd.colorscheme("tokyonight-moon")

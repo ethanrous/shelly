@@ -14,7 +14,26 @@ return {
 	{
 		"sindrets/diffview.nvim",
 		config = function()
-			require("diffview").setup({})
+			local actions = require("diffview.actions")
+			require("diffview").setup({
+				keymaps = {
+					view = {
+						{
+							"n",
+							"gf",
+							function()
+								local win = vim.fn.nvim_get_current_win()
+								print("CLOSE WINDR? " .. win)
+
+								-- actions.goto_file_edit()
+								--
+								-- vim.api.nvim_win_close(win, false) -- do not force
+							end,
+							{ desc = "Open the file in the previous tabpage" },
+						},
+					},
+				},
+			})
 
 			vim.keymap.set({ "n", "v" }, "<LEADER>gd", function()
 				require("diffview").open({})
@@ -69,6 +88,7 @@ return {
 		},
 		config = function()
 			require("octo").setup({
+				use_local_fs = true,
 				-- integrations = {
 				-- 	telescope = true,
 				-- },

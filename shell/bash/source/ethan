@@ -1,2 +1,6 @@
 
 PS1="[\[\e[32m\]\t \h\[\e[0m\]] \[\e[93m\]\w \[\e[0m\]\$ "
+
+g() {
+	/Applications/Brave\ Browser.app/Contents/MacOS/Brave\ Browser https://google.com/search?q="$*"
+}

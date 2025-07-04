@@ -80,7 +80,13 @@ return {
 				},
 			},
 
-			signature = { enabled = true, window = { border = "single" } },
+			signature = {
+				enabled = true,
+				window = { border = "single" },
+				trigger = {
+					show_on_insert = true,
+				},
+			},
 			keymap = {
 				preset = "default",
 				["<A-j>"] = { "select_next" },

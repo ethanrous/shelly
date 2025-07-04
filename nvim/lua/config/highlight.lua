@@ -12,7 +12,14 @@ function Get_hl_hex(name, option)
 	return hex_color
 end
 
-vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter" }, {
+local overrides = {
+	-- ["DiffviewDiffAddAsDelete"] = { fg = "#131621" },
+	-- ["DiffviewDiffDelete"] = { fg = "#131621" },
+	["DiffDelete"] = { fg = "#473246", bg = "#3a273a" },
+	["DiffviewFilePanelDeletions"] = { fg = Get_hl_hex("Normal", "fg"), bg = "#3a273a" },
+}
+
+vim.api.nvim_create_autocmd({ "ColorScheme" }, {
 	group = vim.api.nvim_create_augroup("Color", {}),
 	pattern = "*",
 	callback = function()
@@ -27,6 +34,11 @@ vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter" }, {
 		vim.api.nvim_set_hl(0, "NeoTreeGitUntracked", { link = "Added" })
 		vim.api.nvim_set_hl(0, "NeoTreeGitRenamed", { link = "Added" })
 		vim.api.nvim_set_hl(0, "NeoTreeGitConflict", { link = "Removed" })
+
+		for group, color in pairs(overrides) do
+			print("Setting highlight group: " .. group .. " with color: " .. vim.inspect(color))
+			vim.api.nvim_set_hl(0, group, color)
+		end
 
 		-- vim.api.nvim_set_hl(0, "SnacksPickerGitStatusUnstaged", { link = "Changed" })
 		-- vim.api.nvim_set_hl(0, "SnacksPickerGitStatusModified", { link = "Changed" })

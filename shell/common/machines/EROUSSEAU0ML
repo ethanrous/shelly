@@ -14,4 +14,6 @@ add_to_path "/Users/erousseau/.local/share/nvim/mason/bin"
 add_to_path "$PNPM_HOME" true
 add_to_path "/Users/erousseau/.rd/bin"
 add_to_path "/Users/erousseau/.local/bin"
+add_to_path "/Users/erousseau/.pyenv/versions/3.12.3/bin"
+add_to_path "/opt/homebrew/opt/ruby/bin"
 

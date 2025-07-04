@@ -72,9 +72,9 @@ return {
 					"html",
 					-- JavaScript/TypeScript
 					"ts_ls",
+					"vue_ls",
 
-					"vtsls",
-					"vuels",
+					-- "vtsls",
 
 					"tailwindcss",
 					"eslint",
@@ -86,6 +86,9 @@ return {
 
 					-- Docker
 					-- "hadolint",
+
+					-- Ruby
+					"ruby_lsp",
 				},
 				automatic_installation = true,
 				automatic_enable = false,

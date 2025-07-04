@@ -35,7 +35,6 @@ return {
 		event = "VeryLazy",
 		version = false, -- set this if you want to always pull the latest change
 		opts = {
-			debug = true,
 			-- add any opts here
 			mode = "agentic",
 			provider = "copilot",

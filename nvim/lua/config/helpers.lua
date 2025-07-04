@@ -115,6 +115,11 @@ autocmd("CursorMoved", {
 	end,
 })
 
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "eruby.yaml",
+	command = "set filetype=yaml",
+})
+
 function Dump(o)
 	if type(o) == "table" then
 		local s = "{ "

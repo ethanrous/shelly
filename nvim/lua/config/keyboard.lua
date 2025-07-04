@@ -2,6 +2,8 @@
 -- Keyboard shortcuts --
 ------------------------
 
+local keymap = require("util.keymap")
+
 -- Disable arrow keys
 vim.keymap.set({ "n", "v" }, "<Up>", "<Nop>", { silent = true, noremap = true })
 vim.keymap.set({ "n", "v" }, "<Down>", "<Nop>", { silent = true, noremap = true })
@@ -86,6 +88,18 @@ vim.keymap.set("v", "<leader>gs", function()
 	local r = vim.fn.getregion(vim.fn.getpos("v"), vim.fn.getpos("."))
 	vim.cmd("silent !~/shelly/zsh/source/gsearch " .. r[1])
 end, { silent = true })
+
+keymap.set({
+	key = "<leader>xc",
+	cmd = ":call setreg('+', expand('%:.') .. ':' .. line('.'))<CR>",
+	desc = "Copy current file path and line number to clipboard",
+})
+
+keymap.set({
+	key = "<leader>bd",
+	cmd = ":w | %bd | e#<CR>",
+	desc = "Close all buffers except the current one",
+})
 
 -- Remove conflicting keymaps --
 vim.keymap.del("n", "gri")

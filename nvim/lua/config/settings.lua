@@ -43,6 +43,7 @@ opt.title = true
 opt.ttimeoutlen = 0
 opt.undofile = true
 opt.inccommand = "nosplit"
+opt.fillchars = opt.fillchars + "diff:╱"
 
 o.cursorline = true
 opt.cursorline = true
