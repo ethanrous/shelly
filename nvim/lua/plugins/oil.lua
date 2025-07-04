@@ -11,6 +11,7 @@ return {
 				use_default_keymaps = false,
 				delete_to_trash = true,
 				skip_confirm_for_simple_edits = true,
+				default_file_explorer = false,
 				keymaps = {
 					["g?"] = "actions.show_help",
 					["I"] = "actions.toggle_hidden",
@@ -87,6 +88,7 @@ return {
 				},
 
 				filesystem = {
+					hijack_netrw_behavior = "disabled",
 					follow_current_file = {
 						enabled = true,
 						leave_dirs_open = true,

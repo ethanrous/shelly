@@ -44,8 +44,10 @@ return {
 				enable_cursor_planning_mode = true, -- enable cursor planning mode!
 				auto_suggestions = false,
 			},
-			copilot = {
-				model = "gpt-4.1",
+			providers = {
+				copilot = {
+					model = "gpt-4.1",
+				},
 			},
 			mappings = {
 				sidebar = {

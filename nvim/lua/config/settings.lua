@@ -26,6 +26,8 @@ opt.number = true
 opt.ruler = false
 opt.scrolloff = 20
 
+vim.opt.formatoptions:remove({ "t" })
+
 -- Danny. Why. Why would you use this. I hate it.
 -- opt.showmatch = true
 

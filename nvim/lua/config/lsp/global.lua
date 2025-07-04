@@ -40,11 +40,26 @@ local function set_global_keymaps(client, bufnr)
 		bufnr = bufnr,
 	})
 
+	-- Show all workspace symbols
+	keymap.set({
+		key = "<leader>gS",
+		cmd = require("telescope.builtin").lsp_dynamic_workspace_symbols,
+		desc = "Go workspace symbols",
+		bufnr = bufnr,
+	})
+
 	-- Go to vue component references
 	keymap.set({
 		key = "<leader>vr",
 		cmd = FindVueFileReferences,
 		desc = "Go to references",
+		bufnr = bufnr,
+	})
+
+	keymap.set({
+		key = "<leader>P",
+		cmd = require("config.helpers.tag-jump").parent,
+		desc = "Go to parent",
 		bufnr = bufnr,
 	})
 
