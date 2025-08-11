@@ -109,6 +109,11 @@ config.keys = {
 	},
 	{
 		key = "h",
+		mods = "CMD",
+		action = wezterm.action.ActivatePaneDirection("Left"),
+	},
+	{
+		key = "h",
 		mods = "CMD|SHIFT",
 		action = wezterm.action.SplitVertical({ domain = "CurrentPaneDomain" }),
 	},
@@ -116,11 +121,6 @@ config.keys = {
 		key = "z",
 		mods = "CMD",
 		action = wezterm.action.TogglePaneZoomState,
-	},
-	{
-		key = "h",
-		mods = "CMD",
-		action = wezterm.action.ActivatePaneDirection("Left"),
 	},
 	{
 		key = "l",

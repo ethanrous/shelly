@@ -3,6 +3,9 @@ return {
 		"zbirenbaum/copilot.lua",
 		event = "InsertEnter",
 		config = function()
+			-- vim.g.copilot_proxy = "http://127.0.0.1:11435"
+			-- vim.g.copilot_proxy_strict_ssl = false
+
 			require("copilot").setup({
 				filetypes = {
 					["*"] = true,
@@ -29,6 +32,26 @@ return {
 				},
 			})
 		end,
+	},
+	{
+		"olimorris/codecompanion.nvim",
+		opts = {
+			strategies = {
+				chat = {
+					adapter = "ollama",
+				},
+				inline = {
+					adapter = "ollama",
+				},
+				cmd = {
+					adapter = "ollama",
+				},
+			},
+		},
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"nvim-treesitter/nvim-treesitter",
+		},
 	},
 	{
 		"yetone/avante.nvim",
