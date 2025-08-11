@@ -62,10 +62,30 @@ return {
 	},
 
 	-- Highlight color codes with their code #ff00ff
+	-- {
+	-- 	"catgoose/nvim-colorizer.lua",
+	-- 	event = "BufReadPre",
+	-- 	config = function()
+	-- 		require("colorizer").setup({
+	-- 			filetypes = { "*" },
+	-- 			user_default_options = {
+	-- 				css_fn = true,
+	-- 				css = true,
+	-- 				tailwind = "both",
+	-- 			},
+	-- 		})
+	-- 	end,
+	-- },
 	{
-		"norcalli/nvim-colorizer.lua",
+		"brenoprata10/nvim-highlight-colors",
 		config = function()
-			require("colorizer").setup()
+			require("nvim-highlight-colors").setup({
+				render = "virtual",
+				enable_named_colors = true,
+				enable_tailwind = true,
+				enable_hex = true,
+				disable = { "NvimTree" },
+			})
 		end,
 	},
 }

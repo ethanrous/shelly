@@ -27,7 +27,13 @@ end, { expr = true, noremap = true, silent = true })
 
 -- Duplicate line
 vim.keymap.set({ "i", "n" }, "<A-S-j>", '<Esc>mc"kyy"kp`cj', { silent = true })
-vim.keymap.set("v", "<A-S-j>", '"ky\']"kpV`]', { silent = true })
+vim.keymap.set("x", "<A-S-j>", function()
+	if vim.fn.mode() == "V" then
+		return '"ky\']"kpV`]'
+	else
+		return 'V"ky\']"kpV`]'
+	end
+end, { silent = true, expr = true })
 
 vim.keymap.set("x", "p", [["_dP]]) -- Paste without yanking
 
@@ -74,7 +80,7 @@ vim.keymap.set("n", "<LEADER>FF", function()
 	vim.cmd("silent update")
 	local buf_name = vim.api.nvim_buf_get_name(0)
 	if buf_name:sub(-#".go") == ".go" then
-		vim.cmd("silent !swag fmt %")
+		vim.cmd("silent !swag fmt --exclude ./build")
 	end
 end, { silent = true })
 
@@ -100,6 +106,11 @@ keymap.set({
 	cmd = ":w | %bd | e#<CR>",
 	desc = "Close all buffers except the current one",
 })
+
+-- Code Companion --
+vim.keymap.set({ "n", "v" }, "<C-a>", "<cmd>CodeCompanionActions<cr>", { noremap = true })
+vim.keymap.set({ "n", "v" }, "<LocalLeader>a", "<cmd>CodeCompanionChat Toggle<cr>", { noremap = true, silent = true })
+vim.keymap.set("v", "ga", "<cmd>CodeCompanionChat Add<cr>", { noremap = true, silent = true })
 
 -- Remove conflicting keymaps --
 vim.keymap.del("n", "gri")

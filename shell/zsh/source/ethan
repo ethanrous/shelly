@@ -11,3 +11,6 @@ PROMPT='[%F{$COLOR}%t %m%f] %11F%~%f ${vcs_info_msg_0_}%f$ '
 if [[ $SHELLY_DEBUG == "true" ]]; then
     echo "Set Prompt $PROMPT"
 fi
+
+export HOMEBREW_NO_ENV_HINTS=true
+add_to_path "/opt/homebrew/opt/ruby/bin"

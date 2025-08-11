@@ -152,9 +152,9 @@ vim.lsp.config.cssls = {
 }
 -- }}}
 
--- TailwindCss {{{
-vim.lsp.config.tailwindcssls = {
-	cmd = { "tailwindcss-language-server", "--stdio" },
+-- TailwindCss
+vim.lsp.config.tailwindcss = {
+	-- cmd = { "tailwindcss-language-server", "--stdio" },
 	filetypes = {
 		"ejs",
 		"html",
@@ -186,6 +186,7 @@ vim.lsp.config.tailwindcssls = {
 				eruby = "erb",
 				htmlangular = "html",
 				templ = "html",
+				css = "css",
 			},
 			lint = {
 				cssConflict = "warning",
@@ -200,7 +201,6 @@ vim.lsp.config.tailwindcssls = {
 		},
 	},
 }
--- }}}
 
 -- HTML {{{
 vim.lsp.config.htmlls = {
@@ -223,7 +223,7 @@ vim.lsp.enable({
 	"vtsls",
 	"vue_ls",
 	"cssls",
-	"tailwindcssls",
+	"tailwindcss",
 	"htmlls",
 	"eslint",
 })
