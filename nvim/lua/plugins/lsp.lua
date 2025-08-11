@@ -73,6 +73,7 @@ return {
 					-- JavaScript/TypeScript
 					"ts_ls",
 					"vue_ls",
+					"angularls",
 
 					-- "vtsls",
 

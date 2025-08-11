@@ -70,7 +70,11 @@ return {
 						auto_quoting = true, -- enable/disable auto-quoting
 						file_ignore_patterns = { "node_modules", "pnpm-lock.yaml", "package-lock.json" },
 						additional_args = function(_)
-							return { "--hidden" }
+							return {
+								"--hidden",
+								"--glob",
+								"!.git",
+							}
 						end,
 						hidden = true,
 						-- define mappings, e.g.
@@ -124,6 +128,8 @@ return {
 						"--smart-case",
 						"--ignore-file",
 						".gitignore",
+						"--ignore-file",
+						".git/",
 						"--ignore-file",
 						"swag/",
 						"--ignore-file",

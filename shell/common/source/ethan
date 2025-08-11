@@ -146,5 +146,5 @@ fi
 # export CPPFLAGS="-I/opt/homebrew/include"
 
 # Danger??
-ulimit -n 4096
+# ulimit -n 4096
 
