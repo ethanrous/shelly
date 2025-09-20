@@ -95,17 +95,30 @@ vim.keymap.set("v", "<leader>gs", function()
 	vim.cmd("silent !~/shelly/zsh/source/gsearch " .. r[1])
 end, { silent = true })
 
-keymap.set({
-	key = "<leader>xc",
-	cmd = ":call setreg('+', expand('%:.') .. ':' .. line('.'))<CR>",
-	desc = "Copy current file path and line number to clipboard",
-})
+vim.keymap.set(
+	"n",
+	"<leader>xc",
+	":call setreg('+', expand('%:.'))<CR>",
+	{ desc = "Copy current file relative path to clipboard" }
+)
 
-keymap.set({
-	key = "<leader>bd",
-	cmd = ":w | %bd | e#<CR>",
-	desc = "Close all buffers except the current one",
-})
+vim.keymap.set(
+	"n",
+	"<leader>xC",
+	":call setreg('+', expand('%:p'))<CR>",
+	{ desc = "Copy current file absolute path to clipboard" }
+)
+
+vim.keymap.set("n", "<leader>bd", ":w | %bd | e#<CR>", { desc = "Close all buffers except the current one" })
+
+vim.keymap.set("n", "<leader>tt", ":tabn<CR>", { desc = "Switch to the most recent tab" })
+vim.keymap.set("n", "<leader>tc", ":tabn<CR>", { desc = "Switch to the most recent tab" })
+
+vim.keymap.set("n", "<leader>do", function()
+	local file_path = vim.fn.expand("%:p")
+	print(file_path)
+	vim.cmd("silent !open -R " .. file_path)
+end, { desc = "Open the currnet directory in Finder" })
 
 -- Code Companion --
 vim.keymap.set({ "n", "v" }, "<C-a>", "<cmd>CodeCompanionActions<cr>", { noremap = true })
@@ -114,6 +127,7 @@ vim.keymap.set("v", "ga", "<cmd>CodeCompanionChat Add<cr>", { noremap = true, si
 
 -- Remove conflicting keymaps --
 vim.keymap.del("n", "gri")
+vim.keymap.del("n", "grt")
 vim.keymap.del("n", "grr")
 vim.keymap.del({ "n", "x" }, "gra")
 vim.keymap.del("n", "grn")

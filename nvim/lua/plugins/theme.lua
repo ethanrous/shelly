@@ -21,7 +21,6 @@ return {
 					}
 				end,
 				on_highlights = function(hl, c)
-					print("Setting highlights")
 					hl.CursorLineNr.fg = c.blue
 					hl.EndOfBuffer.fg = c.bg_statusline
 					hl.StatusLine.fg = c.bg_statusline

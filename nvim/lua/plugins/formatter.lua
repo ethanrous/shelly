@@ -47,8 +47,10 @@ return {
 		local conform = require("conform")
 
 		conform.setup({
+			log_level = vim.log.levels.DEBUG,
 			formatters_by_ft = {
 				javascript = { "prettier" },
+				-- typescript = { "eslint_d", "prettier", stop_after_first = true },
 				typescript = { "prettier" },
 				javascriptreact = { "prettier" },
 				typescriptreact = { "prettier" },
@@ -56,6 +58,7 @@ return {
 				svelte = { "prettier" },
 				css = { "prettier" },
 				html = { "prettier" },
+				htmlangular = { "prettier" },
 				json = { "prettier" },
 				yaml = { "prettier" },
 				markdown = { "prettier" },
@@ -66,11 +69,18 @@ return {
 				lua = { "stylua" },
 				python = { "isort", "black" },
 				go = { "gofmt", "goimports" },
+				java = {},
 			},
 
-			format_on_save = {
-				timeout_ms = 1000,
+			-- format_on_save = {
+			-- 	timeout_ms = 50000,
+			-- 	lsp_format = "fallback",
+			-- 	async = true,
+			-- },
+			format_after_save = {
+				timeout_ms = 5000,
 				lsp_format = "fallback",
+				async = true,
 			},
 		})
 

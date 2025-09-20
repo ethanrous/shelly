@@ -1,0 +1,8 @@
+#!/bin/bash
+
+export DOCKER_HOST=unix://$HOME/.rd/docker.sock
+alias bld='grdlu gen java js start --parallel'
+
+if [[ $PWD == "/Users/erousseau/repos/newton" ]]; then
+	source ./buildenv.bash
+fi

@@ -17,6 +17,7 @@ config.window_padding = {
 	bottom = 0,
 }
 config.max_fps = 120
+config.audible_bell = "Disabled"
 
 -- config.tab_bar_at_bottom = true
 config.use_fancy_tab_bar = false

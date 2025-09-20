@@ -89,6 +89,9 @@ autocmd("BufReadPost", {
 		if mk[1] == 0 then
 			return
 		end
+		if mk[1] > vim.api.nvim_buf_line_count(0) then
+			return
+		end
 		vim.cmd("'.")
 	end,
 })

@@ -36,7 +36,6 @@ vim.api.nvim_create_autocmd({ "ColorScheme" }, {
 		vim.api.nvim_set_hl(0, "NeoTreeGitConflict", { link = "Removed" })
 
 		for group, color in pairs(overrides) do
-			print("Setting highlight group: " .. group .. " with color: " .. vim.inspect(color))
 			vim.api.nvim_set_hl(0, group, color)
 		end
 

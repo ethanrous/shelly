@@ -68,7 +68,7 @@ git_wip()
     fi
     if [[ "$answer" == "y" ]]; then
         git add -A
-        git commit -m "WIP"
+        git commit -m "WIP" --no-verify
         git push origin HEAD
     fi
 }

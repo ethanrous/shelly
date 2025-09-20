@@ -2,10 +2,12 @@
 
 export USE_CCACHE=1
 
+export PNPM_HOME="/Users/erousseau/Library/pnpm"
+
 add_to_path "$HOME/.cargo/bin"
 # add_to_path "/Library/Frameworks/Python.framework/Versions/3.10/bin"
 add_to_path "/opt/homebrew/bin"
-add_to_path "/Users/ethan/go/bin"
+add_to_path "/Users/erousseau/go/bin"
 # add_to_path "/Users/ethan/Library/Python/3.10/bin"
 add_to_path "/opt/homebrew/bin" true
 add_to_path "/opt/homebrew/sbin" true
@@ -17,3 +19,4 @@ add_to_path "/Users/erousseau/.local/bin"
 add_to_path "/Users/erousseau/.pyenv/versions/3.12.3/bin"
 add_to_path "/opt/homebrew/opt/ruby/bin"
 
+source "$SHELLY/shell/$SHELL_NAME/machines/EROUSSEAU0ML"

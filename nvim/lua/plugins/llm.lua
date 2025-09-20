@@ -10,7 +10,7 @@ return {
 				filetypes = {
 					["*"] = true,
 				},
-				copilot_model = "gpt-4o-copilot",
+				copilot_model = "gpt-41-copilot",
 				suggestion = {
 					enabled = true,
 					auto_trigger = true,
@@ -69,7 +69,19 @@ return {
 			},
 			providers = {
 				copilot = {
-					model = "gpt-4.1",
+					model = "gpt-5",
+				},
+				ollama = {
+					endpoint = "http://127.0.0.1:9001",
+					timeout = 30000, -- Timeout in milliseconds
+					model = "gpt-oss:20b",
+					extra_request_body = {
+						options = {
+							temperature = 0.75,
+							num_ctx = 20480,
+							keep_alive = "5m",
+						},
+					},
 				},
 			},
 			mappings = {
