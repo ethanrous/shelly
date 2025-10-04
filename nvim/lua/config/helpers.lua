@@ -96,16 +96,16 @@ autocmd("BufReadPost", {
 	end,
 })
 
-autocmd("UIEnter", {
-	pattern = "*",
-	callback = function()
-		if vim.bo.filetype ~= "" then
-			return
-		end
-
-		vim.defer_fn(gotoHarpoon, 1)
-	end,
-})
+-- autocmd("UIEnter", {
+-- 	pattern = "*",
+-- 	callback = function()
+-- 		if vim.bo.filetype ~= "" then
+-- 			return
+-- 		end
+--
+-- 		vim.defer_fn(gotoHarpoon, 1)
+-- 	end,
+-- })
 
 autocmd("CursorMoved", {
 	group = vim.api.nvim_create_augroup("auto-hlsearch", { clear = true }),

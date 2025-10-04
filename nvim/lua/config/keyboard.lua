@@ -125,9 +125,19 @@ vim.keymap.set({ "n", "v" }, "<C-a>", "<cmd>CodeCompanionActions<cr>", { noremap
 vim.keymap.set({ "n", "v" }, "<LocalLeader>a", "<cmd>CodeCompanionChat Toggle<cr>", { noremap = true, silent = true })
 vim.keymap.set("v", "ga", "<cmd>CodeCompanionChat Add<cr>", { noremap = true, silent = true })
 
+local function safeDelete(mode, lhs)
+	if type(mode) == "table" then
+		mode = mode[1]
+	end
+
+	if vim.fn.maparg(lhs, mode) ~= "" then
+		vim.keymap.del(mode, lhs)
+	end
+end
+
 -- Remove conflicting keymaps --
-vim.keymap.del("n", "gri")
-vim.keymap.del("n", "grt")
-vim.keymap.del("n", "grr")
-vim.keymap.del({ "n", "x" }, "gra")
-vim.keymap.del("n", "grn")
+safeDelete("n", "gri")
+safeDelete("n", "grt")
+safeDelete("n", "grr")
+safeDelete({ "n", "x" }, "gra")
+safeDelete("n", "grn")

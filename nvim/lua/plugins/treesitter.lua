@@ -2,6 +2,7 @@ return {
 	-- Syntax plugin
 	{
 		"nvim-treesitter/nvim-treesitter",
+		lazy = false,
 		config = function()
 			local status_ok, nvim_treesitter_configs = pcall(require, "nvim-treesitter.configs")
 			if not status_ok then
@@ -64,6 +65,7 @@ return {
 			"nvim-treesitter/nvim-treesitter-context",
 			"nvim-treesitter/nvim-treesitter-textobjects",
 			"JoosepAlviste/nvim-ts-context-commentstring",
+			"OXY2DEV/markview.nvim",
 		},
 	},
 	{

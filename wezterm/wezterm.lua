@@ -154,6 +154,11 @@ config.keys = {
 		action = wezterm.action.Search({ CaseInSensitiveString = "" }),
 	},
 	{
+		key = "F",
+		mods = "CMD|SHIFT",
+		action = wezterm.action.Search({ CaseInSensitiveString = "" }),
+	},
+	{
 		key = "u",
 		mods = "ALT",
 		action = wezterm.action.ActivateCopyMode,
