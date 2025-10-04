@@ -55,6 +55,20 @@ return {
 			vim.keymap.set({ "n", "v" }, "<LEADER>gc", function()
 				require("diffview").close()
 			end, { silent = true })
+
+			vim.keymap.set({ "n", "v" }, "<LEADER>bc", function()
+				local line = vim.fn.line(".")
+				local cmd = "git blame -L " .. line .. "," .. line .. " " .. vim.fn.expand("%")
+				local output = vim.fn.system(cmd)
+				local spaceIndex = string.find(output, " ")
+				if spaceIndex == 0 then
+					print("No commit hash found")
+					return
+				end
+
+				local commitHash = string.sub(output, 0, spaceIndex - 1)
+				require("diffview").open({ commitHash .. "~.." .. commitHash })
+			end, { silent = true })
 		end,
 	},
 	{

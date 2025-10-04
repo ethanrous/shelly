@@ -14,11 +14,11 @@ return {
 					colors.bg_search = "#131621"
 					colors.bg_sidebar = "#131621"
 					colors.bg_statusline = "#131621"
-					colors.git = {
-						add = "#449dab",
-						change = "#6183bb",
-						delete = "#473246",
-					}
+					-- colors.git = {
+					-- 	add = "#449dab",
+					-- 	change = "#6183bb",
+					-- 	delete = "#473246",
+					-- }
 				end,
 				on_highlights = function(hl, c)
 					hl.CursorLineNr.fg = c.blue

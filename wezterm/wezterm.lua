@@ -8,7 +8,7 @@ local config = wezterm.config_builder()
 
 -- For example, changing the color scheme:
 config.font = wezterm.font("JetBrains Mono")
-config.font_size = 17
+config.font_size = 15
 config.automatically_reload_config = true
 config.window_padding = {
 	left = "0.25cell",

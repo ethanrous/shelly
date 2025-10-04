@@ -26,12 +26,32 @@ return {
 				end,
 				desc = "Open a json scratch buffer",
 			},
+			{
+				"<leader>sn",
+				function()
+					local scratchName = vim.fn.input("Enter scratch buffer name: ")
+					if scratchName == "" then
+						print("A name is required")
+						return
+					end
+
+					local scratchFt = vim.fn.input("Enter scratch buffer filetype: ")
+					local opts = { name = scratchName }
+
+					if scratchFt ~= "" then
+						opts.ft = scratchFt
+					end
+
+					Snacks.scratch(opts)
+				end,
+				desc = "Open a new named json scratch buffer",
+			},
 		},
 		opts = {
 			styles = {
 				scratch = {
-					width = 0.5,
-					height = 0.75,
+					width = 0.75,
+					height = 0.85,
 					border = "single",
 				},
 			},
