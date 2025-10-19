@@ -96,16 +96,17 @@ autocmd("BufReadPost", {
 	end,
 })
 
--- autocmd("UIEnter", {
--- 	pattern = "*",
--- 	callback = function()
--- 		if vim.bo.filetype ~= "" then
--- 			return
--- 		end
---
--- 		vim.defer_fn(gotoHarpoon, 1)
--- 	end,
--- })
+vim.api.nvim_create_autocmd("VimLeavePre", {
+	pattern = "*",
+	callback = function()
+		if vim.g.savesession then
+			local cwd = vim.fn.getcwd()
+			local new_path = string.gsub(cwd, "/", "-")
+			new_path = string.sub(new_path, 2)
+			vim.api.nvim_command("mks! ~/.config/nvim/session/" .. new_path .. ".session.vim")
+		end
+	end,
+})
 
 autocmd("CursorMoved", {
 	group = vim.api.nvim_create_augroup("auto-hlsearch", { clear = true }),

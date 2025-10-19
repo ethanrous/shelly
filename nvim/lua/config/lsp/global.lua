@@ -42,8 +42,8 @@ local function set_global_keymaps(client, bufnr)
 
 	-- Show all workspace symbols
 	keymap.set({
-		key = "<leader>gS",
-		cmd = require("telescope.builtin").lsp_dynamic_workspace_symbols,
+		key = "<leader>gs",
+		cmd = require("telescope.builtin").lsp_document_symbols,
 		desc = "Go workspace symbols",
 		bufnr = bufnr,
 	})
@@ -187,27 +187,6 @@ local function set_global_keymaps(client, bufnr)
 			lsp.inlay_hint.enable(not lsp.inlay_hint.is_enabled({}))
 		end,
 		desc = "Check health of LSP",
-		bufnr = bufnr,
-	})
-
-	keymap.set({
-		key = "<leader>gt",
-		cmd = ":Neotree<CR>",
-		desc = "Open NeoTree",
-		bufnr = bufnr,
-	})
-
-	keymap.set({
-		key = "<leader>gs",
-		cmd = ":Neotree document_symbols<CR>",
-		desc = "Open NeoTree document_symbols",
-		bufnr = bufnr,
-	})
-
-	keymap.set({
-		key = "<leader>bp",
-		cmd = ":1,9999bd | e#<CR>",
-		desc = "Open NeoTree document_symbols",
 		bufnr = bufnr,
 	})
 end

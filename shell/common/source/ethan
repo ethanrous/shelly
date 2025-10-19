@@ -2,7 +2,7 @@
 
 ### Alias ###
 alias dps="sudo docker ps --format \"table {{.ID}} \t{{.Status}} \t{{.Names}}\""
-alias ebrc="cd $SHELLY && em ."
+alias ebrc="cd $SHELLY && e ."
 alias v='ls -l'
 alias va='ls -la'
 alias n='ping 1.1.1.1'
@@ -13,6 +13,8 @@ alias tab='wezterm cli set-tab-title'
 
 alias sbp="source ~/.${SHELL_NAME}rc"
 alias sync="$SHELLY/shell/common/auto-loader.bash"
+
+export EDITOR="e"
 
 ### Funcs ###
 
@@ -41,9 +43,36 @@ ls() {
     fi
 }
 
-alias em="$EDITOR"
+e () {
+    if [[ -z "$@" ]]; then
+        if [[ ! -d $HOME/.config/nvim/session ]]; then
+            mkdir -p $HOME/.config/nvim/session
+        fi
+
+        session_path="${PWD//\//-}"
+        session_path="$HOME/.config/nvim/session/${session_path:1}.session.vim"
+	if [[ -f $session_path ]]; then
+	    nvim -S "$session_path" -c 'lua vim.g.savesession = true'
+	else
+	    nvim -c 'lua vim.g.savesession = true'
+	fi
+    else
+    	nvim "$@"
+    fi
+}
+
 man() {
 	nvim -c ":Man $1 | :only"
+}
+
+dbg() {
+    if [[ $SHELLY_DEBUG == true ]]; then
+        export SHELLY_DEBUG=false
+        echo "SHELLY_DEBUG DISABLED"
+    else
+        export SHELLY_DEBUG=true
+        echo "SHELLY_DEBUG ENABLED"
+    fi
 }
 
 search() {

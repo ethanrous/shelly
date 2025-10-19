@@ -10,61 +10,60 @@ return {
 		config = function()
 			local telescope = require("telescope")
 			local actions = require("telescope.actions")
-			local callTelescope = function(input)
-				-- local theme = require("telescope.themes").get_dropdown()teles
-				-- input(theme)
-				input()
-			end
+			local builtin = require("telescope.builtin")
 
 			vim.keymap.set("n", "gi", function()
-				callTelescope(require("telescope.builtin").lsp_implementations)
+				builtin.lsp_implementations()
 			end, { silent = true })
 
 			vim.keymap.set("n", "gr", function()
-				require("telescope.builtin").lsp_references({ include_declaration = false })
+				builtin.lsp_references({ include_declaration = false })
 			end, { silent = true })
-
-			-- vim.keymap.set("n", "gs", function()
-			-- 	callTelescope(require("telescope.builtin").lsp_document_symbols)
-			-- end, { silent = true })
-
-			-- vim.keymap.set("n", "gd", function()
-			-- 	require("telescope.builtin").lsp_definitions()
-			-- end, { silent = true })
 
 			vim.keymap.set("n", "<leader>fg", function()
 				telescope.extensions.live_grep_args.live_grep_args()
 			end, { silent = true })
 
 			vim.keymap.set("n", "<leader>tc", function()
-				require("telescope.builtin").resume({ cache_index = 1 })
+				builtin.resume({ cache_index = 1 })
 			end)
 
 			vim.keymap.set("v", "<leader>fg", function()
-				require("telescope.builtin").grep_string()
+				builtin.grep_string()
 			end, { silent = true })
 
 			vim.keymap.set("n", "<leader>gh", function()
-				require("telescope.builtin").highlights()
+				builtin.highlights()
 			end, { silent = true })
 
 			vim.keymap.set("n", "<leader>gp", function()
-				require("telescope.builtin").diagnostics({
+				builtin.diagnostics({
 					show_all = true,
 					severity = { "Error" },
 				})
 			end, { silent = true })
 
 			vim.keymap.set("n", "gt", function()
-				callTelescope(require("telescope.builtin").lsp_type_definitions)
+				builtin.lsp_type_definitions()
 			end, { silent = true })
 
 			vim.keymap.set({ "i", "n" }, "<A-f>", function()
-				callTelescope(require("telescope.builtin").current_buffer_fuzzy_find)
+				builtin.current_buffer_fuzzy_find()
 			end, { silent = true })
 
 			local lga_actions = require("telescope-live-grep-args.actions")
+
+			-- allow for more space for the fnames
+			local picker_config = {}
+			for b, _ in pairs(builtin) do
+				picker_config[b] = { fname_width = 80 }
+			end
+
 			telescope.setup({
+				pickers = vim.tbl_extend("force", picker_config, {
+					lsp_references = { fname_width = 80 },
+				}),
+
 				extensions = {
 					live_grep_args = {
 						auto_quoting = true, -- enable/disable auto-quoting
@@ -102,22 +101,22 @@ return {
 				defaults = {
 					borderchars = { "─", "│", "─", "│", "┌", "┐", "┘", "└" },
 					sorting_strategy = "ascending",
-					layout_strategy = "flex",
+					layout_strategy = "vertical",
 					layout_config = {
 						horizontal = {
 							prompt_position = "top",
 							width = 0.90,
 							height = 0.90,
-							preview_width = 0.5,
+							preview_width = 0.9,
 						},
 						vertical = {
-							width = 0.90,
-							height = 0.90,
-							preview_width = 0.5,
+							width = 0.95,
+							height = 0.95,
+							preview_width = 0.9,
 						},
 					},
 
-					path_display = { shorten = 1 },
+					-- path_display = { shorten = 10 },
 					vimgrep_arguments = {
 						"rg",
 						"--color=never",

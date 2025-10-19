@@ -1,6 +1,7 @@
 vim.loader.enable()
 
 require("config")
+require("util")
 
 -- Load all LSP's in "lua/config/lsp"
 local lsp_path = vim.fn.stdpath("config") .. "/lua/config/lsp"

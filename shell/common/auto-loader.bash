@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [[ $SHELLY_DEBUG == "true" ]]; then
+    set -x
+fi
+
 if [[ $SHELL_NAME == "" ]]; then
     echo "SHELL_NAME NOT SET, EXITING"
     return
@@ -62,3 +66,5 @@ fi
 if [[ $SHELLY_DEBUG == "true" ]]; then
     echo "Sourced $count files"
 fi
+
+set +x

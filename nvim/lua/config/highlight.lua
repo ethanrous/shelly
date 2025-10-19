@@ -12,40 +12,40 @@ function Get_hl_hex(name, option)
 	return hex_color
 end
 
-local overrides = {
-	-- ["DiffviewDiffAddAsDelete"] = { fg = "#131621" },
-	-- ["DiffviewDiffDelete"] = { fg = "#131621" },
-	["DiffDelete"] = { fg = "#473246", bg = "#3a273a" },
-	["DiffviewFilePanelDeletions"] = { fg = Get_hl_hex("Normal", "fg"), bg = "#3a273a" },
-}
+-- local overrides = {
+-- 	-- ["DiffviewDiffAddAsDelete"] = { fg = "#131621" },
+-- 	-- ["DiffviewDiffDelete"] = { fg = "#131621" },
+-- 	["DiffDelete"] = { fg = "#473246", bg = "#3a273a" },
+-- 	["DiffviewFilePanelDeletions"] = { fg = Get_hl_hex("Normal", "fg"), bg = "#3a273a" },
+-- }
 
-vim.api.nvim_create_autocmd({ "ColorScheme" }, {
-	group = vim.api.nvim_create_augroup("Color", {}),
-	pattern = "*",
-	callback = function()
-		vim.api.nvim_set_hl(0, "DiagnosticUnnecessary", { underline = true })
-		vim.api.nvim_set_hl(0, "WinSeparator", { link = "FloatBorder" })
-
-		vim.api.nvim_set_hl(0, "NeoTreeNormal", { link = "NormalFloat" })
-		vim.api.nvim_set_hl(0, "NeoTreeDirectoryIcon", { fg = Get_hl_hex("Function", "fg") })
-		vim.api.nvim_set_hl(0, "NeoTreeDirectoryName", { fg = Get_hl_hex("Function", "fg") })
-		vim.api.nvim_set_hl(0, "NeoTreeGitUnstaged", { link = "Changed" })
-		vim.api.nvim_set_hl(0, "NeoTreeGitModified", { link = "Changed" })
-		vim.api.nvim_set_hl(0, "NeoTreeGitUntracked", { link = "Added" })
-		vim.api.nvim_set_hl(0, "NeoTreeGitRenamed", { link = "Added" })
-		vim.api.nvim_set_hl(0, "NeoTreeGitConflict", { link = "Removed" })
-
-		for group, color in pairs(overrides) do
-			vim.api.nvim_set_hl(0, group, color)
-		end
-
-		-- vim.api.nvim_set_hl(0, "SnacksPickerGitStatusUnstaged", { link = "Changed" })
-		-- vim.api.nvim_set_hl(0, "SnacksPickerGitStatusModified", { link = "Changed" })
-		-- vim.api.nvim_set_hl(0, "SnacksPickerGitStatusUntracked", { link = "Added" })
-		-- vim.api.nvim_set_hl(0, "SnacksPickerGitStatusRenamed", { link = "Added" })
-		-- vim.api.nvim_set_hl(0, "SnacksPickerGitStatusConflict", { link = "Removed" })
-	end,
-})
+-- vim.api.nvim_create_autocmd({ "ColorScheme" }, {
+-- 	group = vim.api.nvim_create_augroup("Color", {}),
+-- 	pattern = "*",
+-- 	callback = function()
+-- 		vim.api.nvim_set_hl(0, "DiagnosticUnnecessary", { underline = true })
+-- 		vim.api.nvim_set_hl(0, "WinSeparator", { link = "FloatBorder" })
+--
+-- 		vim.api.nvim_set_hl(0, "NeoTreeNormal", { link = "NormalFloat" })
+-- 		vim.api.nvim_set_hl(0, "NeoTreeDirectoryIcon", { fg = Get_hl_hex("Function", "fg") })
+-- 		vim.api.nvim_set_hl(0, "NeoTreeDirectoryName", { fg = Get_hl_hex("Function", "fg") })
+-- 		vim.api.nvim_set_hl(0, "NeoTreeGitUnstaged", { link = "Changed" })
+-- 		vim.api.nvim_set_hl(0, "NeoTreeGitModified", { link = "Changed" })
+-- 		vim.api.nvim_set_hl(0, "NeoTreeGitUntracked", { link = "Added" })
+-- 		vim.api.nvim_set_hl(0, "NeoTreeGitRenamed", { link = "Added" })
+-- 		vim.api.nvim_set_hl(0, "NeoTreeGitConflict", { link = "Removed" })
+--
+-- 		for group, color in pairs(overrides) do
+-- 			vim.api.nvim_set_hl(0, group, color)
+-- 		end
+--
+-- 		-- vim.api.nvim_set_hl(0, "SnacksPickerGitStatusUnstaged", { link = "Changed" })
+-- 		-- vim.api.nvim_set_hl(0, "SnacksPickerGitStatusModified", { link = "Changed" })
+-- 		-- vim.api.nvim_set_hl(0, "SnacksPickerGitStatusUntracked", { link = "Added" })
+-- 		-- vim.api.nvim_set_hl(0, "SnacksPickerGitStatusRenamed", { link = "Added" })
+-- 		-- vim.api.nvim_set_hl(0, "SnacksPickerGitStatusConflict", { link = "Removed" })
+-- 	end,
+-- })
 
 -- highlight on yank
 local highlight_group = vim.api.nvim_create_augroup("YankHighlight", { clear = true })
