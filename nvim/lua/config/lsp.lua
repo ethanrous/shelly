@@ -1,4 +1,19 @@
+print("WHATIUP")
 local keymap = require("util.keymap")
+
+function FindVueFileReferences()
+	local filename = vim.fn.expand("%:t")
+	if not filename:endsWith(".vue") then
+		return
+	end
+
+	filename = filename:gsub("%.vue$", "")
+
+	local telescope = require("telescope")
+	telescope.extensions.live_grep_args.live_grep_args({
+		default_text = '"<' .. filename .. '" -g *.vue -g !' .. filename .. ".vue",
+	})
+end
 
 local function set_global_keymaps(client, bufnr)
 	local lsp = vim.lsp
@@ -232,7 +247,7 @@ local function configure_diagnostics()
 end
 
 vim.api.nvim_create_autocmd("LspAttach", {
-	group = vim.api.nvim_create_augroup("global.lsp", { clear = true }),
+	group = vim.api.nvim_create_augroup("lsp", { clear = true }),
 	callback = function(args)
 		local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
 		local bufnr = args.buf
@@ -241,7 +256,3 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		configure_diagnostics()
 	end,
 })
-
--- vim.lsp.config("*", {
--- 	capabilities = require("cmp_nvim_lsp").default_capabilities(),
--- })

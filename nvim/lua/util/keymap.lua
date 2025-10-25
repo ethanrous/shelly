@@ -6,6 +6,7 @@ function utils.set(opts)
 	local expr = opts.expr or false
 
 	if not opts.key or not opts.cmd then
+		print(vim.inspect(opts))
 		error("Keymap options must include 'key' and 'cmd' fields")
 	end
 

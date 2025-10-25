@@ -117,3 +117,13 @@ git_rb()
     printf "\n"
  done
 }
+
+# Check for console.log in changes
+git_check() {
+    git diff --name-only -G "console."
+}
+
+# Delete local branches that have been removed from remote
+git_clean() {
+    git branch -vv | grep ': gone]' | awk '{print $1}' | xargs git branch -D
+}

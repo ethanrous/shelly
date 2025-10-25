@@ -106,18 +106,25 @@ return {
 			snippets = { preset = "luasnip" },
 			cmdline = { enabled = false },
 			sources = {
-				default = { "avante", "lsp", "path", "snippets", "buffer" },
-				per_filetype = {
-					codecompanion = { "codecompanion" },
-				},
+				default = { "lsp", "path", "snippets", "buffer" },
+				-- per_filetype = {
+				-- 	codecompanion = { "codecompanion" },
+				-- },
 				providers = {
-					avante = {
-						module = "blink-cmp-avante",
-						name = "Avante",
+					path = {
 						opts = {
-							-- options for blink-cmp-avante
+							get_cwd = function()
+								return vim.fn.getcwd()
+							end,
 						},
 					},
+					-- avante = {
+					-- 	module = "blink-cmp-avante",
+					-- 	name = "Avante",
+					-- 	opts = {
+					-- 		-- options for blink-cmp-avante
+					-- 	},
+					-- },
 				},
 			},
 
@@ -157,6 +164,7 @@ return {
 				["<S-Tab>"] = { "snippet_backward", "fallback" },
 			},
 		},
+		opts_extend = { "sources.default" },
 	},
 
 	-- Automatic docstrings

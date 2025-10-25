@@ -40,10 +40,16 @@ return {
 			end, { silent = true })
 
 			vim.keymap.set({ "n", "v" }, "<LEADER>dm", function()
-				local result = vim.fn.system("git branch | grep master")
 				local branch = "main"
+
+				local result = vim.fn.system("git branch | grep master")
 				if result ~= "" then
 					branch = "master"
+				end
+
+				result = vim.fn.system("git branch | grep devel")
+				if result ~= "" then
+					branch = "devel"
 				end
 				require("diffview").open({ "origin/" .. branch .. "..." })
 			end, { silent = true })
