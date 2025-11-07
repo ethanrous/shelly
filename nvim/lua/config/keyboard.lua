@@ -48,6 +48,9 @@ vim.keymap.set({ "i", "n" }, "<C-w><C-l>", "<Esc>:vert split<CR>", { silent = tr
 vim.keymap.set({ "v", "n" }, "<A-j>", "10j", { silent = true })
 vim.keymap.set({ "v", "n" }, "<A-k>", "10k", { silent = true })
 
+vim.keymap.set({ "v", "n" }, "<A-l>", "$", { silent = true })
+vim.keymap.set({ "v", "n" }, "<A-h>", "^", { silent = true })
+
 -- Selection --
 -- Enter puts you in insert mode and makes a newline below or above you
 -- vim.keymap.set("n", "<Enter>", "o", { silent = true, noremap = true })
@@ -67,7 +70,6 @@ vim.keymap.set("n", "<LEADER>lr", function()
 end, { silent = true })
 
 vim.keymap.set("n", "<LEADER>ln", function()
-	print(vim.o.rnu)
 	vim.o.rnu = not vim.o.rnu
 end)
 
@@ -111,17 +113,15 @@ vim.keymap.set(
 
 vim.keymap.set("n", "<leader>bd", ":w | %bd | e#<CR>", { desc = "Close all buffers except the current one" })
 
-vim.keymap.set("n", "<leader>tt", ":tabn<CR>", { desc = "Switch to the most recent tab" })
-vim.keymap.set("n", "<leader>tc", ":tabn<CR>", { desc = "Switch to the most recent tab" })
+vim.keymap.set("n", "<c-L>", ":tabn<CR>", { desc = "Switch to the most recent tab" })
 
 vim.keymap.set("n", "<leader>do", function()
 	local file_path = vim.fn.expand("%:p")
-	print(file_path)
 	vim.cmd("silent !open -R " .. file_path)
 end, { desc = "Open the currnet directory in Finder" })
 
 -- Code Companion --
-vim.keymap.set({ "n", "v" }, "<C-a>", "<cmd>CodeCompanionActions<cr>", { noremap = true })
+-- vim.keymap.set({ "n", "v" }, "<C-a>", "<cmd>CodeCompanionActions<cr>", { noremap = true })
 vim.keymap.set({ "n", "v" }, "<LocalLeader>a", "<cmd>CodeCompanionChat Toggle<cr>", { noremap = true, silent = true })
 vim.keymap.set("v", "ga", "<cmd>CodeCompanionChat Add<cr>", { noremap = true, silent = true })
 

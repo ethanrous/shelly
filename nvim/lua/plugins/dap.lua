@@ -1,41 +1,53 @@
 return {
 	{
 		"mfussenegger/nvim-dap",
+		lazy = true,
+		keys = {
+			{ "<leader>db", mode = "n" },
+			{ "<leader>dc", mode = "n" },
+			{ "<A-S-c>", mode = "n" },
+			{ "<leader>dr", mode = "n" },
+			{ "<A-n>", mode = "n" },
+			{ "<A-o>", mode = "n" },
+			{ "<A-O>", mode = "n" },
+			{ "<A-i>", mode = "n" },
+			{ "<A-I>", mode = "n" },
+		},
 		dependencies = { "mfussenegger/nvim-dap-python", "leoluz/nvim-dap-go" },
 		config = function()
 			local dap = require("dap")
 			dap.set_log_level("TRACE")
 
 			require("dap-python").setup("python3")
-			require("dap-go")
+			require("dap-go").setup()
 
-			dap.adapters.delve = function(callback, config)
-				local delve_args = { "debug", "--log-output=delve.log" }
-				if config.mode == "remote" and config.request == "attach" then
-					callback({
-						type = "server",
-						host = config.host or "127.0.0.1",
-						port = config.port or "38697",
-					})
-				else
-					callback({
-						type = "server",
-						port = "${port}",
-						executable = {
-							command = "dlv",
-							args = {
-								"dap",
-								"-l",
-								"127.0.0.1:${port}",
-								"debug",
-								"--log",
-								"--log-dest=./build/logs/go-dlv.log",
-							},
-							detached = vim.fn.has("win32") == 0,
-						},
-					})
-				end
-			end
+			-- dap.adapters.delve = function(callback, config)
+			-- 	local delve_args = { "debug", "--log-output=delve.log" }
+			-- 	if config.mode == "remote" and config.request == "attach" then
+			-- 		callback({
+			-- 			type = "server",
+			-- 			host = config.host or "127.0.0.1",
+			-- 			port = config.port or "38697",
+			-- 		})
+			-- 	else
+			-- 		callback({
+			-- 			type = "server",
+			-- 			port = "${port}",
+			-- 			executable = {
+			-- 				command = "dlv",
+			-- 				args = {
+			-- 					"dap",
+			-- 					"-l",
+			-- 					"127.0.0.1:${port}",
+			-- 					"debug",
+			-- 					"--log",
+			-- 					"--log-dest=./build/logs/go-dlv.log",
+			-- 				},
+			-- 				detached = vim.fn.has("win32") == 0,
+			-- 			},
+			-- 		})
+			-- 	end
+			-- end
 
 			dap.configurations.python = {
 				{
@@ -48,45 +60,17 @@ return {
 					end,
 				},
 			}
-			dap.configurations.go = {
-				{
-					type = "delve",
-					request = "launch",
-					mode = "test",
-					program = "${file}",
-					name = "Go test current file",
-					showLog = true,
-					logFile = vim.fn.getcwd() .. "/build/logs/go-dap.log",
-					logLevel = "DEBUG",
-					env = {
-						APP_ROOT = vim.fn.getcwd(),
-						WEBLENS_LOG_FILE = "./build/logs/weblens-test.log",
-					},
-				},
-				{
-					type = "delve",
-					request = "launch",
-					program = "./cmd/weblens/main.go",
-					name = "Run weblens CORE",
-					showLog = true,
-					logFile = vim.fn.getcwd() .. "/build/logs/go-dap.log",
-					env = {
-						CONFIG_NAME = "DEBUG-CORE",
-						APP_ROOT = vim.fn.getcwd(),
-						PKG_CONFIG_PATH = "/opt/homebrew/Cellar/vips/8.16.0/lib/pkgconfig/",
-						CGO_CFLAGS_ALLOW = "-Xpreprocessor",
-						WEBLENS_LOG_FILE = "./build/logs/weblens.log",
-						LOG_LEVEL = "trace",
-					},
-				},
-				{
-					type = "delve",
-					request = "attach",
-					name = "Attach to weblens CORE",
-					waitFor = "weblens",
-					showLog = true,
-				},
-			}
+
+			-- table.insert(dap.configurations.go, {
+			-- 	buildFlags = "",
+			-- 	name = "Launch pre-built executable",
+			-- 	program = function()
+			-- 		return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+			-- 	end,
+			-- 	request = "attach",
+			-- 	type = "executable",
+			-- })
+
 			vim.keymap.set("n", "<leader>db", function()
 				dap.toggle_breakpoint()
 			end, { silent = true })
@@ -103,29 +87,30 @@ return {
 				dap.run_last()
 			end, { silent = true })
 
-			vim.keymap.set("n", "<leader>so", function()
-				dap.up()
-			end, { silent = true })
-
-			vim.keymap.set("n", "<leader>si", function()
-				dap.down()
-			end, { silent = true })
-
 			vim.keymap.set("n", "<A-n>", function()
 				dap.step_over()
 			end, { silent = true })
 
-			vim.keymap.set("n", "<leader>SO", function()
+			vim.keymap.set("n", "<A-o>", function()
+				dap.up()
+			end, { silent = true })
+
+			vim.keymap.set("n", "<A-O>", function()
 				dap.step_out()
 			end, { silent = true })
 
-			vim.keymap.set("n", "<leader>SI", function()
+			vim.keymap.set("n", "<A-i>", function()
+				dap.down()
+			end, { silent = true })
+
+			vim.keymap.set("n", "<A-I>", function()
 				dap.step_into()
 			end, { silent = true })
 		end,
 	},
 	{
 		"rcarriga/nvim-dap-ui",
+		lazy = true,
 		config = function()
 			local dapui = require("dapui")
 			dapui.setup({
@@ -167,7 +152,7 @@ return {
 				dapui.toggle()
 			end, { noremap = true, silent = true })
 
-			vim.keymap.set("n", "<leader>dv", function()
+			vim.keymap.set("n", "dh", function()
 				dapui.eval()
 			end, { noremap = true, silent = true })
 		end,
@@ -175,16 +160,20 @@ return {
 	},
 	{
 		"theHamsta/nvim-dap-virtual-text",
+		lazy = true,
 		config = function()
 			require("nvim-dap-virtual-text").setup({
 				virt_text_win_col = 80,
 				highlight_changed_variables = true,
 				clear_on_continue = true,
+				all_references = true,
+				virt_text_pos = "inline",
 			})
 		end,
 	},
 	{
 		"leoluz/nvim-dap-go",
+		lazy = true,
 		config = function()
 			require("dap-go").setup({})
 		end,

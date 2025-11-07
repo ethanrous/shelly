@@ -13,6 +13,13 @@ return {
 	-- },
 	{
 		"sindrets/diffview.nvim",
+		keys = {
+			{ "<LEADER>gd", mode = { "n", "v" } },
+			{ "<LEADER>dm", mode = { "n", "v" } },
+			{ "<LEADER>gf", mode = { "n", "v" } },
+			{ "<LEADER>gc", mode = { "n", "v" } },
+			{ "<LEADER>bc", mode = { "n", "v" } },
+		},
 		config = function()
 			local actions = require("diffview.actions")
 			require("diffview").setup({
@@ -23,7 +30,6 @@ return {
 							"gf",
 							function()
 								local win = vim.api.nvim_get_current_win()
-								print("CLOSE WINDR? " .. win)
 
 								actions.goto_file_edit()
 								--
@@ -79,6 +85,7 @@ return {
 	},
 	{
 		"lewis6991/gitsigns.nvim",
+		event = "VeryLazy",
 		config = function()
 			require("gitsigns").setup({
 				preview_config = {
@@ -113,6 +120,7 @@ return {
 	},
 	{
 		"NeogitOrg/neogit",
+		lazy = true,
 		dependencies = {
 			"nvim-lua/plenary.nvim", -- required
 			"sindrets/diffview.nvim", -- optional - Diff integration
@@ -132,6 +140,7 @@ return {
 	},
 	{
 		"pwntester/octo.nvim",
+		lazy = true,
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 			"nvim-telescope/telescope.nvim",

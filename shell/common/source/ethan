@@ -14,7 +14,7 @@ alias tab='wezterm cli set-tab-title'
 alias sbp="source ~/.${SHELL_NAME}rc"
 alias sync="$SHELLY/shell/common/auto-loader.bash"
 
-export EDITOR="e"
+export EDITOR="nvim"
 
 ### Funcs ###
 

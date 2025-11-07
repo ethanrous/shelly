@@ -4,6 +4,9 @@ return {
 	{
 		"stevearc/oil.nvim",
 		dependencies = { "nvim-tree/nvim-web-devicons" },
+		keys = {
+			{ "<LEADER>n", "<Cmd>Oil<CR>", desc = "Open Oil" },
+		},
 		config = function()
 			local oil = require("oil")
 			oil.setup({
@@ -55,90 +58,90 @@ return {
 			)
 		end,
 	},
-	{
-		"nvim-neo-tree/neo-tree.nvim",
-		config = function()
-			require("neo-tree").setup({
-				close_if_last_window = true,
-
-				default_component_configs = {
-					git_status = {
-						symbols = {
-							-- Change type
-							added = "", -- or "✚", but this is redundant info if you use git_status_colors on the name
-							modified = "", -- or "", but this is redundant info if you use git_status_colors on the name
-							deleted = "✖", -- this can only be used in the git_status source
-							renamed = "󰁕", -- this can only be used in the git_status source
-							-- Status type
-							untracked = "",
-							ignored = "",
-							unstaged = "󰄱",
-							staged = "",
-							conflict = "",
-						},
-					},
-				},
-				sources = {
-					"filesystem",
-					"document_symbols",
-					"filesystem",
-				},
-				buffers = {
-					follow_current_file = { enabled = true },
-				},
-
-				filesystem = {
-					hijack_netrw_behavior = "disabled",
-					follow_current_file = {
-						enabled = true,
-						leave_dirs_open = true,
-					},
-					commands = {
-						avante_add_files = function(state)
-							local node = state.tree:get_node()
-							local filepath = node:get_id()
-							local relative_path = require("avante.utils").relative_path(filepath)
-
-							local sidebar = require("avante").get()
-
-							local open = sidebar:is_open()
-							-- ensure avante sidebar is open
-							if not open then
-								require("avante.api").ask()
-								sidebar = require("avante").get()
-							end
-
-							sidebar.file_selector:add_selected_file(relative_path)
-
-							-- remove neo tree buffer
-							if not open then
-								sidebar.file_selector:remove_selected_file("neo-tree filesystem [1]")
-							end
-						end,
-					},
-					window = {
-						mappings = {
-							["oa"] = "avante_add_files",
-							["P"] = { "toggle_preview", config = { use_float = true, use_image_nvim = true } },
-						},
-						fuzzy_finder_mappings = { -- define keymaps for filter popup window in fuzzy_finder_mode
-							["<A-j>"] = "move_cursor_down",
-							["<A-k>"] = "move_cursor_up",
-						},
-					},
-				},
-				document_symbols = {
-					window = {
-						position = "float",
-						mappings = {
-							["<cr>"] = "open",
-							["<Tab>"] = "toggle_node",
-						},
-					},
-				},
-			})
-		end,
-	},
+	-- {
+	-- 	"nvim-neo-tree/neo-tree.nvim",
+	-- 	config = function()
+	-- 		require("neo-tree").setup({
+	-- 			close_if_last_window = true,
+	--
+	-- 			default_component_configs = {
+	-- 				git_status = {
+	-- 					symbols = {
+	-- 						-- Change type
+	-- 						added = "", -- or "✚", but this is redundant info if you use git_status_colors on the name
+	-- 						modified = "", -- or "", but this is redundant info if you use git_status_colors on the name
+	-- 						deleted = "✖", -- this can only be used in the git_status source
+	-- 						renamed = "󰁕", -- this can only be used in the git_status source
+	-- 						-- Status type
+	-- 						untracked = "",
+	-- 						ignored = "",
+	-- 						unstaged = "󰄱",
+	-- 						staged = "",
+	-- 						conflict = "",
+	-- 					},
+	-- 				},
+	-- 			},
+	-- 			sources = {
+	-- 				"filesystem",
+	-- 				"document_symbols",
+	-- 				"filesystem",
+	-- 			},
+	-- 			buffers = {
+	-- 				follow_current_file = { enabled = true },
+	-- 			},
+	--
+	-- 			filesystem = {
+	-- 				hijack_netrw_behavior = "disabled",
+	-- 				follow_current_file = {
+	-- 					enabled = true,
+	-- 					leave_dirs_open = true,
+	-- 				},
+	-- 				commands = {
+	-- 					avante_add_files = function(state)
+	-- 						local node = state.tree:get_node()
+	-- 						local filepath = node:get_id()
+	-- 						local relative_path = require("avante.utils").relative_path(filepath)
+	--
+	-- 						local sidebar = require("avante").get()
+	--
+	-- 						local open = sidebar:is_open()
+	-- 						-- ensure avante sidebar is open
+	-- 						if not open then
+	-- 							require("avante.api").ask()
+	-- 							sidebar = require("avante").get()
+	-- 						end
+	--
+	-- 						sidebar.file_selector:add_selected_file(relative_path)
+	--
+	-- 						-- remove neo tree buffer
+	-- 						if not open then
+	-- 							sidebar.file_selector:remove_selected_file("neo-tree filesystem [1]")
+	-- 						end
+	-- 					end,
+	-- 				},
+	-- 				window = {
+	-- 					mappings = {
+	-- 						["oa"] = "avante_add_files",
+	-- 						["P"] = { "toggle_preview", config = { use_float = true, use_image_nvim = true } },
+	-- 					},
+	-- 					fuzzy_finder_mappings = { -- define keymaps for filter popup window in fuzzy_finder_mode
+	-- 						["<A-j>"] = "move_cursor_down",
+	-- 						["<A-k>"] = "move_cursor_up",
+	-- 					},
+	-- 				},
+	-- 			},
+	-- 			document_symbols = {
+	-- 				window = {
+	-- 					position = "float",
+	-- 					mappings = {
+	-- 						["<cr>"] = "open",
+	-- 						["<Tab>"] = "toggle_node",
+	-- 					},
+	-- 				},
+	-- 			},
+	-- 		})
+	-- 	end,
+	-- },
 	-- {
 	-- 	"nvim-tree/nvim-tree.lua",
 	-- 	config = function()

@@ -82,11 +82,11 @@ local vtsls_config = {
 		},
 	},
 	filetypes = tsserver_filetypes,
-	on_attach = function(client, bufnr)
-		if vim.bo[bufnr].filetype == "vue" then
-			client.server_capabilities.semanticTokensProvider = nil
-		end
-	end,
+	-- on_init = function(client, bufnr)
+	-- 	if vim.bo[bufnr].filetype == "vue" then
+	-- 		client.server_capabilities.semanticTokensProvider = nil
+	-- 	end
+	-- end,
 }
 
 -- ETHAN. If you are looking for completion issues with Vue files, add:

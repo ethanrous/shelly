@@ -34,4 +34,6 @@ vim.lsp.enable({
 	"golangci_lint_ls",
 	"ruby_lsp",
 	"jdtls",
+	"lemminx",
+	"html",
 })

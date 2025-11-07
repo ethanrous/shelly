@@ -2,7 +2,7 @@ return {
 	-- Syntax plugin
 	{
 		"nvim-treesitter/nvim-treesitter",
-		lazy = false,
+		event = "VeryLazy",
 		config = function()
 			local status_ok, nvim_treesitter_configs = pcall(require, "nvim-treesitter.configs")
 			if not status_ok then
@@ -70,6 +70,7 @@ return {
 	},
 	{
 		"nvim-treesitter/nvim-treesitter-context",
+		event = "VeryLazy",
 		config = function()
 			require("treesitter-context").setup({
 				max_lines = 10,
@@ -80,6 +81,30 @@ return {
 	-- Tressitter text objects
 	{
 		"nvim-treesitter/nvim-treesitter-textobjects",
+		keys = {
+			"aa",
+			"ia",
+			"ai",
+			"ii",
+			"al",
+			"il",
+			"af",
+			"if",
+			"am",
+			"im",
+			"ac",
+			"ic",
+			"]f",
+			"]m",
+			"]c",
+			"]i",
+			"]l",
+			"[f",
+			"[m",
+			"[c",
+			"[i",
+			"[l",
+		},
 		config = function()
 			require("nvim-treesitter.configs").setup({
 				textobjects = {

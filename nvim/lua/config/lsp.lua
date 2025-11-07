@@ -1,4 +1,3 @@
-print("WHATIUP")
 local keymap = require("util.keymap")
 
 function FindVueFileReferences()

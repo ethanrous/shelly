@@ -55,6 +55,10 @@ autocmd("BufEnter", {
 			return
 		end
 		harpoon:list():prepend()
+
+		while harpoon:list()._length > 100 do
+			harpoon:list():remove_at(harpoon:list()._length)
+		end
 		harpoon:list():select(1)
 	end,
 })

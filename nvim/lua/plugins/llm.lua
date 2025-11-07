@@ -35,6 +35,7 @@ return {
 	},
 	{
 		"olimorris/codecompanion.nvim",
+		lazy = true,
 		opts = {
 			strategies = {
 				chat = {
@@ -55,7 +56,7 @@ return {
 	},
 	{
 		"yetone/avante.nvim",
-		event = "VeryLazy",
+		lazy = true,
 		version = false, -- set this if you want to always pull the latest change
 		opts = {
 			-- add any opts here
@@ -133,7 +134,7 @@ return {
 	{
 		"OXY2DEV/markview.nvim",
 		enabled = true,
-		lazy = false,
+		lazy = true,
 		ft = { "markdown", "norg", "rmd", "org", "vimwiki", "Avante" },
 		opts = {
 			preview = {
