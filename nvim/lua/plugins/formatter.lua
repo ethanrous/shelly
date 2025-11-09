@@ -15,7 +15,7 @@ return {
 				typescript = { "prettier" },
 				javascriptreact = { "prettier" },
 				typescriptreact = { "prettier" },
-				vue = { "prettier" },
+				-- vue = { "prettier" },
 				svelte = { "prettier" },
 				css = { "prettier" },
 				xml = { "xml" },

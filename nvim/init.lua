@@ -22,7 +22,7 @@ vim.cmd.colorscheme("tokyonight-moon")
 vim.lsp.enable({
 	"clangd",
 	"gopls",
-	"rust-analyzer",
+	"rust_analyzer",
 	"vtsls",
 	"vue_ls",
 	"tailwindcssls",
@@ -36,4 +36,7 @@ vim.lsp.enable({
 	"jdtls",
 	"lemminx",
 	"html",
+	"cssls",
+	-- "sqls",
+	"postgres_lsp",
 })
