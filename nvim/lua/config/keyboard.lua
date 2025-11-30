@@ -113,7 +113,8 @@ vim.keymap.set(
 
 vim.keymap.set("n", "<leader>bd", ":w | %bd | e#<CR>", { desc = "Close all buffers except the current one" })
 
-vim.keymap.set("n", "<c-L>", ":tabn<CR>", { desc = "Switch to the most recent tab" })
+vim.keymap.set("n", "<A-L>", ":tabn<CR>", { desc = "Switch to the next tab" })
+vim.keymap.set("n", "<A-H>", ":tabp<CR>", { desc = "Switch to the previous tab" })
 
 vim.keymap.set("n", "<leader>do", function()
 	local file_path = vim.fn.expand("%:p")

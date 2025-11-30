@@ -8,6 +8,7 @@ return {
 			log_level = vim.log.levels.DEBUG,
 			formatters = {
 				xml = { command = "prettier", args = { "--plugin=@prettier/plugin-xml", "$FILENAME" } },
+				templ = { command = "templ fmt" },
 			},
 			formatters_by_ft = {
 				javascript = { "prettier" },
@@ -15,11 +16,12 @@ return {
 				typescript = { "prettier" },
 				javascriptreact = { "prettier" },
 				typescriptreact = { "prettier" },
-				-- vue = { "prettier" },
+				vue = { "prettier" },
 				svelte = { "prettier" },
 				css = { "prettier" },
 				xml = { "xml" },
 				html = { "prettier" },
+				tmpl = { "templ" },
 				htmlangular = { "prettier" },
 				json = { "prettier" },
 				yaml = { "prettier" },

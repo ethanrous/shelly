@@ -32,11 +32,12 @@ vim.lsp.enable({
 	"eslint",
 	"go",
 	"golangci_lint_ls",
+	"templ",
 	"ruby_lsp",
 	"jdtls",
 	"lemminx",
 	"html",
 	"cssls",
-	-- "sqls",
+	"pyright",
 	"postgres_lsp",
 })

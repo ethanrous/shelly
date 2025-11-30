@@ -1,16 +1,4 @@
 return {
-	-- {
-	-- 	"tpope/vim-fugitive",
-	-- 	config = function()
-	-- 		vim.keymap.set({ "n", "v" }, "<LEADER>gb", function()
-	-- 			if Close_win_if_open("fugitiveblame") then
-	-- 				return
-	-- 			end
-	-- 			Close_win_if_open("NvimTree")
-	-- 			vim.cmd("G blame")
-	-- 		end, { silent = true })
-	-- 	end,
-	-- },
 	{
 		"sindrets/diffview.nvim",
 		keys = {
@@ -29,9 +17,12 @@ return {
 							"n",
 							"gf",
 							function()
-								local win = vim.api.nvim_get_current_win()
+								-- local win = vim.api.nvim_get_current_win()
+								-- print("WIN", win, )
 
+								local tab_nmbr = vim.fn.tabpagenr()
 								actions.goto_file_edit()
+								vim.cmd("tabclose " .. tab_nmbr)
 								--
 								-- vim.api.nvim_win_close(win, false) -- do not force
 							end,
@@ -121,6 +112,9 @@ return {
 	{
 		"NeogitOrg/neogit",
 		lazy = true,
+		keys = {
+			{ "<leader>gg", mode = { "n", "v" } },
+		},
 		dependencies = {
 			"nvim-lua/plenary.nvim", -- required
 			"sindrets/diffview.nvim", -- optional - Diff integration
@@ -136,31 +130,6 @@ return {
 				Close_win_if_open("fugitiveblame")
 				require("neogit").open({ kind = "vsplit" })
 			end, { silent = true })
-		end,
-	},
-	{
-		"pwntester/octo.nvim",
-		lazy = true,
-		dependencies = {
-			"nvim-lua/plenary.nvim",
-			"nvim-telescope/telescope.nvim",
-			"nvim-tree/nvim-web-devicons",
-		},
-		config = function()
-			require("octo").setup({
-				use_local_fs = true,
-				-- integrations = {
-				-- 	telescope = true,
-				-- },
-			})
-
-			-- vim.keymap.set({ "n", "v" }, "<LEADER>gh", function()
-			-- 	if Close_win_if_open("octo") then
-			-- 		return
-			-- 	end
-			-- 	Close_win_if_open("fugitiveblame")
-			-- 	require("octo").open_hunk()
-			-- end, { silent = true })
 		end,
 	},
 }

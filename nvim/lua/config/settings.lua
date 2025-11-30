@@ -26,7 +26,7 @@ opt.number = true
 opt.ruler = false
 opt.scrolloff = 20
 
-vim.opt.formatoptions:remove({ "t" })
+opt.formatoptions:remove({ "t" })
 
 -- Danny. Why. Why would you use this. I hate it.
 -- opt.showmatch = true
@@ -47,8 +47,13 @@ opt.undofile = true
 opt.inccommand = "nosplit"
 opt.fillchars = opt.fillchars + "diff:╱"
 
-o.cursorline = true
+-- Spell checking
+opt.spell = true
+opt.spelllang = "en_us"
+
 opt.cursorline = true
+
+o.cursorline = true
 o.cursorlineopt = "both"
 
 o.showmode = false
@@ -57,8 +62,6 @@ o.gdefault = true
 o.termguicolors = true
 
 g.mapleader = " "
-
-opt.number = true
 
 opt.diffopt = "internal,filler,closeoff,indent-heuristic,linematch:60,algorithm:histogram"
 -- o.guicursor = "n-v-c-sm:block,ci-ve:ver25,r-cr-o:hor20,i:block-blinkoff400-blinkon350"
