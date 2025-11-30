@@ -40,4 +40,5 @@ vim.lsp.enable({
 	"cssls",
 	"pyright",
 	"postgres_lsp",
+	"bashls",
 })
