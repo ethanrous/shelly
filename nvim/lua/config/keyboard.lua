@@ -67,6 +67,18 @@ end, { silent = true })
 
 vim.keymap.set("n", "<LEADER>lr", function()
 	vim.cmd("LspRestart")
+
+	local timer = vim.loop.new_timer()
+	-- Delay 2000ms and 0 means "do not repeat"
+	timer:start(
+		2000,
+		0,
+		vim.schedule_wrap(function()
+			vim.cmd("Copilot enable")
+			timer:stop()
+			timer:close()
+		end)
+	)
 end, { silent = true })
 
 vim.keymap.set("n", "<LEADER>ln", function()

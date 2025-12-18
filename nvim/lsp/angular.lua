@@ -1,4 +1,0 @@
--- vim.lsp.enable("angularls")
--- vim.lsp.config.angularls = {
--- 	filetypes = { "typescript", "html", "typescriptreact", "typescript.tsx" },
--- }

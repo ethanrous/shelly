@@ -19,15 +19,16 @@ export EDITOR="nvim"
 ### Funcs ###
 
 function run_cmd() {
-  if [[ $2 =~ ^([^@]+@)?([^:]+):(.*)$ ]]; then
-    ssh $match[1]$match[2] $1 $match[3]
-  else
     $(which $1) $2 $3
-  fi
+    # if [[ $2 =~ ^([^@]+@)?([^:]+):(.*)$ ]]; then
+    #   ssh $match[1]$match[2] $1 $match[3]
+    # else
+    #   $(which $1) $2 $3
+    # fi
 }
 
 dock() {
-	docker exec -it "$1" "${2:-bash}"
+    docker exec -it "$1" "${2:-bash}"
 }
 
 cat() {
@@ -37,9 +38,9 @@ cat() {
 ls() {
     # $1 is the options for lsd, use $2
     if which eza >/dev/null 2>&1; then
-      run_cmd eza "$1" "${@: -1}"
+        run_cmd eza "$1" "${@: -1}"
     else
-      run_cmd /usr/bin/ls "$1" "${@: -1}"
+        run_cmd /usr/bin/ls "$1" "${@: -1}"
     fi
 }
 
@@ -51,18 +52,18 @@ e () {
 
         session_path="${PWD//\//-}"
         session_path="$HOME/.config/nvim/session/${session_path:1}.session.vim"
-	if [[ -f $session_path ]]; then
-	    nvim -S "$session_path" -c 'lua vim.g.savesession = true'
-	else
-	    nvim -c 'lua vim.g.savesession = true'
-	fi
+        if [[ -f $session_path ]]; then
+            nvim -S "$session_path" -c 'lua vim.g.savesession = true'
+        else
+            nvim -c 'lua vim.g.savesession = true'
+        fi
     else
-    	nvim "$@"
+        nvim "$@"
     fi
 }
 
 man() {
-	nvim -c ":Man $1 | :only"
+    nvim -c ":Man $1 | :only"
 }
 
 dbg() {
@@ -76,13 +77,13 @@ dbg() {
 }
 
 search() {
-  DIR=""
-  if [[ "$2" != "" ]]; then
-	  DIR="$2"
-  else
-	  DIR=.
-  fi
-  find "$DIR" -name "*$1*" 2>&1 | grep -v "find: "
+    DIR=""
+    if [[ "$2" != "" ]]; then
+        DIR="$2"
+    else
+        DIR=.
+    fi
+    find "$DIR" -name "*$1*" 2>&1 | grep -v "find: "
 }
 
 searchall() {
@@ -90,36 +91,36 @@ searchall() {
 }
 
 known-host-rm() {
-  cat ~/.ssh/known_hosts | grep -v $1 > ~/.ssh/known_hosts
+    cat ~/.ssh/known_hosts | grep -v $1 > ~/.ssh/known_hosts
 }
 
 printProcess() {
-	printf "\n------ Processes Matching \"$1\" ------\n$(ps aux | grep "$1" | grep -v grep | awk '{print $2, $11}')\n\n"
+    printf "\n------ Processes Matching \"$1\" ------\n$(ps aux | grep "$1" | grep -v grep | awk '{print $2, $11}')\n\n"
 }
 
 getme() {
-  if [[ "$1" == "" ]]
-  then
-    echo "No filename specified"
-    return
-  fi
+    if [[ "$1" == "" ]]
+    then
+        echo "No filename specified"
+        return
+    fi
 
-  files=$(find . -type f -name "*$1*")
-  files=("${(@s:\n:)files}")
-  echo "Reading $files[1]"
-  cat $files[1]
+    files=$(find . -type f -name "*$1*")
+    files=("${(@s:\n:)files}")
+    echo "Reading $files[1]"
+    cat $files[1]
 }
 
 mcsay() {
-  text="\"$@\""
+    text="\"$@\""
 
-  command="/Users/ethan/repos/mcrcon/mcrcon -H lucy.arcticnet -p minecraft1234 "
-  command+=\'
-  command+="tellraw @a "
-  command+=$text
-  command+=\'
-  eval "$command"
-  # ~/repos/mcrcon/mcrcon -H lucy.arcticnet -p minecraft1234 $(echo $command)
+    command="/Users/ethan/repos/mcrcon/mcrcon -H lucy.arcticnet -p minecraft1234 "
+    command+=\'
+    command+="tellraw @a "
+    command+=$text
+    command+=\'
+    eval "$command"
+    # ~/repos/mcrcon/mcrcon -H lucy.arcticnet -p minecraft1234 $(echo $command)
 }
 
 port() {
@@ -128,22 +129,22 @@ port() {
 }
 
 kill-ollama() {
-	pkill ollama-copilot
+    pkill ollama-copilot
 }
 
 add_to_path() {
-	if [[ $2 == true ]]; then
-		if [[ $SHELLY_DEBUG == true ]]; then
-			echo "Overriding PATH entry $1 to be at top"
-		fi
-		export PATH=$(echo $PATH | sed -r -e "s|${1}:?||g")
-	fi
-	if [[ ":$PATH:" != *":$1:"* ]]; then
-		if [[ $SHELLY_DEBUG == true ]]; then
-			echo "Adding $1 to PATH"
-		fi
-		export PATH=$1:$PATH
-	fi
+    if [[ $2 == true ]]; then
+        if [[ $SHELLY_DEBUG == true ]]; then
+            echo "Overriding PATH entry $1 to be at top"
+        fi
+        export PATH=$(echo $PATH | sed -r -e "s|${1}:?||g")
+    fi
+    if [[ ":$PATH:" != *":$1:"* ]]; then
+        if [[ $SHELLY_DEBUG == true ]]; then
+            echo "Adding $1 to PATH"
+        fi
+        export PATH=$1:$PATH
+    fi
 }
 
 # Wrap nvm in setup function so initial shell load doesn't take forever
@@ -153,7 +154,7 @@ nvm() {
         export NVM_DIR="$HOME/.nvm"
         [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
         [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
-		add_to_path $(nvm which default) true
+        add_to_path $(nvm which default) true
     fi
     nvm $@
 }
@@ -162,8 +163,8 @@ unset NVM_DIR
 if which ollama-copilot >/dev/null; then
     if ! pgrep ollama-copilot >/dev/null; then
         echo "Launching ollama-copilot"
-		export OLLAMA_HOST="lucy.arcticnet:11439"
-		mkdir -p ~/.config/logs
+        export OLLAMA_HOST="lucy.arcticnet:11439"
+        mkdir -p ~/.config/logs
         ollama-copilot >~/.config/logs/ollama.log 2>&1 &
 
         # Detatch from new process

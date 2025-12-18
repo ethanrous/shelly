@@ -1,5 +1,3 @@
-local keymap = require("util.keymap")
-
 return {
 	{
 		"stevearc/oil.nvim",

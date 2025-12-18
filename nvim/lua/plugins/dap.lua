@@ -18,58 +18,56 @@ return {
 			local dap = require("dap")
 			dap.set_log_level("TRACE")
 
-			require("dap-python").setup("python3")
+			require("dap-python").setup("uv")
 			require("dap-go").setup()
 
-			-- dap.adapters.delve = function(callback, config)
-			-- 	local delve_args = { "debug", "--log-output=delve.log" }
-			-- 	if config.mode == "remote" and config.request == "attach" then
-			-- 		callback({
-			-- 			type = "server",
-			-- 			host = config.host or "127.0.0.1",
-			-- 			port = config.port or "38697",
-			-- 		})
-			-- 	else
-			-- 		callback({
-			-- 			type = "server",
-			-- 			port = "${port}",
-			-- 			executable = {
-			-- 				command = "dlv",
-			-- 				args = {
-			-- 					"dap",
-			-- 					"-l",
-			-- 					"127.0.0.1:${port}",
-			-- 					"debug",
-			-- 					"--log",
-			-- 					"--log-dest=./build/logs/go-dlv.log",
-			-- 				},
-			-- 				detached = vim.fn.has("win32") == 0,
-			-- 			},
-			-- 		})
-			-- 	end
-			-- end
+			vim.api.nvim_set_hl(0, "DapBreakpointColor", { fg = "#ffffff", bg = "NONE" })
+			vim.api.nvim_set_hl(0, "DapBreakpointStoppedColor", { fg = "#FF0000", bg = "NONE" })
+			vim.fn.sign_define("DapBreakpoint", { text = "B", texthl = "DapBreakpointColor", linehl = "", numhl = "" })
+			vim.fn.sign_define(
+				"DapStopped",
+				{ text = "→", texthl = "DapBreakpointStoppedColor", linehl = "", numhl = "" }
+			)
+
+			local dapui = require("dapui")
+
+			dap.listeners.before.attach.dapui_config = function()
+				dapui.open()
+			end
+			dap.listeners.before.launch.dapui_config = function()
+				dapui.open()
+			end
 
 			dap.configurations.python = {
 				{
 					type = "python",
 					request = "launch",
 					name = "Launch file",
-					program = "${file}",
+					program = function()
+						return "${file}"
+					end,
+					console = "integratedTerminal",
 					pythonPath = function()
-						return "/usr/bin/python3"
+						return vim.fn.getcwd() .. "/.venv/bin/python3"
+					end,
+					justMyCode = false,
+
+					args = function()
+						local args_string = vim.fn.input("Arguments: ")
+						if args_string and args_string ~= "" then
+							return vim.split(args_string, " +") -- Splits by one or more spaces
+						end
+						return {} -- No arguments if input is empty
 					end,
 				},
 			}
 
-			-- table.insert(dap.configurations.go, {
-			-- 	buildFlags = "",
-			-- 	name = "Launch pre-built executable",
-			-- 	program = function()
-			-- 		return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
-			-- 	end,
-			-- 	request = "attach",
-			-- 	type = "executable",
-			-- })
+			local last_config = nil
+
+			---@param session dap.Session
+			dap.listeners.after.event_initialized["store_config"] = function(session)
+				last_config = session.config
+			end
 
 			vim.keymap.set("n", "<leader>db", function()
 				dap.toggle_breakpoint()
@@ -84,7 +82,11 @@ return {
 			end, { silent = true })
 
 			vim.keymap.set("n", "<leader>dr", function()
-				dap.run_last()
+				if last_config then
+					dap.run(last_config)
+				else
+					dap.run_last()
+				end
 			end, { silent = true })
 
 			vim.keymap.set("n", "<A-n>", function()
@@ -111,6 +113,10 @@ return {
 	{
 		"rcarriga/nvim-dap-ui",
 		lazy = true,
+		keys = {
+			{ "<leader>du", mode = "n" },
+			{ "dh", mode = "n" },
+		},
 		config = function()
 			local dapui = require("dapui")
 			dapui.setup({
@@ -139,6 +145,16 @@ return {
 						},
 						position = "right",
 						size = 0.4,
+					},
+					{
+						elements = {
+							{
+								id = "console",
+								size = 1,
+							},
+						},
+						position = "bottom",
+						size = 0.3,
 					},
 				},
 			})

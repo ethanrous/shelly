@@ -4,17 +4,7 @@ return {
 		"nvim-treesitter/nvim-treesitter",
 		event = "VeryLazy",
 		config = function()
-			local status_ok, nvim_treesitter_configs = pcall(require, "nvim-treesitter.configs")
-			if not status_ok then
-				return
-			end
-
-			local status_ok_2, nvim_treesitter_parsers = pcall(require, "nvim-treesitter.parsers")
-			if not status_ok_2 then
-				return
-			end
-
-			nvim_treesitter_configs.setup({
+			require("nvim-treesitter.configs").setup({
 				ensure_installed = {
 					"lua",
 					"javascript",
@@ -56,16 +46,14 @@ return {
 				},
 			})
 
-			local parser_config = nvim_treesitter_parsers.get_parser_configs()
+			local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
 			parser_config.tsx.filetype_to_parsername = { "javascript", "typescript.tsx" }
 		end,
 		build = ":TSUpdate",
-		-- event = "BufEnter",
 		dependencies = {
 			"nvim-treesitter/nvim-treesitter-context",
 			"nvim-treesitter/nvim-treesitter-textobjects",
 			"JoosepAlviste/nvim-ts-context-commentstring",
-			"OXY2DEV/markview.nvim",
 		},
 	},
 	{

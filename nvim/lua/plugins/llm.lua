@@ -2,6 +2,9 @@ return {
 	{
 		"zbirenbaum/copilot.lua",
 		event = "InsertEnter",
+		dependencies = {
+			"copilotlsp-nvim/copilot-lsp",
+		},
 		config = function()
 			-- vim.g.copilot_proxy = "http://127.0.0.1:11435"
 			-- vim.g.copilot_proxy_strict_ssl = false
@@ -10,7 +13,15 @@ return {
 				filetypes = {
 					["*"] = true,
 				},
-				copilot_model = "gpt-41-copilot",
+				copilot_model = "claude-haiku-4-5-copilot",
+				-- nes = {
+				-- 	enabled = true,
+				-- 	keymap = {
+				-- 		accept_and_goto = "<A-s>",
+				-- 		accept = false,
+				-- 		dismiss = "<Esc>",
+				-- 	},
+				-- },
 				suggestion = {
 					enabled = true,
 					auto_trigger = true,
@@ -56,49 +67,13 @@ return {
 	},
 	{
 		"yetone/avante.nvim",
-		lazy = true,
 		version = false, -- set this if you want to always pull the latest change
+		keys = {
+			{ "<leader>aa", mode = { "n", "v" } },
+			{ "<leader>at", mode = { "n", "v" } },
+		},
 		opts = {
-			-- add any opts here
-			mode = "agentic",
-			provider = "copilot",
-			cursor_applying_provider = "copilot",
-			behaviour = {
-				--- ... existing behaviours
-				enable_cursor_planning_mode = true, -- enable cursor planning mode!
-				auto_suggestions = false,
-			},
-			providers = {
-				copilot = {
-					model = "gpt-5",
-				},
-				ollama = {
-					endpoint = "http://127.0.0.1:9001",
-					timeout = 30000, -- Timeout in milliseconds
-					model = "gpt-oss:20b",
-					extra_request_body = {
-						options = {
-							temperature = 0.75,
-							num_ctx = 20480,
-							keep_alive = "5m",
-						},
-					},
-				},
-			},
-			mappings = {
-				sidebar = {
-					apply_all = "A",
-					apply_cursor = "a",
-					retry_user_request = "r",
-					edit_user_request = "e",
-					switch_windows = "<Tab>",
-					reverse_switch_windows = "<S-Tab>",
-					remove_file = "d",
-					add_file = "@",
-					close = { "<Esc>", "q" },
-					close_from_input = nil, -- e.g., { normal = "<Esc>", insert = "<C-d>" }
-				},
-			},
+			provider = "claude-code",
 		},
 		-- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
 		build = "make",
@@ -112,23 +87,6 @@ return {
 			"nvim-telescope/telescope.nvim", -- for file_selector provider telescope
 			"zbirenbaum/copilot.lua", -- for providers='copilot'
 			"OXY2DEV/markview.nvim",
-			-- {
-			-- 	-- support for image pasting
-			-- 	"HakonHarnes/img-clip.nvim",
-			-- 	event = "VeryLazy",
-			-- 	opts = {
-			-- 		-- recommended settings
-			-- 		default = {
-			-- 			embed_image_as_base64 = false,
-			-- 			prompt_for_file_name = false,
-			-- 			drag_and_drop = {
-			-- 				insert_mode = true,
-			-- 			},
-			-- 			-- required for Windows users
-			-- 			use_absolute_path = true,
-			-- 		},
-			-- 	},
-			-- },
 		},
 	},
 	{

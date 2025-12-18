@@ -9,6 +9,7 @@ return {
 			formatters = {
 				xml = { command = "prettier", args = { "--plugin=@prettier/plugin-xml", "$FILENAME" } },
 				templ = { command = "templ fmt" },
+				ruff = { command = "ruff", args = { "format" } },
 			},
 			formatters_by_ft = {
 				javascript = { "prettier" },
@@ -31,7 +32,7 @@ return {
 				bash = { "shfmt" },
 				zsh = { "shfmt" },
 				lua = { "stylua" },
-				python = { "isort", "black" },
+				python = { "ruff_fix", "ruff_format" },
 				go = { "gofmt", "goimports" },
 				java = {},
 			},
