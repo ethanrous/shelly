@@ -17,14 +17,9 @@ return {
 							"n",
 							"gf",
 							function()
-								-- local win = vim.api.nvim_get_current_win()
-								-- print("WIN", win, )
-
 								local tab_nmbr = vim.fn.tabpagenr()
 								actions.goto_file_edit()
 								vim.cmd("tabclose " .. tab_nmbr)
-								--
-								-- vim.api.nvim_win_close(win, false) -- do not force
 							end,
 							{ desc = "Open the file in the previous tabpage" },
 						},

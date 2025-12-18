@@ -42,4 +42,5 @@ vim.lsp.enable({
 	"templ",
 	"vtsls",
 	"vue_ls",
+	"bashls",
 })
