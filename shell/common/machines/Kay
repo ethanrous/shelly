@@ -1,6 +1,7 @@
 #!/bin/zsh
 
 alias lucy='ssh root@lucy'
+alias nvim-lucy='nvim oil-ssh://root@lucy//mnt/user'
 alias du='gdu'
 
 colorscript() {

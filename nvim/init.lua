@@ -43,4 +43,5 @@ vim.lsp.enable({
 	"vtsls",
 	"vue_ls",
 	"bashls",
+	"yamlls",
 })
