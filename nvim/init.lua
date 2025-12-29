@@ -21,6 +21,7 @@ vim.cmd.colorscheme("tokyonight-moon")
 
 vim.lsp.enable({
 	"angularls",
+	"bashls",
 	"clangd",
 	"cssls",
 	"eslint",
@@ -42,6 +43,6 @@ vim.lsp.enable({
 	"templ",
 	"vtsls",
 	"vue_ls",
-	"bashls",
 	"yamlls",
+	"copilot",
 })

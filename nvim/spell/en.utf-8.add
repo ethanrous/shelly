@@ -11,3 +11,10 @@ npm
 auth
 config
 nuxt
+struct
+FileHistory
+BackupInfo
+GetBackup
+highres
+img
+Resize

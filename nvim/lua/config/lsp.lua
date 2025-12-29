@@ -96,17 +96,17 @@ local function set_global_keymaps(client, bufnr)
 	})
 
 	-- Populate diagnostics for whole workspace
-	keymap.set({
-		key = "<leader>gP",
-		cmd = function()
-			for _, cur_client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
-				require("workspace-diagnostics").populate_workspace_diagnostics(cur_client, bufnr)
-			end
-			vim.notify("INFO: Diagnostic populated")
-		end,
-		desc = "Populate diagnostics for whole workspace",
-		bufnr = bufnr,
-	})
+	-- keymap.set({
+	-- 	key = "<leader>gP",
+	-- 	cmd = function()
+	-- 		for _, cur_client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
+	-- 			require("workspace-diagnostics").populate_workspace_diagnostics(cur_client, bufnr)
+	-- 		end
+	-- 		vim.notify("INFO: Diagnostic populated")
+	-- 	end,
+	-- 	desc = "Populate diagnostics for whole workspace",
+	-- 	bufnr = bufnr,
+	-- })
 
 	-- Show hover information
 	keymap.set({

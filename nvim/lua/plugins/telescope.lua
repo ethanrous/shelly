@@ -43,6 +43,16 @@ return {
 				})
 			end, { silent = true })
 
+			vim.keymap.set("n", "<leader>gP", function()
+				builtin.diagnostics({
+					show_all = true,
+					severity = {
+						"Error",
+						"Warn",
+					},
+				})
+			end, { silent = true })
+
 			vim.keymap.set("n", "gt", function()
 				builtin.lsp_type_definitions()
 			end, { silent = true })
