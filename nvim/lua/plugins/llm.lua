@@ -13,7 +13,7 @@ return {
 				filetypes = {
 					["*"] = true,
 				},
-				copilot_model = "claude-haiku-4-5-copilot",
+				copilot_model = "gpt-41-copilot",
 				-- nes = {
 				-- 	enabled = true,
 				-- 	keymap = {

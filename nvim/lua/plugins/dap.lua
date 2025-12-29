@@ -60,6 +60,19 @@ return {
 						return {} -- No arguments if input is empty
 					end,
 				},
+				{
+					type = "python",
+					request = "launch",
+					name = "Pytest: Current File",
+					module = "pytest",
+					console = "integratedTerminal",
+					pythonPath = function()
+						return vim.fn.getcwd() .. "/.venv/bin/python3"
+					end,
+					justMyCode = false,
+
+					args = { "${file}", "-sv" },
+				},
 			}
 
 			local last_config = nil
