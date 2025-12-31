@@ -102,12 +102,12 @@ return {
 			}, nil, bufnr)
 		end, {})
 
-		vim.api.nvim_create_autocmd("BufWritePre", {
-			buffer = bufnr,
-			callback = function()
-				vim.lsp.buf.format({ bufnr = bufnr })
-			end,
-		})
+		-- vim.api.nvim_create_autocmd("BufWritePre", {
+		-- 	buffer = bufnr,
+		-- 	callback = function()
+		-- 		vim.lsp.buf.format({ bufnr = bufnr })
+		-- 	end,
+		-- })
 	end,
 	root_dir = function(bufnr, on_dir)
 		-- The project root is where the LSP can be started from
