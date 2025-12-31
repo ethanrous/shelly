@@ -14,6 +14,56 @@ function FindVueFileReferences()
 	})
 end
 
+local function configure_diagnostics(virtual_lines)
+	local cfg = {
+		virtual_text = {
+			prefix = function(diagnostic)
+				if diagnostic.severity == vim.diagnostic.severity.ERROR then
+					return "│×"
+				elseif diagnostic.severity == vim.diagnostic.severity.WARN then
+					return "│▲"
+				else
+					return "│•"
+				end
+			end,
+			suffix = "│",
+		},
+		underline = true,
+		update_in_insert = true, -- Update diagnostics in insert mode
+		severity_sort = true, -- Sort by severity
+		float = {
+			border = "single", -- Match your diagnostic_float_opts style
+			source = "if_many", -- Show source of diagnostic
+			format = function(diagnostic)
+				local message = diagnostic.message
+				if diagnostic.source == "ts-plugin" or diagnostic.source == "ts" then
+					message = message:gsub("type '(.-)'.?", "type \n\n%1\n\n")
+				end
+				return message
+			end,
+		},
+		signs = {
+			text = {
+				[vim.diagnostic.severity.ERROR] = " ×",
+				[vim.diagnostic.severity.WARN] = " ▲",
+				[vim.diagnostic.severity.HINT] = " •",
+				[vim.diagnostic.severity.INFO] = " •",
+			},
+		},
+	}
+
+	if virtual_lines then
+		cfg.virtual_lines = {
+			{ current_line = true },
+		}
+		cfg.virtual_text = false
+	else
+		cfg.virtual_lines = false
+	end
+
+	vim.diagnostic.config(cfg)
+end
+
 local function set_global_keymaps(client, bufnr)
 	local lsp = vim.lsp
 	local builtin = require("telescope.builtin")
@@ -156,6 +206,24 @@ local function set_global_keymaps(client, bufnr)
 		bufnr = bufnr,
 	})
 
+	keymap.set({
+		key = "<leader>lv",
+		cmd = function()
+			local config = vim.diagnostic.config()
+			if config == nil then
+				configure_diagnostics(false)
+				return
+			end
+
+			print(vim.inspect(config))
+			local new_virtual_lines = not config.virtual_lines
+			print("Setting virtual_lines to " .. tostring(new_virtual_lines))
+			configure_diagnostics(new_virtual_lines)
+		end,
+		desc = "Toggle virtual lines for diagnostics",
+		bufnr = bufnr,
+	})
+
 	-- Go to previous diagnostic
 	keymap.set({
 		key = "gE",
@@ -205,46 +273,6 @@ local function set_global_keymaps(client, bufnr)
 	})
 end
 
-local function configure_diagnostics()
-	vim.diagnostic.config({
-		virtual_text = {
-			enabled = true,
-			prefix = function(diagnostic)
-				if diagnostic.severity == vim.diagnostic.severity.ERROR then
-					return "│×"
-				elseif diagnostic.severity == vim.diagnostic.severity.WARN then
-					return "│▲"
-				else
-					return "│•"
-				end
-			end,
-			suffix = "│",
-		},
-		underline = true,
-		update_in_insert = true, -- Update diagnostics in insert mode
-		severity_sort = true, -- Sort by severity
-		float = {
-			border = "single", -- Match your diagnostic_float_opts style
-			source = "if_many", -- Show source of diagnostic
-			format = function(diagnostic)
-				local message = diagnostic.message
-				if diagnostic.source == "ts-plugin" or diagnostic.source == "ts" then
-					message = message:gsub("type '(.-)'.?", "type \n\n%1\n\n")
-				end
-				return message
-			end,
-		},
-		signs = {
-			text = {
-				[vim.diagnostic.severity.ERROR] = " ×",
-				[vim.diagnostic.severity.WARN] = " ▲",
-				[vim.diagnostic.severity.HINT] = " •",
-				[vim.diagnostic.severity.INFO] = " •",
-			},
-		},
-	})
-end
-
 vim.api.nvim_create_autocmd("LspAttach", {
 	group = vim.api.nvim_create_augroup("lsp", { clear = true }),
 	callback = function(args)
@@ -252,6 +280,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		local bufnr = args.buf
 
 		set_global_keymaps(client, bufnr)
-		configure_diagnostics()
+		configure_diagnostics(true)
 	end,
 })
