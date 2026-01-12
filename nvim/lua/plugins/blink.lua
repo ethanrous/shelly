@@ -47,7 +47,7 @@ return {
 	{
 		"saghen/blink.cmp",
 		event = "InsertEnter",
-		version = "*",
+		version = "1.*",
 		dependencies = {
 			-- Autocompletion
 			"onsails/lspkind.nvim",
@@ -55,6 +55,7 @@ return {
 			"Kaiser-Yang/blink-cmp-avante",
 		},
 		opts = {
+			fuzzy = { implementation = "prefer_rust_with_warning" },
 			completion = {
 				menu = {
 					auto_show = function(ctx)

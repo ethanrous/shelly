@@ -75,6 +75,15 @@ return {
 				},
 			}
 
+			table.insert(dap.configurations.go, {
+				type = "delve",
+				name = "Debug weblens",
+				request = "launch",
+				mode = "exec",
+				console = "integratedTerminal",
+				program = "${workspaceFolder}/_build/bin/weblens_debug",
+			})
+
 			local last_config = nil
 
 			---@param session dap.Session
