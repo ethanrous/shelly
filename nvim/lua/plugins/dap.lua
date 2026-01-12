@@ -71,7 +71,7 @@ return {
 					end,
 					justMyCode = false,
 
-					args = { "${file}", "-sv" },
+					args = { "${file}" },
 				},
 			}
 
@@ -178,14 +178,60 @@ return {
 			end
 
 			vim.keymap.set("n", "<leader>du", function()
-				dapui.toggle()
+				dapui.toggle({ reset = true, layout = 1 })
 			end, { noremap = true, silent = true })
 
 			vim.keymap.set("n", "dh", function()
 				dapui.eval()
 			end, { noremap = true, silent = true })
+
+			vim.keymap.set("n", "<leader>dU", function()
+				dapui.toggle({ reset = true, layout = 2 })
+			end, { noremap = true, silent = true })
 		end,
 		dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" },
+	},
+	{
+		"nvim-neotest/neotest",
+		dependencies = {
+			"nvim-neotest/nvim-nio",
+			"nvim-lua/plenary.nvim",
+			"antoinemadec/FixCursorHold.nvim",
+			"nvim-treesitter/nvim-treesitter",
+			"nvim-neotest/neotest-python",
+		},
+		config = function()
+			require("neotest").setup({
+				adapters = {
+					require("neotest-python")({
+						dap = { justMyCode = false },
+					}),
+				},
+			})
+
+			print("SETTING KEYMAPS")
+
+			vim.keymap.set("n", "<leader>tt", function()
+				require("neotest").run.run({
+					strategy = "dap",
+				})
+			end, { silent = true })
+
+			vim.keymap.set("n", "<leader>tf", function()
+				require("neotest").run.run({
+					vim.fn.expand("%"),
+					strategy = "dap",
+				})
+			end, { silent = true })
+
+			vim.keymap.set("n", "<leader>tp", function()
+				require("neotest").output_panel.toggle()
+			end, { silent = true })
+
+			vim.keymap.set("n", "<leader>tr", function()
+				require("neotest").summary.toggle()
+			end, { silent = true })
+		end,
 	},
 	{
 		"theHamsta/nvim-dap-virtual-text",

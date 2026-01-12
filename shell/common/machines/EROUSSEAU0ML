@@ -14,6 +14,7 @@ add_to_path "/opt/homebrew/sbin" true
 # add_to_path "/opt/homebrew/opt/python@3.12/libexec/bin" true
 add_to_path "/Users/erousseau/.local/share/nvim/mason/bin"
 add_to_path "$PNPM_HOME" true
+add_to_path "$PNPM_HOME/global/5/node_modules/@github/copilot-language-server-darwin-arm64" true
 add_to_path "/Users/erousseau/.rd/bin"
 add_to_path "/Users/erousseau/.local/bin"
 add_to_path "/opt/homebrew/opt/ruby/bin"

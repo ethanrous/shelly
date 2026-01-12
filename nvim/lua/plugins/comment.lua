@@ -10,13 +10,13 @@ return {
 				},
 			})
 
-			vim.keymap.set(
-				"n",
-				"<leader>tt", -- <space><space>
-				function()
-					require("alternate-toggler").toggleAlternate()
-				end
-			)
+			-- vim.keymap.set(
+			-- 	"n",
+			-- 	"<leader>tt", -- <space><space>
+			-- 	function()
+			-- 		require("alternate-toggler").toggleAlternate()
+			-- 	end
+			-- )
 		end,
 	},
 }
