@@ -108,7 +108,14 @@ local function set_global_keymaps(client, bufnr)
 	keymap.set({
 		key = "<leader>gs",
 		cmd = require("telescope.builtin").lsp_document_symbols,
-		desc = "Go workspace symbols",
+		desc = "Go to document symbols",
+		bufnr = bufnr,
+	})
+
+	keymap.set({
+		key = "<leader>gS",
+		cmd = require("telescope.builtin").lsp_dynamic_workspace_symbols,
+		desc = "Go to workspace symbols",
 		bufnr = bufnr,
 	})
 

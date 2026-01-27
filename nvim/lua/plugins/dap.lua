@@ -165,7 +165,7 @@ return {
 								size = 0.25,
 							},
 						},
-						position = "right",
+						position = "left",
 						size = 0.4,
 					},
 					{
@@ -208,6 +208,7 @@ return {
 			"antoinemadec/FixCursorHold.nvim",
 			"nvim-treesitter/nvim-treesitter",
 			"nvim-neotest/neotest-python",
+			"nvim-neotest/neotest-go",
 		},
 		config = function()
 			require("neotest").setup({
@@ -215,10 +216,9 @@ return {
 					require("neotest-python")({
 						dap = { justMyCode = false },
 					}),
+					require("neotest-go")({}),
 				},
 			})
-
-			print("SETTING KEYMAPS")
 
 			vim.keymap.set("n", "<leader>tt", function()
 				require("neotest").run.run({
