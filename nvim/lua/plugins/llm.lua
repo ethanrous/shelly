@@ -76,13 +76,13 @@ return {
 				desc = "Sidekick Toggle",
 				mode = { "n", "t", "i", "x" },
 			},
-			{
-				"<leader>aa",
-				function()
-					require("sidekick.cli").toggle()
-				end,
-				desc = "Sidekick Toggle CLI",
-			},
+			-- {
+			-- 	"<leader>aa",
+			-- 	function()
+			-- 		require("sidekick.cli").toggle()
+			-- 	end,
+			-- 	desc = "Sidekick Toggle CLI",
+			-- },
 			{
 				"<leader>as",
 				function()
@@ -148,7 +148,22 @@ return {
 			{ "<leader>at", mode = { "n", "v" } },
 		},
 		opts = {
-			provider = "claude-code",
+			provider = "claude",
+			providers = {
+				claude = {
+					auth_type = "max",
+				},
+			},
+			acp_providers = {
+				["claude-code"] = {
+					command = "npx",
+					args = { "@zed-industries/claude-code-acp" },
+					env = {
+						NODE_NO_WARNINGS = "1",
+						ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY"),
+					},
+				},
+			},
 		},
 		-- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
 		build = "make",

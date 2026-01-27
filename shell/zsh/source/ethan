@@ -14,3 +14,25 @@ fi
 
 export HOMEBREW_NO_ENV_HINTS=true
 add_to_path "/opt/homebrew/opt/ruby/bin"
+
+todo() {
+    if [[ -n "$1" ]]; then
+        if [[ "$1" == "add" ]]; then
+            echo "- [ ] ${@:2}" >>~/docs/todo.md
+            echo "Added todo: ${@:2}"
+        elif [[ "$1" == "edit" || "$1" == "e" ]]; then
+            nvim ~/docs/todo.md
+            return
+        elif [[ "$1" == "rm" ]]; then
+            args="${@:2}"
+            sed -i '' "/${args}/d" ~/docs/todo.md
+            echo "Removed todo: ${@:2}"
+        else
+            echo "Unknown argument: $1"
+            echo "Usage: todo [add] <todo item>"
+            return
+        fi
+    fi
+
+    glow ~/docs/todo.md
+}

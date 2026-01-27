@@ -34,15 +34,6 @@ return {
 		version = "v2.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
 		-- install jsregexp (optional!).
 		build = "make install_jsregexp",
-		config = function()
-			-- Load my snippets
-			-- snip_loader.lazy_load()
-			-- require("luasnip.loaders.from_lua").load({ paths = "~/shelly/nvim/snippets/" })
-			require("../config.snippets")
-
-			-- Im 100% sure this is bad, and it can be achieved in a better way
-			-- but i couldn't find the proper way.
-		end,
 	},
 	{
 		"saghen/blink.cmp",
@@ -51,8 +42,8 @@ return {
 		dependencies = {
 			-- Autocompletion
 			"onsails/lspkind.nvim",
-			-- "rafamadriz/friendly-snippets",
-			"Kaiser-Yang/blink-cmp-avante",
+			"L3MON4D3/LuaSnip",
+			version = "v2.*",
 		},
 		opts = {
 			fuzzy = { implementation = "prefer_rust_with_warning" },
@@ -61,7 +52,7 @@ return {
 					auto_show = function(ctx)
 						return ctx.mode ~= "cmdline" or not vim.tbl_contains({ "/", "?" }, vim.fn.getcmdtype())
 					end,
-					border = "single",
+					border = "none",
 					draw = {
 						gap = 2,
 						columns = { { "kind_icon" }, { "label", "label_description", gap = 1 } },
@@ -102,17 +93,24 @@ return {
 						},
 					},
 				},
-				documentation = { auto_show = true, auto_show_delay_ms = 0, window = { border = "single" } },
+				documentation = { auto_show = true, auto_show_delay_ms = 0, window = { border = "solid" } },
 				list = { selection = { preselect = true, auto_insert = false } },
 			},
 			snippets = { preset = "luasnip" },
 			cmdline = { enabled = false },
 			sources = {
-				default = { "lsp", "path", "snippets", "buffer" },
-				-- per_filetype = {
-				-- 	codecompanion = { "codecompanion" },
-				-- },
+				default = {
+					"lsp",
+					"path",
+					"snippets",
+					"buffer",
+				},
 				providers = {
+					snippets = {
+						opts = {
+							prefer_doc_trig = true, -- Use docTrig for regex snippets
+						},
+					},
 					path = {
 						opts = {
 							get_cwd = function()
@@ -120,19 +118,12 @@ return {
 							end,
 						},
 					},
-					-- avante = {
-					-- 	module = "blink-cmp-avante",
-					-- 	name = "Avante",
-					-- 	opts = {
-					-- 		-- options for blink-cmp-avante
-					-- 	},
-					-- },
 				},
 			},
 
 			signature = {
 				enabled = true,
-				window = { border = "single" },
+				window = { border = "solid" },
 				trigger = {
 					show_on_insert = true,
 				},
