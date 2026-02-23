@@ -1,7 +1,8 @@
 #!/bin/bash
 
 ### Alias ###
-alias dps="sudo docker ps --format \"table {{.ID}} \t{{.Status}} \t{{.Names}}\""
+alias dps="docker ps --format \"table {{.ID}} \t{{.Status}} \t{{.Names}}\""
+alias di="docker image ls --format \"table {{.ID}} \t{{.Repository}}:{{.Tag}} \t{{.Size}}\""
 alias ebrc="cd $SHELLY && e ."
 alias v='ls -l'
 alias va='ls -la'
