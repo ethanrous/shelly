@@ -1,0 +1,17 @@
+#!/bin/zsh
+
+ZVM_DIR="$SHELLY/shell/zsh/plugins/zsh-vi-mode"
+ZVM_VI_SURROUND_BINDKEY="s-prefix"
+
+function zvm_after_lazy_keybindings() {
+    bindkey -M vicmd '^A' beginning-of-line
+    bindkey -M vicmd '^E' end-of-line
+    bindkey -M vicmd '^K' kill-line
+}
+
+if [[ ! -d "$ZVM_DIR" ]]; then
+    echo "Installing zsh-vi-mode..."
+    git clone https://github.com/jeffreytse/zsh-vi-mode "$ZVM_DIR"
+fi
+
+source "$ZVM_DIR/zsh-vi-mode.zsh"
