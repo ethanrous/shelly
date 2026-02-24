@@ -3,7 +3,7 @@
 ### Alias ###
 alias dps="docker ps --format \"table {{.ID}} \t{{.Status}} \t{{.Names}}\""
 alias di="docker image ls --format \"table {{.ID}} \t{{.Repository}}:{{.Tag}} \t{{.Size}}\""
-alias ebrc="cd $SHELLY && e ."
+alias ebrc='cd $SHELLY && e .'
 alias v='ls -l'
 alias va='ls -la'
 alias n='ping 1.1.1.1'
@@ -12,15 +12,17 @@ alias ip='ifconfig | grep 10.10.1'
 alias pathls='echo $PATH | tr ":" "\n"'
 alias tab='wezterm cli set-tab-title'
 
-alias sbp="source ~/.${SHELL_NAME}rc"
-alias sync="$SHELLY/shell/common/auto-loader.bash"
+alias sbp='source ~/.${SHELL_NAME}rc'
+alias sync='$SHELLY/shell/common/auto-loader.bash'
 
 export EDITOR="nvim"
+
+export ANTHROPIC_BASE_URL="http://localhost:8000"
 
 ### Funcs ###
 
 function run_cmd() {
-    $(which $1) $2 $3
+    $(which "$1") "$2" "$3"
     # if [[ $2 =~ ^([^@]+@)?([^:]+):(.*)$ ]]; then
     #   ssh $match[1]$match[2] $1 $match[3]
     # else
@@ -32,9 +34,9 @@ dock() {
     docker exec -it "$1" "${2:-bash}"
 }
 
-cat() {
-    run_cmd /bin/cat "${@: -1}"
-}
+# cat() {
+#     run_cmd /bin/cat "${@: -1}"
+# }
 
 ls() {
     # $1 is the options for lsd, use $2
@@ -46,9 +48,9 @@ ls() {
 }
 
 e () {
-    if [[ -z "$@" ]]; then
+    if [[ -z "$*" ]]; then
         if [[ ! -d $HOME/.config/nvim/session ]]; then
-            mkdir -p $HOME/.config/nvim/session
+            mkdir -p "$HOME"/.config/nvim/session
         fi
 
         session_path="${PWD//\//-}"
@@ -155,9 +157,9 @@ nvm() {
         export NVM_DIR="$HOME/.nvm"
         [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
         [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
-        add_to_path $(nvm which default) true
+        add_to_path "$(nvm which default)" true
     fi
-    nvm $@
+    nvm "$@"
 }
 unset NVM_DIR
 

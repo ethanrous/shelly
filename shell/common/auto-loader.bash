@@ -26,7 +26,7 @@ for f in "$SHELLY"/shell/common/source/*; do
         echo "SOURCING $f"
     fi
 
-    source $f
+    source "$f"
 done
 
 mainfile="$SHELLY/shell/$SHELL_NAME/main"
@@ -46,9 +46,14 @@ if [[ $localHost == "" ]]; then
 fi
 
 machine_specific_path="$SHELLY/shell/common/machines/$localHost"
-if [ ! -f "$machine_specific_path" ]; then
-    printf "No config found for this \$HOST (%s). Create one? (y/[n])" "$localHost"
-    read -n1 ans
+if [[ -L "$machine_specific_path" ]]; then
+    echo "$machine_specific_path is a symlink, resolving..."
+    machine_specific_path=$(realpath "${SHELLY}/$(readlink /Users/erousseau/shelly/shell/common/machines/PTC-7VXVMYQW)")
+fi
+
+if [[ ! -f "$machine_specific_path" ]] && [[ ! -L "$machine_specific_path" ]]; then
+    printf "No config found for this \$HOST at (%s). Create one? (y/[n]) " "$machine_specific_path"
+    read -n 1 ans
     printf "\n"
 
     if [[ $ans == "y" ]]; then
@@ -60,7 +65,7 @@ else
         echo "SOURCING $machine_specific_path"
     fi
 
-    source $machine_specific_path && ((count++))
+    source "$machine_specific_path" && ((count++))
 fi
 
 if [[ $SHELLY_DEBUG == "true" ]]; then

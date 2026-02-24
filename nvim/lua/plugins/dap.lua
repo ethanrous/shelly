@@ -55,7 +55,13 @@ return {
 					args = function()
 						local args_string = vim.fn.input("Arguments: ")
 						if args_string and args_string ~= "" then
-							return vim.split(args_string, " +") -- Splits by one or more spaces
+							local args = vim.split(args_string, " +") -- Splits by one or more spaces
+							-- Remove empty arguments that may occur due to leading/trailing spaces
+							args = vim.tbl_filter(function(arg)
+								return arg ~= ""
+							end, args)
+							print("GOT ARGS!", vim.inspect(args))
+							return args
 						end
 						return {} -- No arguments if input is empty
 					end,
@@ -93,6 +99,10 @@ return {
 
 			vim.keymap.set("n", "<leader>db", function()
 				dap.toggle_breakpoint()
+			end, { silent = true })
+
+			vim.keymap.set("n", "<leader>dB", function()
+				dap.toggle_breakpoint(vim.fn.input("Breakpoint condition: "))
 			end, { silent = true })
 
 			-- Continue / Run to Cursor

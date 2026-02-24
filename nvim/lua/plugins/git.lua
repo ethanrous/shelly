@@ -93,6 +93,9 @@ return {
 			vim.keymap.set({ "n" }, "<leader>hh", function()
 				gitsigns.preview_hunk_inline()
 			end, { silent = true })
+			vim.keymap.set({ "n" }, "<leader>hH", function()
+				gitsigns.preview_hunk()
+			end, { silent = true })
 
 			vim.keymap.set({ "o", "x" }, "ih", gitsigns.select_hunk)
 			vim.keymap.set({ "n" }, "<leader>bl", function()
