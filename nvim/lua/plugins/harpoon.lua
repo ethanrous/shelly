@@ -1,3 +1,5 @@
+local const = require("config/const")
+
 return {
 	{
 		"ThePrimeagen/harpoon",
@@ -23,7 +25,7 @@ return {
 				end
 
 				harpoon.ui:toggle_quick_menu(harpoon:list(), {
-					border = "single",
+					border = const.BORDER_STYLE,
 				})
 				vim.api.nvim_feedkeys("j", "n", false)
 

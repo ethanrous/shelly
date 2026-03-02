@@ -1,4 +1,5 @@
 return {
+
 	{
 		"folke/tokyonight.nvim",
 		lazy = false,
@@ -14,17 +15,41 @@ return {
 					colors.bg_search = "#131621"
 					colors.bg_sidebar = "#131621"
 					colors.bg_statusline = "#131621"
-					-- colors.git = {
-					-- 	add = "#449dab",
-					-- 	change = "#6183bb",
-					-- 	delete = "#473246",
-					-- }
 				end,
 				on_highlights = function(hl, c)
 					hl.CursorLineNr.fg = c.blue
 					hl.EndOfBuffer.fg = c.bg_statusline
 					hl.StatusLine.fg = c.bg_statusline
 					hl.DiffDelete.fg = c.git.delete
+
+					local prompt = "#2d3149"
+					hl.TelescopeNormal = {
+						bg = c.bg_float,
+						fg = c.fg_dark,
+					}
+					hl.TelescopeBorder = {
+						bg = c.bg_float,
+						fg = c.bg_float,
+					}
+					hl.TelescopePromptNormal = {
+						bg = prompt,
+					}
+					hl.TelescopePromptBorder = {
+						bg = prompt,
+						fg = prompt,
+					}
+					hl.TelescopePromptTitle = {
+						bg = prompt,
+						fg = prompt,
+					}
+					hl.TelescopePreviewTitle = {
+						bg = c.bg_float,
+						fg = c.bg_float,
+					}
+					hl.TelescopeResultsTitle = {
+						bg = c.bg_float,
+						fg = c.bg_float,
+					}
 				end,
 				styles = {
 					comments = { italic = false },
@@ -60,22 +85,6 @@ return {
 		event = "VeryLazy",
 		dependencies = { "nvim-tree/nvim-web-devicons" },
 	},
-
-	-- Highlight color codes with their code #ff00ff
-	-- {
-	-- 	"catgoose/nvim-colorizer.lua",
-	-- 	event = "BufReadPre",
-	-- 	config = function()
-	-- 		require("colorizer").setup({
-	-- 			filetypes = { "*" },
-	-- 			user_default_options = {
-	-- 				css_fn = true,
-	-- 				css = true,
-	-- 				tailwind = "both",
-	-- 			},
-	-- 		})
-	-- 	end,
-	-- },
 	{
 		"brenoprata10/nvim-highlight-colors",
 		config = function()

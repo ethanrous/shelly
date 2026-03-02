@@ -1,3 +1,4 @@
+local const = require("config/const")
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
@@ -19,7 +20,7 @@ require("lazy").setup({
 	{ import = "plugins" },
 }, {
 	ui = {
-		border = "single",
+		border = const.BORDER_STYLE,
 		size = {
 			width = 0.95,
 			height = 0.9,

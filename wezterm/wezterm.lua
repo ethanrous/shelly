@@ -4,14 +4,12 @@ local wezterm = require("wezterm")
 -- This will hold the configuration.
 local config = wezterm.config_builder()
 
--- This is where you actually apply your config choices
-
 -- For example, changing the color scheme:
 config.font = wezterm.font("JetBrains Mono")
-config.font_size = 15
+config.font_size = 17
 config.automatically_reload_config = true
 config.window_padding = {
-	left = "0.25cell",
+	left = 0,
 	right = 0,
 	top = 0,
 	bottom = 0,
@@ -25,59 +23,99 @@ config.show_new_tab_button_in_tab_bar = false
 config.window_decorations = "RESIZE"
 config.tab_max_width = 50
 
--- local background = "#232136",
-local tabBarBackground = "#131621"
-local background = "#0D1017"
-local c_white = "#e5e5eb"
-local blue = "#82aaff"
+local theme = "dark"
 
-config.colors = {
-	background = background,
-	foreground = c_white,
-	cursor_bg = c_white,
+local tabBarBackground
+local background
+local c_white
+local blue
 
-	tab_bar = {
-		-- background = tabBarBackground,
-		-- The active tab is the one that has focus in the window
+if theme == "light" then
+	config.color_scheme = "Catppuccin Latte"
+
+	tabBarBackground = "#e6e9ef"
+	background = "#eff1f5"
+	c_white = "#4c4f69"
+	blue = "#1e66f5"
+else
+	tabBarBackground = "#131621"
+	background = "#0D1017"
+	c_white = "#e5e5eb"
+	blue = "#82aaff"
+
+	config.colors = {
 		background = background,
+		foreground = c_white,
+		cursor_bg = c_white,
 
-		active_tab = {
-			fg_color = blue,
-			bg_color = background,
+		tab_bar = {
+			-- background = tabBarBackground,
+			-- The active tab is the one that has focus in the window
+			background = tabBarBackground,
+
+			active_tab = {
+				fg_color = blue,
+				bg_color = background,
+			},
+
+			inactive_tab = {
+				fg_color = c_white,
+				bg_color = tabBarBackground,
+			},
+		},
+		ansi = {
+			"#393552",
+			"#eb6f92",
+			"#3e8fb0",
+			"#f6c177",
+			"#9ccfd8",
+			"#c4a7e7",
+			"#ea9a97",
+			"#e0def4",
 		},
 
-		inactive_tab = {
-			fg_color = c_white,
-			bg_color = tabBarBackground,
+		brights = {
+			"#6e6a86",
+			"#eb6f92",
+			"#3e8fb0",
+			"#f6c177",
+			"#9ccfd8",
+			"#c4a7e7",
+			"#ea9a97",
+			"#e0def4",
 		},
-	},
-	ansi = {
-		"#393552",
-		"#eb6f92",
-		"#3e8fb0",
-		"#f6c177",
-		"#9ccfd8",
-		"#c4a7e7",
-		"#ea9a97",
-		"#e0def4",
-	},
+	}
+end
 
-	brights = {
-		"#6e6a86",
-		"#eb6f92",
-		"#3e8fb0",
-		"#f6c177",
-		"#9ccfd8",
-		"#c4a7e7",
-		"#ea9a97",
-		"#e0def4",
-	},
-}
+-- Allow for sessions to be resurrected after quitting WezTerm
+local resurrect = wezterm.plugin.require("https://github.com/MLFlexer/resurrect.wezterm")
 
 config.leader = { key = " ", mods = "CTRL" }
+
+local function spawn_tab_to_right(window, _pane)
+	local mux_window = window:mux_window()
+
+	local active_index = 0
+	for i, tab_info in ipairs(mux_window:tabs_with_info()) do
+		if tab_info.is_active then
+			active_index = i - 1
+			break
+		end
+	end
+
+	local new_tab, new_pane = mux_window:spawn_tab({})
+	window:perform_action(wezterm.action.MoveTab(active_index + 1), new_pane)
+	new_tab:activate()
+end
+
 config.keys = {
 	-- Turn off the default CMD-m Hide action, allowing CMD-m to
 	-- be potentially recognized and handled by the tab
+	{
+		key = "t",
+		mods = "CMD",
+		action = wezterm.action_callback(spawn_tab_to_right),
+	},
 	{
 		key = "[",
 		mods = "CMD",
@@ -114,7 +152,7 @@ config.keys = {
 		action = wezterm.action.ActivatePaneDirection("Left"),
 	},
 	{
-		key = "h",
+		key = "v",
 		mods = "CMD|SHIFT",
 		action = wezterm.action.SplitVertical({ domain = "CurrentPaneDomain" }),
 	},
@@ -172,6 +210,40 @@ config.keys = {
 		key = "H",
 		mods = "CMD|SHIFT",
 		action = wezterm.action.ActivateTabRelative(-1),
+	},
+	{
+		key = "w",
+		mods = "ALT",
+		action = wezterm.action_callback(function(win, pane)
+			resurrect.state_manager.save_state(resurrect.workspace_state.get_workspace_state())
+		end),
+	},
+	{
+		key = "r",
+		mods = "ALT",
+		action = wezterm.action_callback(function(win, pane)
+			resurrect.fuzzy_loader.fuzzy_load(win, pane, function(id, label)
+				local type = string.match(id, "^([^/]+)") -- match before '/'
+				id = string.match(id, "([^/]+)$") -- match after '/'
+				id = string.match(id, "(.+)%..+$") -- remove file extention
+				local opts = {
+					spawn_in_workspace = true,
+					relative = true,
+					restore_text = true,
+					on_pane_restore = resurrect.tab_state.default_on_pane_restore,
+				}
+				if type == "workspace" then
+					local state = resurrect.state_manager.load_state(id, "workspace")
+					resurrect.workspace_state.restore_workspace(state, opts)
+				elseif type == "window" then
+					local state = resurrect.state_manager.load_state(id, "window")
+					resurrect.window_state.restore_window(pane:window(), state, opts)
+				elseif type == "tab" then
+					local state = resurrect.state_manager.load_state(id, "tab")
+					resurrect.tab_state.restore_tab(pane:tab(), state, opts)
+				end
+			end)
+		end),
 	},
 }
 
@@ -250,17 +322,35 @@ local function tab_title(tab_info)
 end
 
 wezterm.on("format-tab-title", function(tab, tabs, panes, cnf, hover, max_width)
-	local edge_background = tabBarBackground
-	local foreground = "#808080"
+	local edge_background
+	local edge_foreground
+	local foreground
 
-	if tab.is_active then
-		foreground = blue
-		edge_background = background
-	elseif hover then
-		foreground = "#c0c0c0"
+	if theme == "light" then
+		edge_background = tabBarBackground
+		foreground = "#808080"
+
+		if tab.is_active then
+			foreground = blue
+			edge_background = background
+		elseif hover then
+			foreground = "#c0c0c0"
+		end
+
+		edge_foreground = background
+	else
+		edge_background = tabBarBackground
+		foreground = "#808080"
+
+		if tab.is_active then
+			foreground = blue
+			edge_background = background
+		elseif hover then
+			foreground = "#c0c0c0"
+		end
+
+		edge_foreground = background
 	end
-
-	local edge_foreground = background
 
 	local title = tab_title(tab)
 
@@ -275,6 +365,22 @@ wezterm.on("format-tab-title", function(tab, tabs, panes, cnf, hover, max_width)
 		{ Foreground = { Color = edge_foreground } },
 		{ Text = " " },
 	}
+end)
+
+wezterm.on("gui-startup", resurrect.state_manager.resurrect_on_gui_startup)
+
+resurrect.state_manager.set_max_nlines(5000)
+
+resurrect.state_manager.periodic_save({
+	interval_seconds = 60,
+	save_tabs = true,
+	save_windows = true,
+	save_workspaces = true,
+})
+
+wezterm.on("resurrect.error", function(err)
+	wezterm.log_error("ERROR!")
+	wezterm.gui.gui_windows()[1]:toast_notification("resurrect", err, nil, 3000)
 end)
 
 -- and finally, return the configuration to wezterm

@@ -44,39 +44,6 @@ local get_recording_macro = function()
 	end
 	return ""
 end
---
--- require("lualine").setup({
--- 	options = {
--- 		theme = lineColors,
--- 		section_separators = { "", "" },
--- 		component_separators = { "", "" },
--- 		disabled_filetypes = {},
--- 	},
--- 	sections = {
--- 		lualine_a = { getRepoName },
--- 		lualine_b = { { "filename", path = 1 } },
--- 		lualine_c = { "filetype" },
--- 		lualine_x = { "diagnostics" },
--- 		lualine_y = { get_location, get_recording_macro },
--- 		lualine_z = { { "diff", colored = false }, "branch" },
--- 	},
--- 	inactive_sections = {
--- 		lualine_a = { getRepoName },
--- 		lualine_b = { { "filename", path = 1 } },
--- 		lualine_c = { "filetype" },
--- 		lualine_x = { "diagnostics" },
--- 		lualine_z = { { "diff", colored = false }, "branch" },
--- 	},
--- 	extensions = {
--- 		fugitive_blame,
--- 		"oil",
--- 		"nvim-dap-ui",
--- 		"nvim-tree",
--- 		"quickfix",
--- 		"lazy",
--- 		"fugitive",
--- 	},
--- })
 
 local function lint_progress()
 	return ""

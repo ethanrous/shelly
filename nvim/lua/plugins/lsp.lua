@@ -1,35 +1,5 @@
 -- LSP
 return {
-	-- {
-	-- 	"mason-org/mason.nvim",
-	-- 	config = function()
-	-- 		require("mason").setup()
-	--
-	-- 		vim.keymap.set("n", "gh", require("noice.lsp").hover)
-	-- 		vim.keymap.set("n", "<LEADER>r", function()
-	-- 			require("cosmic-ui").rename({
-	-- 				win_options = {
-	-- 					winhighlight = "Normal:CosmicPopupInput",
-	-- 				},
-	-- 			})
-	-- 		end)
-	--
-	-- 		local diagnostic_float_opts = {
-	-- 			border = "single",
-	-- 		}
-	-- 		vim.keymap.set("n", "gE", function()
-	-- 			vim.diagnostic.open_float(diagnostic_float_opts)
-	-- 		end)
-	--
-	-- 		vim.keymap.set("n", "ge", function()
-	-- 			vim.diagnostic.jump({ count = 1, float = true })
-	-- 		end, { silent = true })
-	--
-	-- 		vim.keymap.set("n", "<LEADER>li", function()
-	-- 			vim.cmd("checkhealth vim.lsp")
-	-- 		end, { silent = true })
-	-- 	end,
-	-- },
 	{
 		"mason-org/mason.nvim",
 		dependencies = {

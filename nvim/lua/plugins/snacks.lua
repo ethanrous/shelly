@@ -1,3 +1,5 @@
+local const = require("config/const")
+
 return {
 	{
 		"folke/snacks.nvim",
@@ -52,7 +54,7 @@ return {
 				scratch = {
 					width = 0.75,
 					height = 0.85,
-					border = "single",
+					border = const.BORDER_STYLE,
 				},
 			},
 			input = {
@@ -180,7 +182,7 @@ return {
 							row = -1,
 							col = 0,
 						},
-						border = { style = "single" },
+						border = { style = const.BORDER_STYLE },
 						size = { max_width = 80 },
 					},
 					cmdline_popup = {
@@ -190,7 +192,7 @@ return {
 							col = "50%",
 						},
 						border = {
-							style = "single",
+							style = const.BORDER_STYLE,
 						},
 						size = {
 							width = 60,
@@ -199,7 +201,7 @@ return {
 					},
 					popup = {
 						border = {
-							style = "single",
+							style = const.BORDER_STYLE,
 							padding = { 0, 1 },
 							size = { max_width = 80, max_height = 60 },
 						},
@@ -219,7 +221,7 @@ return {
 							max_height = 15,
 						},
 						border = {
-							style = "single",
+							style = const.BORDER_STYLE,
 						},
 					},
 				},

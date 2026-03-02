@@ -17,8 +17,6 @@ alias sync='$SHELLY/shell/common/auto-loader.bash'
 
 export EDITOR="nvim"
 
-export ANTHROPIC_BASE_URL="http://localhost:8000"
-
 ### Funcs ###
 
 function run_cmd() {

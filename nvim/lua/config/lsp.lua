@@ -1,4 +1,5 @@
 local keymap = require("util.keymap")
+local const = require("config/const")
 
 function FindVueFileReferences()
 	local filename = vim.fn.expand("%:t")
@@ -32,7 +33,7 @@ local function configure_diagnostics(virtual_lines)
 		update_in_insert = true, -- Update diagnostics in insert mode
 		severity_sort = true, -- Sort by severity
 		float = {
-			border = "single", -- Match your diagnostic_float_opts style
+			border = const.BORDER_STYLE, -- Match your diagnostic_float_opts style
 			source = "if_many", -- Show source of diagnostic
 			format = function(diagnostic)
 				local message = diagnostic.message
