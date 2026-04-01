@@ -154,6 +154,7 @@ config.keys = {
 		mods = "CMD",
 		action = wezterm.action_callback(spawn_tab_to_right),
 	},
+	{ key = "w", mods = "CMD", action = wezterm.action.CloseCurrentPane({ confirm = true }) },
 	{
 		key = "[",
 		mods = "CMD",

@@ -153,18 +153,39 @@ local function set_global_keymaps(client, bufnr)
 		bufnr = bufnr,
 	})
 
-	-- Populate diagnostics for whole workspace
-	-- keymap.set({
-	-- 	key = "<leader>gP",
-	-- 	cmd = function()
-	-- 		for _, cur_client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
-	-- 			require("workspace-diagnostics").populate_workspace_diagnostics(cur_client, bufnr)
-	-- 		end
-	-- 		vim.notify("INFO: Diagnostic populated")
-	-- 	end,
-	-- 	desc = "Populate diagnostics for whole workspace",
-	-- 	bufnr = bufnr,
-	-- })
+	keymap.set({
+		key = "<leader>ad",
+
+		cmd = function()
+			-- Get word under cursor
+			local cursor_word = vim.fn.expand("<cword>")
+
+			-- Capitalize first letter to match Go function naming convention
+			cursor_word = cursor_word:gsub("^%l", string.upper)
+
+			-- Construct the live grep query to find function definitions matching the cursor word in Go files
+			local query = '"func ' .. cursor_word .. '" --iglob *rest_*.go'
+
+			-- Use Telescope's live_grep_args extension to perform the search with the constructed query
+			require("telescope").extensions.live_grep_args.live_grep_args({
+				default_text = query,
+				on_complete = { -- Jump to the definition if there's only one result
+					function(picker)
+						local count = 0
+						for _ in picker.manager:iter() do
+							count = count + 1
+						end
+
+						if count == 1 then
+							require("telescope.actions").select_default(picker.prompt_bufnr)
+						end
+					end,
+				},
+			})
+		end,
+		desc = "Find definition of API handler under cursor (swag)",
+		bufnr = bufnr,
+	})
 
 	-- Show hover information
 	keymap.set({

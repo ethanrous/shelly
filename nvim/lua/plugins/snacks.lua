@@ -170,10 +170,14 @@ return {
 				commands = {
 					all = {
 						-- options for the message history that you get with `:Noice`
-						view = "vsplit",
-						opts = { enter = true, format = "details" },
+						-- floating window for history text, should be large window
+						view = "popup",
+						opts = {
+							border = { style = const.BORDER_STYLE },
+							size = { width = 0.9, height = 0.9 },
+						},
 						filter = {},
-						filter_opts = { reverse = true },
+						filter_opts = {},
 					},
 				},
 				views = {

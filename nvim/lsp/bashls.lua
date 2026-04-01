@@ -26,4 +26,20 @@ return {
 	},
 	filetypes = { "bash", "sh" },
 	root_markers = { ".git" },
+
+	-- Stop the language server from starting for certain filetypes (env files)
+	on_attach = function(client, bufnr)
+		local exclude_filetypes = { "env" }
+		local ft = vim.api.nvim_buf_get_name(bufnr)
+		if ft:match(".*.env") then
+			ft = "env"
+		end
+
+		for _, excluded in ipairs(exclude_filetypes) do
+			if ft == excluded then
+				client:stop()
+				return
+			end
+		end
+	end,
 }
