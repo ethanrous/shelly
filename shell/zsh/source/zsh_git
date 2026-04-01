@@ -1,11 +1,9 @@
-gb()
-{
- git branch $*
+gb() {
+    git branch $*
 }
 
-gc()
-{
- git checkout $*
+gc() {
+    git checkout $*
 }
 
 # gd()
@@ -13,53 +11,43 @@ gc()
 #  git difftool $*
 # }
 
-gd1()
-{
- gd HEAD~1 $*
+gd1() {
+    gd HEAD~1 $*
 }
 
-gdn()
-{
- git difftool --name-only $*
+gdn() {
+    git difftool --name-only $*
 }
 
-gdn1()
-{
- gdn HEAD~1 $*
+gdn1() {
+    gdn HEAD~1 $*
 }
 
-gl()
-{
- git log --pretty=format:'%h %aI %ae %s' $*
+gl() {
+    git log --pretty=format:'%h %aI %ae %s' $*
 }
 
-gll()
-{
- git log --pretty=format:'%H %aI %ae %s' $*
+gll() {
+    git log --pretty=format:'%H %aI %ae %s' $*
 }
 
-gp()
-{
- git pull $*
+gp() {
+    git pull $*
 }
 
-gft()
-{
- git fetch --tags --force
+gft() {
+    git fetch --tags --force
 }
 
-gslm()
-{
- git show lsb/master
+gslm() {
+    git show lsb/master
 }
 
-gs()
-{
- git status $*
+gs() {
+    git status $*
 }
 
-git_wip()
-{
+git_wip() {
     local answer="$1"
     if [[ "$answer" != "y" ]]; then
         printf "Really WIP add/commit/push y/[n]? "
@@ -73,49 +61,45 @@ git_wip()
     fi
 }
 
-gitCheckBranchPrefix()
-{
- local regex="^erousseau.*"
- if [[ ! $1 =~ $regex ]]; then
-    echo "Error: $1 does not match $regex"
-    return 1
- fi
+gitCheckBranchPrefix() {
+    local regex="^erousseau.*"
+    if [[ ! $1 =~ $regex ]]; then
+        echo "Error: $1 does not match $regex"
+        return 1
+    fi
 }
 
-git_cbpo()
-{
- gitCheckBranchPrefix $1
- if [[ $? -ne 0 ]]; then return 1; fi
-
- read -n 1 -p "Really checkout -b/push origin on: $1 (y/n)? " answer
- printf "\n"
- if [ $answer == "y" ]
- then
-    printf "\ngit checkout -b $1\n"
-    git checkout -b $1
+git_cbpo() {
+    gitCheckBranchPrefix $1
     if [[ $? -ne 0 ]]; then return 1; fi
-    printf "\ngit push -u origin HEAD\n"
-    git push -u origin HEAD
+
+    read -n 1 -p "Really checkout -b/push origin on: $1 (y/n)? " answer
     printf "\n"
- fi
+    if [ $answer == "y" ]; then
+        printf "\ngit checkout -b $1\n"
+        git checkout -b $1
+        if [[ $? -ne 0 ]]; then return 1; fi
+        printf "\ngit push -u origin HEAD\n"
+        git push -u origin HEAD
+        printf "\n"
+    fi
 }
 
-git_rb()
-{
- read -n 1 -p "Really remove: $* (y/n)? " answer
- printf "\n"
- [[ $answer != "y" ]] && return
-
- for branch in $*; do
-    gitCheckBranchPrefix $branch
-    if [[ $? -ne 0 ]]; then return 1; fi
-
-    printf "\ngit push origin --delete $branch\n"
-    git push origin --delete $branch || true
-    printf "\ngit branch -D $branch\n"
-    git branch -D $branch
+git_rb() {
+    read -n 1 -p "Really remove: $* (y/n)? " answer
     printf "\n"
- done
+    [[ $answer != "y" ]] && return
+
+    for branch in $*; do
+        gitCheckBranchPrefix $branch
+        if [[ $? -ne 0 ]]; then return 1; fi
+
+        printf "\ngit push origin --delete $branch\n"
+        git push origin --delete $branch || true
+        printf "\ngit branch -D $branch\n"
+        git branch -D $branch
+        printf "\n"
+    done
 }
 
 # Check for console.log in changes
@@ -126,4 +110,45 @@ git_check() {
 # Delete local branches that have been removed from remote
 git_clean() {
     git branch -vv | grep ': gone]' | awk '{print $1}' | xargs git branch -D
+}
+
+# Get the name of the trunk branch (e.g., origin/main or origin/master)
+git_trunk_name() {
+    git rev-parse --abbrev-ref origin/HEAD
+}
+
+# Get the name of the current git repository
+git_repo_name() {
+    basename $(git rev-parse --show-toplevel)
+}
+
+# Create a new worktree, based on main and switch to it
+gwrk() {
+    local branch="$1"
+
+    if [[ -z "$branch" ]]; then
+        echo "Usage: gwrk <branch>"
+        return 1
+    fi
+
+    local new_wrktr_path=~/.worktrees/$(git_repo_name)/"$branch"
+    if [[ -d "$new_wrktr_path" ]]; then
+        cd "$new_wrktr_path"
+        return
+    fi
+
+    git worktree add -b "$branch" "$new_wrktr_path" $(git_trunk_name) || return 1
+    cd "$new_wrktr_path"
+}
+
+# Rebase the current branch on top of the trunk branch (or an input branch, if provided)
+grb() {
+    local trunk_branch=$(git_trunk_name)
+    local target_branch="${1:-$trunk_branch}"
+
+    local target_branch="${target_branch#origin/}"
+    echo "Rebasing on top of origin/$target_branch"
+
+    git fetch origin
+    git rebase -i "origin/$target_branch"
 }

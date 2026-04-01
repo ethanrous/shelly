@@ -23,27 +23,71 @@ config.show_new_tab_button_in_tab_bar = false
 config.window_decorations = "RESIZE"
 config.tab_max_width = 50
 
-local theme = "dark"
+local light_scheme = "Catppuccin Latte"
+local dark_scheme = "Tokyo Night Moon"
 
-local tabBarBackground
-local background
-local c_white
-local blue
+local function get_color_scheme(scheme)
+	local tabBarBackground
+	local background
+	local c_white
+	local blue
+	local ansi, brights
 
-if theme == "light" then
-	config.color_scheme = "Catppuccin Latte"
+	if scheme == light_scheme then
+		tabBarBackground = "#e6e9ef"
+		background = "#eff1f5"
+		c_white = "#4c4f69"
+		blue = "#1e66f5"
 
-	tabBarBackground = "#e6e9ef"
-	background = "#eff1f5"
-	c_white = "#4c4f69"
-	blue = "#1e66f5"
-else
-	tabBarBackground = "#131621"
-	background = "#0D1017"
-	c_white = "#e5e5eb"
-	blue = "#82aaff"
+		ansi = {
+			"#4c4f69", -- black (dark gray)
+			"#c01c28", -- red (darker red)
+			"#2d7b2e", -- green (much darker green)
+			"#a56707", -- yellow (much darker yellow/brown)
+			"#1954cf", -- blue (darker blue)
+			"#7030cf", -- magenta (much darker purple)
+			"#0e7c86", -- cyan (much darker cyan)
+			"#3b3e52", -- white (very dark gray)
+		}
+		brights = {
+			"#5c5f77", -- bright black
+			"#b8174c", -- bright red
+			"#26943a", -- bright green
+			"#c96f1e", -- bright yellow
+			"#155db3", -- bright blue
+			"#8839ef", -- bright magenta
+			"#0d8f99", -- bright cyan
+			"#6c6f85", -- bright white
+		}
+	else
+		tabBarBackground = "#131621"
+		background = "#0D1017"
+		c_white = "#e5e5eb"
+		blue = "#82aaff"
 
-	config.colors = {
+		ansi = {
+			"#393552",
+			"#eb6f92",
+			"#3e8fb0",
+			"#f6c177",
+			"#9ccfd8",
+			"#c4a7e7",
+			"#ea9a97",
+			"#e0def4",
+		}
+		brights = {
+			"#6e6a86",
+			"#eb6f92",
+			"#3e8fb0",
+			"#f6c177",
+			"#9ccfd8",
+			"#c4a7e7",
+			"#ea9a97",
+			"#e0def4",
+		}
+	end
+
+	local colors = {
 		background = background,
 		foreground = c_white,
 		cursor_bg = c_white,
@@ -59,40 +103,34 @@ else
 			},
 
 			inactive_tab = {
-				fg_color = c_white,
+
+				fg_color = "#808080",
+				-- fg_color = c_white,
 				bg_color = tabBarBackground,
 			},
 		},
-		ansi = {
-			"#393552",
-			"#eb6f92",
-			"#3e8fb0",
-			"#f6c177",
-			"#9ccfd8",
-			"#c4a7e7",
-			"#ea9a97",
-			"#e0def4",
-		},
-
-		brights = {
-			"#6e6a86",
-			"#eb6f92",
-			"#3e8fb0",
-			"#f6c177",
-			"#9ccfd8",
-			"#c4a7e7",
-			"#ea9a97",
-			"#e0def4",
-		},
+		ansi = ansi,
+		brights = brights,
 	}
+	return colors
 end
+
+wezterm.on("toggle-dark-mode", function(window)
+	local overrides = window:get_config_overrides() or {}
+	overrides.color_scheme = (overrides.color_scheme == light_scheme) and dark_scheme or light_scheme
+	overrides.colors = get_color_scheme(overrides.color_scheme)
+
+	window:set_config_overrides(overrides)
+end)
+
+config.colors = get_color_scheme(dark_scheme)
 
 -- Allow for sessions to be resurrected after quitting WezTerm
 local resurrect = wezterm.plugin.require("https://github.com/MLFlexer/resurrect.wezterm")
 
 config.leader = { key = " ", mods = "CTRL" }
 
-local function spawn_tab_to_right(window, _pane)
+local function spawn_tab_to_right(window, _)
 	local mux_window = window:mux_window()
 
 	local active_index = 0
@@ -176,11 +214,11 @@ config.keys = {
 		mods = "CMD",
 		action = wezterm.action.ActivatePaneDirection("Down"),
 	},
-	-- {
-	-- 	key = "h",
-	-- 	mods = "CMD|SHIFT",
-	-- 	action = wezterm.action.RotatePanes("CounterClockwise"),
-	-- },
+	{
+		key = "t",
+		mods = "CTRL",
+		action = wezterm.action({ EmitEvent = "toggle-dark-mode" }),
+	},
 	{
 		key = "b",
 		mods = "CMD",
@@ -214,7 +252,7 @@ config.keys = {
 	{
 		key = "w",
 		mods = "ALT",
-		action = wezterm.action_callback(function(win, pane)
+		action = wezterm.action_callback(function(_, _)
 			resurrect.state_manager.save_state(resurrect.workspace_state.get_workspace_state())
 		end),
 	},
@@ -222,7 +260,7 @@ config.keys = {
 		key = "r",
 		mods = "ALT",
 		action = wezterm.action_callback(function(win, pane)
-			resurrect.fuzzy_loader.fuzzy_load(win, pane, function(id, label)
+			resurrect.fuzzy_loader.fuzzy_load(win, pane, function(id, _)
 				local type = string.match(id, "^([^/]+)") -- match before '/'
 				id = string.match(id, "([^/]+)$") -- match after '/'
 				id = string.match(id, "(.+)%..+$") -- remove file extention
@@ -321,48 +359,12 @@ local function tab_title(tab_info)
 	return getTabIndexString(tab_info) .. string.basename(dir) .. " " .. proc
 end
 
-wezterm.on("format-tab-title", function(tab, tabs, panes, cnf, hover, max_width)
-	local edge_background
-	local edge_foreground
-	local foreground
-
-	if theme == "light" then
-		edge_background = tabBarBackground
-		foreground = "#808080"
-
-		if tab.is_active then
-			foreground = blue
-			edge_background = background
-		elseif hover then
-			foreground = "#c0c0c0"
-		end
-
-		edge_foreground = background
-	else
-		edge_background = tabBarBackground
-		foreground = "#808080"
-
-		if tab.is_active then
-			foreground = blue
-			edge_background = background
-		elseif hover then
-			foreground = "#c0c0c0"
-		end
-
-		edge_foreground = background
-	end
-
+wezterm.on("format-tab-title", function(tab, _, _, _, _, _)
 	local title = tab_title(tab)
 
 	return {
-		{ Background = { Color = edge_background } },
-		{ Foreground = { Color = edge_foreground } },
 		{ Text = " " },
-		{ Background = { Color = edge_background } },
-		{ Foreground = { Color = foreground } },
 		{ Text = title },
-		{ Background = { Color = edge_background } },
-		{ Foreground = { Color = edge_foreground } },
 		{ Text = " " },
 	}
 end)

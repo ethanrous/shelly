@@ -1,5 +1,6 @@
 vim.loader.enable()
 
+
 require("config")
 require("util")
 
@@ -31,4 +32,8 @@ vim.lsp.enable({
 	"vue_ls",
 	"yamlls",
 	"copilot",
+	"groovyls",
+	"terraformls",
+	"terraform_lsp",
+	"tflint",
 })

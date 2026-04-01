@@ -1,4 +1,4 @@
-vim.lsp.config.ruby_lsp = {
+return {
 	cmd = { "ruby-lsp" },
 	filetypes = { "ruby", "eruby" },
 	root_markers = { "Gemfile", ".git" },

@@ -101,6 +101,9 @@ return {
 							kind = "progress",
 							cond = function(message)
 								local client = vim.tbl_get(message.opts, "progress", "client")
+								if client == "pyright" then
+									return true
+								end
 								if client ~= "jdtls" then
 									return false
 								end

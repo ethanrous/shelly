@@ -1,6 +1,20 @@
+#!/bin/bash
 
 PS1="[\[\e[32m\]\t \h\[\e[0m\]] \[\e[93m\]\w \[\e[0m\]\$ "
 
 g() {
-	/Applications/Brave\ Browser.app/Contents/MacOS/Brave\ Browser https://google.com/search?q="$*"
+    /Applications/Brave\ Browser.app/Contents/MacOS/Brave\ Browser https://google.com/search?q="$*"
+}
+
+s3_tar_dl() {
+    if [[ $# -ne 2 ]]; then
+        echo "Usage: s3_tar_dl <s3_path> <destination_directory>"
+        return 1
+    fi
+
+    if [[ ! -d "$2" ]]; then
+        mkdir -p "$2"
+    fi
+
+    aws s3 cp "$1" - | tar -xzvf - -C "$2"
 }

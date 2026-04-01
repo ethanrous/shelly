@@ -1,4 +1,4 @@
-vim.lsp.config.tailwindcssls = {
+return {
 	cmd = { "tailwindcss-language-server", "--stdio" },
 	filetypes = {
 		"ejs",

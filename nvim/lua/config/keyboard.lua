@@ -2,8 +2,6 @@
 -- Keyboard shortcuts --
 ------------------------
 
-local keymap = require("util.keymap")
-
 -- Disable arrow keys
 vim.keymap.set({ "n", "v" }, "<Up>", "<Nop>", { silent = true, noremap = true })
 vim.keymap.set({ "n", "v" }, "<Down>", "<Nop>", { silent = true, noremap = true })
@@ -50,6 +48,11 @@ vim.keymap.set({ "v", "n" }, "<A-k>", "10k", { silent = true })
 
 vim.keymap.set({ "v", "n" }, "<A-l>", "$", { silent = true })
 vim.keymap.set({ "v", "n" }, "<A-h>", "^", { silent = true })
+
+-- Toggle theme
+vim.keymap.set("n", "<leader>T", function()
+	vim.opt.background = vim.opt.background:get() == "dark" and "light" or "dark"
+end, { silent = true })
 
 -- Selection --
 -- Enter puts you in insert mode and makes a newline below or above you

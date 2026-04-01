@@ -37,6 +37,9 @@ return {
 		config = function()
 			local notify = require("mini.notify")
 			notify.setup({
+				lsp_progress = {
+					enable = false,
+				},
 				window = {
 					config = {
 						border = "solid",
@@ -60,8 +63,8 @@ return {
 			require("mini.comment").setup({
 				options = {
 					custom_commentstring = function()
-						return require("ts_context_commentstring.internal").calculate_commentstring()
-							or vim.bo.commentstring
+						local ok, cs = pcall(require("ts_context_commentstring.internal").calculate_commentstring)
+						return ok and cs or vim.bo.commentstring
 					end,
 				},
 			})
@@ -113,7 +116,7 @@ return {
 	},
 
 	{
-		"ggandor/leap.nvim",
+		url = "https://codeberg.org/andyg/leap.nvim",
 		config = function()
 			local leap = require("leap")
 			-- leap.create_default_mappings()
