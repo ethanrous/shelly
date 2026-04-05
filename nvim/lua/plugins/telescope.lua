@@ -21,8 +21,60 @@ return {
 				builtin.lsp_references({ include_declaration = false })
 			end, { silent = true })
 
+			local function get_diffview_search_dirs()
+				local ok, lib = pcall(require, "diffview.lib")
+				if not ok then
+					return nil
+				end
+				local view = lib.get_current_view()
+				if not view or not view.files then
+					return nil
+				end
+
+				local paths = {}
+				local seen = {}
+				for _, entry in view.files:iter() do
+					local layout = entry.layout
+					if not layout then
+						goto continue
+					end
+					for _, win in ipairs({ layout.a, layout.b }) do
+						if not (win and win.file and win.file.bufnr) then
+							goto next_win
+						end
+						local bufnr = win.file.bufnr
+						if not vim.api.nvim_buf_is_valid(bufnr) then
+							goto next_win
+						end
+						local name = vim.api.nvim_buf_get_name(bufnr)
+						if name == "" or seen[name] then
+							goto next_win
+						end
+						seen[name] = true
+						if vim.fn.filereadable(name) == 1 then
+							paths[#paths + 1] = name
+						else
+							-- Old-version buffer (git object) — dump to temp file for searching
+							local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+							local tmpfile = vim.fn.tempname()
+							vim.fn.writefile(lines, tmpfile)
+							paths[#paths + 1] = tmpfile
+						end
+						::next_win::
+					end
+					::continue::
+				end
+				if #paths == 0 then
+					return nil
+				end
+				return paths
+			end
+
 			vim.keymap.set("n", "<leader>fg", function()
-				telescope.extensions.live_grep_args.live_grep_args()
+				local dirs = get_diffview_search_dirs()
+				telescope.extensions.live_grep_args.live_grep_args({
+					search_dirs = dirs,
+				})
 			end, { silent = true })
 
 			vim.keymap.set("n", "<leader>tc", function()
@@ -30,7 +82,10 @@ return {
 			end)
 
 			vim.keymap.set("v", "<leader>fg", function()
-				builtin.grep_string()
+				local dirs = get_diffview_search_dirs()
+				builtin.grep_string({
+					search_dirs = dirs,
+				})
 			end, { silent = true })
 
 			vim.keymap.set("n", "<leader>gh", function()

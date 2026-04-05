@@ -1,6 +1,5 @@
 vim.loader.enable()
 
-
 require("config")
 require("util")
 
@@ -16,7 +15,6 @@ vim.lsp.enable({
 	"golangci_lint_ls",
 	"gopls",
 	"html",
-	"htmlls",
 	"jdtls",
 	"jsonls",
 	"lemminx",
