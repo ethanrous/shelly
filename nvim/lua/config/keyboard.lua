@@ -69,7 +69,8 @@ vim.keymap.set("n", "<LEADER>ff", function()
 end, { silent = true })
 
 vim.keymap.set("n", "<LEADER>lr", function()
-	vim.cmd("LspRestart")
+	vim.lsp.stop_client(vim.lsp.get_clients())
+	vim.cmd("edit")
 
 	local timer = vim.loop.new_timer()
 	-- Delay 2000ms and 0 means "do not repeat"

@@ -2,8 +2,7 @@ vim.loader.enable()
 
 require("config")
 require("util")
-
--- vim.cmd.colorscheme("tokyonight")
+-- require("vim._core.ui2").enable()
 
 vim.lsp.enable({
 	"angularls",
@@ -13,7 +12,6 @@ vim.lsp.enable({
 	"eslint",
 	"go",
 	"golangci_lint_ls",
-	"gopls",
 	"html",
 	"jdtls",
 	"jsonls",

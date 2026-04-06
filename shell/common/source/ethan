@@ -15,9 +15,10 @@ alias tab='wezterm cli set-tab-title'
 alias sbp='source ~/.${SHELL_NAME}rc'
 alias sync='$SHELLY/shell/common/auto-loader.bash'
 alias claude-local='ANTHROPIC_BASE_URL=http://localhost:1234/ claude --dangerously-skip-permissions --system-prompt-file ~/tmp/CLAUDE.md'
-alias claude='CLAUDE_CODE_NO_FLICKER=1 claude --dangerously-skip-permissions'
+alias claude='claude --dangerously-skip-permissions'
 
 export EDITOR="nvim"
+export CLAUDE_CODE_NO_FLICKER=1
 
 ### Funcs ###
 
@@ -47,7 +48,7 @@ ls() {
     fi
 }
 
-e () {
+e() {
     if [[ -z "$*" ]]; then
         if [[ ! -d $HOME/.config/nvim/session ]]; then
             mkdir -p "$HOME"/.config/nvim/session
@@ -94,24 +95,11 @@ searchall() {
 }
 
 known-host-rm() {
-    cat ~/.ssh/known_hosts | grep -v $1 > ~/.ssh/known_hosts
+    cat ~/.ssh/known_hosts | grep -v $1 >~/.ssh/known_hosts
 }
 
 printProcess() {
     printf "\n------ Processes Matching \"$1\" ------\n$(ps aux | grep "$1" | grep -v grep | awk '{print $2, $11}')\n\n"
-}
-
-getme() {
-    if [[ "$1" == "" ]]
-    then
-        echo "No filename specified"
-        return
-    fi
-
-    files=$(find . -type f -name "*$1*")
-    files=("${(@s:\n:)files}")
-    echo "Reading $files[1]"
-    cat $files[1]
 }
 
 mcsay() {
@@ -174,4 +162,3 @@ if which ollama-copilot >/dev/null; then
         disown
     fi
 fi
-

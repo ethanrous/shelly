@@ -1,6 +1,17 @@
 local keymap = require("util.keymap")
 local const = require("config/const")
 
+-- Global LSP defaults for all servers
+vim.lsp.config("*", {
+	capabilities = {
+		textDocument = {
+			semanticTokens = {
+				multilineTokenSupport = true,
+			},
+		},
+	},
+})
+
 function FindVueFileReferences()
 	local filename = vim.fn.expand("%:t")
 	if not filename:endsWith(".vue") then
