@@ -14,10 +14,13 @@ require("nvim-autopairs").setup({
 	enable_check_bracket_line = true,
 })
 
--- Comment.nvim (the classic tpope-style commenter; mini.comment handles commenting
--- via keybinds, but this plugin's operator-pending mappings are still wired in by
--- default when loaded — kept for parity with the previous config).
-require("Comment").setup()
+-- Comment.nvim is installed but intentionally NOT setup() — calling setup
+-- would register its default mappings, which include `gb{motion}` as a
+-- blockwise comment operator and would shadow the user's `gb -> <C-o>`
+-- jumplist binding from config/keyboard.lua. mini.comment handles the
+-- actual commenting workflow; Comment.nvim is kept on disk only because
+-- the previous lazy.nvim spec also had it installed-but-not-configured.
+
 
 -- Alternate-toggler
 require("alternate-toggler").setup({
