@@ -99,7 +99,6 @@ require("blink.cmp").setup({
 		},
 		["<S-Tab>"] = { "snippet_backward", "fallback" },
 	},
-	opts_extend = { "sources.default" },
 })
 
 -- Neogen (automatic docstrings)
