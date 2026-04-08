@@ -34,18 +34,28 @@ linkConfigFile() {
     fi
 }
 
-tmuxName=tmux-$(uname).conf
-tmuxPath=~/.config/tmux/tmux.conf
-linkConfigFile $SHELLY/tmux/$tmuxName $tmuxPath
-
-alacrittyName=alacritty-$(uname).toml
-alacrittyPath=~/.config/alacritty/alacritty.toml
-linkConfigFile $SHELLY/alacritty/$alacrittyName $alacrittyPath
-
 weztermName=wezterm.lua
 weztermPath=~/.config/wezterm/wezterm.lua
 linkConfigFile $SHELLY/wezterm/$weztermName $weztermPath
 
-if [[ $TMUX != "" ]]; then
-    tmux source-file $tmuxPath
-fi
+# Claude Code config: replace each item under ~/.claude with a symlink into the
+# repo. Runtime state (sessions/, history.jsonl, projects/ which contains
+# memory, plugins/, etc.) is deliberately left alone.
+symlinkInto() {
+    src=$1
+    dest=$2
+
+    if [[ -L $dest ]] && [[ "$(readlink $dest)" == "$src" ]]; then
+        return
+    fi
+    echo "Symlinking $dest -> $src"
+    rm -rf $dest
+    mkdir -p $(dirname $dest)
+    ln -s $src $dest
+}
+
+mkdir -p ~/.claude/skills
+symlinkInto $SHELLY/claude/settings.json ~/.claude/settings.json
+symlinkInto $SHELLY/claude/rules ~/.claude/rules
+symlinkInto $SHELLY/claude/commands ~/.claude/commands
+symlinkInto $SHELLY/claude/skills/vue-best-practices ~/.claude/skills/vue-best-practices

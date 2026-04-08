@@ -21,10 +21,10 @@ return {
 					["_"] = "actions.open_cwd",
 					["R"] = "actions.refresh",
 					["<LEADER>n"] = "actions.close",
-					["s"] = function()
-						require("oil.actions").select_vsplit.callback()
-						require("oil.actions").close.callback()
-					end,
+					-- ["s"] = function()
+					-- 	require("oil.actions").select_vsplit.callback()
+					-- 	require("oil.actions").close.callback()
+					-- end,
 					["S"] = function()
 						require("oil.actions").select_split.callback()
 						require("oil.actions").close.callback()

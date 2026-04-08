@@ -11,7 +11,3 @@ export EDITOR='nvim'
 export COLOR='magenta'
 
 bindkey -e
-
-if [[ $ALACRITTY != true ]] then
-	alacritty&; disown && exit	
-fi

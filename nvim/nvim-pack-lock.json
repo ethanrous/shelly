@@ -1,0 +1,8 @@
+{
+  "plugins": {
+    "nvim-jump": {
+      "rev": "ed894858aa3c93ff5fb725422073c1071c308558",
+      "src": "git@github.com:yorickpeterse/nvim-jump.git"
+    }
+  }
+}
