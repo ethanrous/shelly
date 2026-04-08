@@ -1,11 +1,28 @@
 -- Entry point for vim.pack-managed plugins.
 -- Registers build hooks, then requires every plugin module in dependency order.
 
--- lazy.nvim clobbers packpath when it sets up. Restore the data/site dir so
--- vim.pack can find its install location at pack/core/opt/. This must run
--- BEFORE any vim.pack.add() call. Will become unnecessary once lazy is removed
--- in Task 23.
-vim.opt.packpath:prepend(vim.fn.stdpath("data") .. "/site")
+-- vim.pack.add defaults `load = false` during init.lua sourcing, which works
+-- like `:packadd!` — adds the plugin to runtimepath but does NOT source its
+-- plugin/* or ftdetect/* files. That breaks any plugin whose behavior depends
+-- on plugin/* scripts running, including:
+--   - nvim-treesitter (filetype-to-parser mapping in plugin/filetypes.lua,
+--     query predicates in plugin/query_predicates.lua — without these,
+--     syntax highlighting silently fails for non-trivial filetypes)
+--   - pure-vimscript plugins (vim-abolish, vim-tmux-navigator, vim-lastplace,
+--     vim-repeat, leap.nvim, nvim-bqf)
+--   - many lua plugins that register commands/autocmds via plugin/*.lua
+-- Wrap vim.pack.add to default load = true so all our plugin files get the
+-- sane behavior without sprinkling explicit packadd calls everywhere.
+do
+	local original_add = vim.pack.add
+	vim.pack.add = function(specs, opts)
+		opts = opts or {}
+		if opts.load == nil then
+			opts.load = true
+		end
+		return original_add(specs, opts)
+	end
+end
 
 -- Build hooks for plugins that used lazy.nvim's `build = ...`.
 -- Must be registered BEFORE any vim.pack.add() call so install-time hooks fire.
