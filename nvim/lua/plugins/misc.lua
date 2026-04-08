@@ -9,17 +9,31 @@ vim.pack.add({
 require("presence").setup({ auto_update = true })
 
 -- Codesnap (screenshot code blocks)
-require("codesnap").setup({
-	has_line_number = true,
-	watermark = "",
-	bg_padding = 0,
-	has_breadcrumbs = true,
-	show_workspace = true,
-	code_font_family = "JetBrainsMono Nerd Font",
-	mac_window_bar = false,
-})
+-- Deferred to first keypress: requiring codesnap mutates package.cpath in a way
+-- that corrupts dlopen() for unrelated native modules (notably blink.cmp's fuzzy
+-- matcher), so we keep it out of the startup path. Equivalent to lazy.nvim's
+-- old `keys = {{...}}` lazy-load.
+local codesnap_initialized = false
+local function init_codesnap()
+	if codesnap_initialized then
+		return
+	end
+	require("codesnap").setup({
+		has_line_number = true,
+		watermark = "",
+		bg_padding = 0,
+		has_breadcrumbs = true,
+		show_workspace = true,
+		code_font_family = "JetBrainsMono Nerd Font",
+		mac_window_bar = false,
+	})
+	codesnap_initialized = true
+end
 
-vim.keymap.set("v", "<Leader>s", "<Cmd>CodeSnap<CR>", { desc = "Screenshot code snippet" })
+vim.keymap.set("v", "<Leader>s", function()
+	init_codesnap()
+	vim.cmd("CodeSnap")
+end, { desc = "Screenshot code snippet" })
 
 -- Remote-nvim
 require("remote-nvim").setup()
