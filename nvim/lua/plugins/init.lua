@@ -46,7 +46,7 @@ vim.api.nvim_create_autocmd("PackChanged", {
 -- exactly one line as it creates that module.
 require("plugins.core")
 require("plugins.colorscheme")
--- require("plugins.treesitter")
+require("plugins.treesitter")
 -- require("plugins.lsp")
 -- require("plugins.completion")
 -- require("plugins.copilot")
