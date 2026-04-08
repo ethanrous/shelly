@@ -1,6 +1,12 @@
 -- Entry point for vim.pack-managed plugins.
 -- Registers build hooks, then requires every plugin module in dependency order.
 
+-- lazy.nvim clobbers packpath when it sets up. Restore the data/site dir so
+-- vim.pack can find its install location at pack/core/opt/. This must run
+-- BEFORE any vim.pack.add() call. Will become unnecessary once lazy is removed
+-- in Task 23.
+vim.opt.packpath:prepend(vim.fn.stdpath("data") .. "/site")
+
 -- Build hooks for plugins that used lazy.nvim's `build = ...`.
 -- Must be registered BEFORE any vim.pack.add() call so install-time hooks fire.
 local function run_build(cwd, cmd)
