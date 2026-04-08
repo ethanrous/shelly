@@ -44,7 +44,7 @@ vim.api.nvim_create_autocmd("PackChanged", {
 -- must load before any file that consumes them.
 -- Every require is commented out initially — each subsequent task uncomments
 -- exactly one line as it creates that module.
--- require("plugins.core")
+require("plugins.core")
 -- require("plugins.colorscheme")
 -- require("plugins.treesitter")
 -- require("plugins.lsp")

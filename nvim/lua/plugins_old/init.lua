@@ -1,7 +1,5 @@
 return {
-	"nvim-lua/plenary.nvim", -- Necessary dependency
 	"farmergreg/vim-lastplace", -- Remember last cursor place
-	"nvim-lua/popup.nvim", -- Necessary dependency
 
 	-- <C-{h/j/k/l}> between panes. Don't remove, even though no longer using tmux
 	"christoomey/vim-tmux-navigator",
