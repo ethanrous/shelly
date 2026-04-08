@@ -47,6 +47,10 @@
       "rev": "ff2cbcba459b637ec3fd165a2be59b7bbaeedf0d",
       "src": "https://github.com/folke/lazydev.nvim"
     },
+    "leap.nvim": {
+      "rev": "b960d5038c5c505c52e56a54490f9bbb1f0e6ef6",
+      "src": "https://codeberg.org/andyg/leap.nvim"
+    },
     "lspkind.nvim": {
       "rev": "c7274c48137396526b59d86232eabcdc7fed8a32",
       "src": "https://github.com/onsails/lspkind.nvim"
@@ -214,9 +218,17 @@
       "rev": "0d1e93684da00ab7c057410fecfc24f434698898",
       "src": "https://github.com/RRethy/vim-illuminate"
     },
+    "vim-lastplace": {
+      "rev": "e58cb0df716d3c88605ae49db5c4741db8b48aa9",
+      "src": "https://github.com/farmergreg/vim-lastplace"
+    },
     "vim-repeat": {
       "rev": "65846025c15494983dafe5e3b46c8f88ab2e9635",
       "src": "https://github.com/tpope/vim-repeat"
+    },
+    "vim-tmux-navigator": {
+      "rev": "e41c431a0c7b7388ae7ba341f01a0d217eb3a432",
+      "src": "https://github.com/christoomey/vim-tmux-navigator"
     },
     "workspace-diagnostics.nvim": {
       "rev": "60f9175b2501ae3f8b1aba9719c0df8827610c8e",
