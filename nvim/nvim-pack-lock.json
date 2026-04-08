@@ -26,6 +26,10 @@
       "rev": "7d7957c26d33a97085d3a0c82eeb0147a0f51314",
       "src": "https://github.com/olimorris/codecompanion.nvim"
     },
+    "codesnap.nvim": {
+      "rev": "0a0941340376439a25d6cd8a4d1d2b372edbfdbd",
+      "src": "https://github.com/mistricky/codesnap.nvim"
+    },
     "conform.nvim": {
       "rev": "086a40dc7ed8242c03be9f47fbcee68699cc2395",
       "src": "https://github.com/stevearc/conform.nvim"
@@ -217,6 +221,14 @@
       "rev": "b7404d35d5d3548a82149238289fa71f7f6de4ac",
       "src": "https://github.com/nvim-lua/popup.nvim"
     },
+    "presence.nvim": {
+      "rev": "87c857a56b7703f976d3a5ef15967d80508df6e6",
+      "src": "https://github.com/andweeb/presence.nvim"
+    },
+    "profile.nvim": {
+      "rev": "30433d7513f0d14665c1cfcea501c90f8a63e003",
+      "src": "https://github.com/stevearc/profile.nvim"
+    },
     "quicker.nvim": {
       "rev": "063cc44da1eef8681bbd653b29d3bc961780886a",
       "src": "https://github.com/stevearc/quicker.nvim"
@@ -224,6 +236,10 @@
     "rainbow-delimiters.nvim": {
       "rev": "aab6caaffd79b8def22ec4320a5344f7c42f58d2",
       "src": "https://github.com/HiPhish/rainbow-delimiters.nvim"
+    },
+    "remote-nvim.nvim": {
+      "rev": "9992c2fb8bf4f11aca2c8be8db286b506f92efcb",
+      "src": "https://github.com/amitds1997/remote-nvim.nvim"
     },
     "smart-open.nvim": {
       "rev": "7763800068bef69334870c10cb595d49ce27580a",
