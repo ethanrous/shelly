@@ -1,50 +1,5 @@
 return {
 	{
-		"zbirenbaum/copilot.lua",
-		event = "InsertEnter",
-		dependencies = {
-			"copilotlsp-nvim/copilot-lsp",
-		},
-		config = function()
-			-- vim.g.copilot_proxy = "http://127.0.0.1:11435"
-			-- vim.g.copilot_proxy_strict_ssl = false
-
-			require("copilot").setup({
-				filetypes = {
-					["*"] = true,
-				},
-				copilot_model = "gpt-41-copilot",
-				-- nes = {
-				-- 	enabled = true,
-				-- 	keymap = {
-				-- 		accept_and_goto = "<A-s>",
-				-- 		accept = false,
-				-- 		dismiss = "<Esc>",
-				-- 	},
-				-- },
-				suggestion = {
-					enabled = true,
-					auto_trigger = true,
-					keymap = {
-						accept = false,
-						accept_word = false,
-						accept_line = false,
-						next = false,
-						prev = false,
-						dismiss = false,
-					},
-				},
-				server_opts_overrides = {
-					settings = {
-						advanced = {
-							inlineSuggestCount = 1,
-						},
-					},
-				},
-			})
-		end,
-	},
-	{
 		"olimorris/codecompanion.nvim",
 		dependencies = {
 			"nvim-lua/plenary.nvim",
