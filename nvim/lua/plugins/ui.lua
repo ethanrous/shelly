@@ -149,8 +149,13 @@ end, { silent = true })
 -- Indent-blankline
 do
 	local highlight = {
-		"RainbowRed", "RainbowYellow", "RainbowBlue", "RainbowOrange",
-		"RainbowGreen", "RainbowViolet", "RainbowCyan",
+		"RainbowRed",
+		"RainbowYellow",
+		"RainbowBlue",
+		"RainbowOrange",
+		"RainbowGreen",
+		"RainbowViolet",
+		"RainbowCyan",
 	}
 	local hooks = require("ibl.hooks")
 	hooks.register(hooks.type.HIGHLIGHT_SETUP, function()
