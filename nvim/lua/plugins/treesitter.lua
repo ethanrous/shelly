@@ -31,6 +31,7 @@ require("nvim-treesitter").install({
 	"yaml",
 	"tsx",
 	"rust",
+	"vue",
 })
 
 vim.treesitter.language.register("tsx", { "javascript", "typescript.tsx" })
