@@ -14,11 +14,14 @@ alias tab='wezterm cli set-tab-title'
 
 alias sbp='source ~/.${SHELL_NAME}rc'
 alias sync='$SHELLY/shell/common/auto-loader.bash'
-alias claude-local='ANTHROPIC_BASE_URL=http://localhost:1234/ claude --dangerously-skip-permissions --system-prompt-file ~/tmp/CLAUDE.md'
+alias claude-local='ANTHROPIC_BASE_URL=http://localhost:1234/ claude --dangerously-skip-permissions --system-prompt-file ~/.claude/CLAUDE.md'
+# alias claude-local='ANTHROPIC_BASE_URL=http://localhost:1234/ claude --dangerously-skip-permissions --system-prompt-file ~/tmp/CLAUDE.md'
 alias claude='claude --dangerously-skip-permissions'
 
+### ENV ###
 export EDITOR="nvim"
 export CLAUDE_CODE_NO_FLICKER=1
+export FPATH="$HOME/.docker/completions:$FPATH"
 
 ### Funcs ###
 
@@ -44,7 +47,7 @@ ls() {
     if which eza >/dev/null 2>&1; then
         run_cmd eza "$1" "${@: -1}"
     else
-        run_cmd /usr/bin/ls "$1" "${@: -1}"
+        run_cmd /bin/ls "$1" "${@: -1}"
     fi
 }
 
@@ -124,6 +127,10 @@ kill-ollama() {
 }
 
 add_to_path() {
+    if [[ -z $1 ]]; then
+        return
+    fi
+
     if [[ $2 == true ]]; then
         if [[ $SHELLY_DEBUG == true ]]; then
             echo "Overriding PATH entry $1 to be at top"
@@ -162,3 +169,6 @@ if which ollama-copilot >/dev/null; then
         disown
     fi
 fi
+
+autoload -Uz compinit
+compinit

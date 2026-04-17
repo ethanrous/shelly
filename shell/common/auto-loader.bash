@@ -1,8 +1,8 @@
 #!/bin/bash
 
-if [[ $SHELLY_DEBUG == "true" ]]; then
-    set -x
-fi
+# if [[ $SHELLY_DEBUG == "true" ]]; then
+#     set -x
+# fi
 
 if [[ $SHELL_NAME == "" ]]; then
     echo "SHELL_NAME NOT SET, EXITING"
@@ -39,7 +39,7 @@ source "$mainfile"
 ((count++))
 
 localHost=$(hostname)
-
+localHost="${localHost%.local}"
 if [[ $localHost == "" ]]; then
     echo "Could not determine hostname, exiting"
     return

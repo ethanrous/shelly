@@ -1,132 +1,68 @@
-return {
-	-- Better a/i movements
-	{
-		"echasnovski/mini.ai",
-		version = false,
-		config = function()
-			require("mini.ai").setup()
+vim.pack.add({
+	"https://github.com/echasnovski/mini.ai",
+	"https://github.com/echasnovski/mini.splitjoin",
+	"https://github.com/echasnovski/mini.bracketed",
+	"https://github.com/echasnovski/mini.notify",
+	"https://github.com/echasnovski/mini.comment",
+	"https://github.com/echasnovski/mini.move",
+	"https://github.com/echasnovski/mini.surround",
+	"https://github.com/echasnovski/mini.misc",
+})
+
+-- Better a/i movements
+require("mini.ai").setup()
+
+-- Switch between single-line and multiline statements
+local splitjoin = require("mini.splitjoin")
+splitjoin.setup()
+vim.keymap.set("n", "<leader>ts", function()
+	splitjoin.toggle()
+end, { silent = true, desc = "Toggle between single-line and multiline statements" })
+
+-- Bracketed movement
+require("mini.bracketed").setup()
+
+-- Notifications (override vim.notify)
+local notify = require("mini.notify")
+notify.setup({
+	lsp_progress = { enable = false },
+	window = { config = { border = "solid" } },
+})
+vim.notify = notify.make_notify({
+	ERROR = { duration = 5000 },
+	WARN = { duration = 4000 },
+	INFO = { duration = 2000 },
+})
+
+-- Comment (with treesitter-aware commentstring)
+require("mini.comment").setup({
+	options = {
+		custom_commentstring = function()
+			local ok, cs = pcall(require("ts_context_commentstring.internal").calculate_commentstring)
+			return ok and cs or vim.bo.commentstring
 		end,
 	},
+})
 
-	-- To switch between single-line and multiline statements
-	{
-		"echasnovski/mini.splitjoin",
-		version = false,
-		config = function()
-			local splitjoin = require("mini.splitjoin")
-			splitjoin.setup()
-			vim.keymap.set("n", "<leader>ts", function()
-				splitjoin.toggle()
-			end, { silent = true, desc = "Toggle between single-line and multiline statements" })
-		end,
+-- Move lines
+require("mini.move").setup({
+	mappings = {
+		left = "H",
+		right = "L",
+		down = "J",
+		up = "K",
+		line_left = "",
+		line_right = "",
+		line_down = "J",
+		line_up = "K",
 	},
+})
 
-	-- Move forward and backwards
-	{
-		"echasnovski/mini.bracketed",
-		version = false,
-		config = function()
-			require("mini.bracketed").setup()
-		end,
-	},
+-- Surround
+require("mini.surround").setup({ n_lines = 50 })
 
-	-- Notification pluggin & lsp loading
-	{
-		"echasnovski/mini.notify",
-		version = false,
-		config = function()
-			local notify = require("mini.notify")
-			notify.setup({
-				lsp_progress = {
-					enable = false,
-				},
-				window = {
-					config = {
-						border = "solid",
-					},
-				},
-			})
-
-			vim.notify = notify.make_notify({
-				ERROR = { duration = 5000 },
-				WARN = { duration = 4000 },
-				INFO = { duration = 2000 },
-			})
-		end,
-	},
-
-	-- Commenting
-	{
-		"echasnovski/mini.comment",
-		version = false,
-		config = function()
-			require("mini.comment").setup({
-				options = {
-					custom_commentstring = function()
-						local ok, cs = pcall(require("ts_context_commentstring.internal").calculate_commentstring)
-						return ok and cs or vim.bo.commentstring
-					end,
-				},
-			})
-		end,
-	},
-
-	-- Move lines around
-	{
-		"echasnovski/mini.move",
-		version = false,
-		config = function()
-			require("mini.move").setup({
-				mappings = {
-					-- Visual mode
-					left = "H",
-					right = "L",
-					down = "J",
-					up = "K",
-
-					-- Normal mode
-					line_left = "",
-					line_right = "",
-					line_down = "J",
-					line_up = "K",
-				},
-			})
-		end,
-	},
-
-	--  Surround text objects
-	{
-		"echasnovski/mini.surround",
-		version = false,
-		config = function()
-			require("mini.surround").setup({
-				n_lines = 50,
-			})
-		end,
-	},
-
-	{
-		"echasnovski/mini.misc",
-		version = false,
-		config = function()
-			vim.keymap.set("n", "<leader>wz", function()
-				require("mini.misc").zoom()
-			end, { silent = true })
-		end,
-	},
-
-	{
-		url = "https://codeberg.org/andyg/leap.nvim",
-		config = function()
-			local leap = require("leap")
-			-- leap.create_default_mappings()
-			leap.opts.equivalence_classes = { " \t\r\n", "([{", ")]}", "'\"`" }
-			vim.keymap.set({ "n", "x", "o" }, "f", "<Plug>(leap-forward)")
-			vim.keymap.set({ "n", "x", "o" }, "F", "<Plug>(leap-backward)")
-			-- vim.keymap.set({ "n", "x", "o" }, "gs", "<Plug>(leap-from-window)")
-		end,
-		dependencies = {
-			"tpope/vim-repeat",
-		},
-	},
-}
+-- Misc (zoom window)
+require("mini.misc").setup({})
+vim.keymap.set("n", "<leader>wz", function()
+	require("mini.misc").zoom()
+end, { silent = true })
