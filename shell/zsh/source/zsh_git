@@ -48,7 +48,21 @@ gs() {
 }
 
 git_wip() {
-    local answer="$1"
+    local answer=""
+    local ai=false
+
+    while [ "${1:-}" != "" ]; do
+        case "$1" in
+        "--ai")
+            ai=true
+        ;;
+        *)
+            answer="$1"
+        ;;
+        esac
+        shift
+    done
+
     if [[ "$answer" != "y" ]]; then
         printf "Really WIP add/commit/push y/[n]? "
         read -n -k 1 answer
@@ -56,7 +70,15 @@ git_wip() {
     fi
     if [[ "$answer" == "y" ]]; then
         git add -A
-        git commit -m "WIP" --no-verify
+
+        if [[ $ai == true ]]; then
+            echo "Making git commit with AI generated commit message..."
+
+            opencode run --model 'mlx-community/qwen3.6-35b-a3b' "/write-commit-message"
+        else
+            git commit -m "WIP" --no-verify
+        fi
+
         git push origin HEAD
     fi
 }

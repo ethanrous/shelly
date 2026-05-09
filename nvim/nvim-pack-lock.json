@@ -111,6 +111,10 @@
       "rev": "2715e04bea3ec9244f15b421dc5b18c0fe326210",
       "src": "https://github.com/echasnovski/mini.surround"
     },
+    "minuet-ai.nvim": {
+      "rev": "2e7b1dd18e1207627bf0360be8032a50e9489970",
+      "src": "https://github.com/milanglacier/minuet-ai.nvim"
+    },
     "neogen": {
       "rev": "23e7e9f883d01289ebd90e98025acc860ea26366",
       "src": "https://github.com/danymat/neogen"

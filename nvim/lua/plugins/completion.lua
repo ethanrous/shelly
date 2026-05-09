@@ -21,10 +21,8 @@ require("blink.cmp").setup({
 						text = function(ctx)
 							local icon = ctx.kind_icon
 							if ctx.item.source_name == "LSP" then
-								local color_item = require("nvim-highlight-colors").format(
-									ctx.item.documentation,
-									{ kind = ctx.kind }
-								)
+								local color_item =
+									require("nvim-highlight-colors").format(ctx.item.documentation, { kind = ctx.kind })
 								if color_item and color_item.abbr ~= "" then
 									icon = color_item.abbr
 								end
@@ -34,10 +32,8 @@ require("blink.cmp").setup({
 						highlight = function(ctx)
 							local highlight = "BlinkCmpKind" .. ctx.kind
 							if ctx.item.source_name == "LSP" then
-								local color_item = require("nvim-highlight-colors").format(
-									ctx.item.documentation,
-									{ kind = ctx.kind }
-								)
+								local color_item =
+									require("nvim-highlight-colors").format(ctx.item.documentation, { kind = ctx.kind })
 								if color_item and color_item.abbr_hl_group then
 									highlight = color_item.abbr_hl_group
 								end

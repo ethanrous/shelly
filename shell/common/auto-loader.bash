@@ -38,12 +38,12 @@ fi
 source "$mainfile"
 ((count++))
 
-localHost=$(hostname)
-localHost="${localHost%.local}"
-if [[ $localHost == "" ]]; then
-    echo "Could not determine hostname, exiting"
-    return
-fi
+localHost=$(scutil --get ComputerName)
+# localHost="${localHost%.local}"
+# if [[ $localHost == "" ]]; then
+#     echo "Could not determine hostname, exiting"
+#     return
+# fi
 
 machine_specific_path="$SHELLY/shell/common/machines/$localHost"
 if [[ -L "$machine_specific_path" ]]; then
