@@ -1,71 +1,18 @@
--- LSP
-return {
-	{
-		"mason-org/mason.nvim",
-		dependencies = {
-			-- "mason-org/mason-lspconfig.nvim",
-			-- "neovim/nvim-lspconfig",
-		},
-		config = function()
-			require("mason").setup()
-			-- require("mason-lspconfig").setup({
-			-- 	ensure_installed = {
-			-- 		"vimls",
-			--
-			-- 		-- Go
-			-- 		"gopls",
-			-- 		"golangci_lint_ls",
-			-- 		--
-			-- 		-- Lua
-			-- 		"lua_ls",
-			-- 		-- Bash
-			-- 		"bashls",
-			--
-			-- 		-- JSON
-			-- 		"jsonls",
-			--
-			-- 		-- Python
-			-- 		"pyright",
-			--
-			-- 		-- YAML
-			-- 		"yamlls",
-			--
-			-- 		-- Rust
-			-- 		"rust_analyzer",
-			--
-			-- 		-- Java
-			-- 		"jdtls",
-			-- 		"gradle_ls",
-			--
-			-- 		-- HTML
-			-- 		"html",
-			-- 		-- JavaScript/TypeScript
-			-- 		"ts_ls",
-			-- 		"vue_ls",
-			-- 		"angularls",
-			--
-			-- 		-- "vtsls",
-			--
-			-- 		"tailwindcss",
-			-- 		"eslint",
-			-- 		"cssls",
-			-- 		-- "cssmodules-language-server",
-			--
-			-- 		-- C/C++
-			-- 		"clangd",
-			--
-			-- 		-- Docker
-			-- 		-- "hadolint",
-			--
-			-- 		-- Ruby
-			-- 		"ruby_lsp",
-			-- 	},
-			-- 	automatic_installation = true,
-			-- 	automatic_enable = false,
-			-- })
-		end,
+vim.pack.add({
+	"https://github.com/mason-org/mason.nvim",
+	"https://github.com/artemave/workspace-diagnostics.nvim",
+	"https://github.com/folke/lazydev.nvim",
+})
+
+require("mason").setup()
+
+require("lazydev").setup({
+	library = {
+		-- Load luvit types when the `vim.uv` word is found
+		{ path = "${3rd}/luv/library", words = { "vim%.uv" } },
 	},
-	{
-		"artemave/workspace-diagnostics.nvim",
-	},
-}
+})
+
+-- workspace-diagnostics has no global setup; it's consumed via
+-- require("workspace-diagnostics").populate_workspace_diagnostics(client, bufnr)
+-- from LspAttach, which can be wired in later if needed.

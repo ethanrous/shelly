@@ -1,56 +1,45 @@
 local const = require("config/const")
 
-return {
-	{
-		"ThePrimeagen/harpoon",
-		lazy = true,
-		branch = "harpoon2",
-		dependencies = { "nvim-lua/plenary.nvim" },
-		config = function()
-			local harpoon = require("harpoon")
-			local Extensions = require("harpoon.extensions")
-			local Path = require("plenary.path")
-			harpoon.setup()
+vim.pack.add({ { src = "https://github.com/ThePrimeagen/harpoon", version = "harpoon2" } })
 
-			vim.keymap.set("n", "<A-a>", function()
-				if harpoon.ui.win_id ~= nil then
-					vim.api.nvim_feedkeys("k", "n", false)
-				end
-			end)
+local harpoon = require("harpoon")
+harpoon.setup()
 
-			vim.keymap.set("n", "<A-d>", function()
-				if harpoon.ui.win_id ~= nil then
-					vim.api.nvim_feedkeys("j", "n", false)
-					return
-				end
+vim.keymap.set("n", "<A-a>", function()
+	if harpoon.ui.win_id ~= nil then
+		vim.api.nvim_feedkeys("k", "n", false)
+	end
+end)
 
-				harpoon.ui:toggle_quick_menu(harpoon:list(), {
-					border = const.BORDER_STYLE,
-				})
-				vim.api.nvim_feedkeys("j", "n", false)
+vim.keymap.set("n", "<A-d>", function()
+	if harpoon.ui.win_id ~= nil then
+		vim.api.nvim_feedkeys("j", "n", false)
+		return
+	end
 
-				vim.o.cursorline = true
-			end)
+	harpoon.ui:toggle_quick_menu(harpoon:list(), {
+		border = const.BORDER_STYLE,
+	})
+	vim.api.nvim_feedkeys("j", "n", false)
+	vim.o.cursorline = true
+end)
 
-			vim.keymap.set("n", "<A-w>", function()
-				local h_list = harpoon:list()
-				h_list:select(h_list._index)
-			end)
+vim.keymap.set("n", "<A-w>", function()
+	local h_list = harpoon:list()
+	h_list:select(h_list._index)
+end)
 
-			vim.keymap.set({ "i", "n" }, "<A-s>", function()
-				if harpoon.ui.win_id ~= nil then
-					vim.api.nvim_feedkeys("\x0d", "m", false)
-					return
-				end
+vim.keymap.set({ "i", "n" }, "<A-s>", function()
+	if harpoon.ui.win_id ~= nil then
+		vim.api.nvim_feedkeys("\x0d", "m", false)
+		return
+	end
 
-				if harpoon:list()._length > 1 then
-					harpoon:list():select(2)
-					return
-				end
+	if harpoon:list()._length > 1 then
+		harpoon:list():select(2)
+		return
+	end
 
-				local key = vim.api.nvim_replace_termcodes("<C-^>", true, false, true)
-				vim.api.nvim_feedkeys(key, "n", false)
-			end)
-		end,
-	},
-}
+	local key = vim.api.nvim_replace_termcodes("<C-^>", true, false, true)
+	vim.api.nvim_feedkeys(key, "n", false)
+end)

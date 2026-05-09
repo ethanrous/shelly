@@ -1,7 +1,7 @@
 require("config.settings")
 require("config.keyboard")
 require("config.highlight")
-require("config.lazy")
+require("plugins")
 require("config.helpers")
 require("config.snippets")
 require("config.lsp")

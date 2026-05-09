@@ -137,11 +137,6 @@ vim.keymap.set("n", "<leader>do", function()
 	vim.cmd("silent !open -R " .. file_path)
 end, { desc = "Open the currnet directory in Finder" })
 
--- Code Companion --
--- vim.keymap.set({ "n", "v" }, "<C-a>", "<cmd>CodeCompanionActions<cr>", { noremap = true })
-vim.keymap.set({ "n", "v" }, "<LocalLeader>a", "<cmd>CodeCompanionChat Toggle<cr>", { noremap = true, silent = true })
-vim.keymap.set("v", "ga", "<cmd>CodeCompanionChat Add<cr>", { noremap = true, silent = true })
-
 local function safeDelete(mode, lhs)
 	if type(mode) == "table" then
 		mode = mode[1]

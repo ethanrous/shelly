@@ -1,5 +1,9 @@
-local vue_language_server_path = vim.fn.stdpath("data")
-	.. "/mason/packages/vue-language-server/node_modules/@vue/language-server"
+local vue_language_server_path = vim.fn.exepath("vue-language-server")
+if vue_language_server_path ~= "" then
+	vue_language_server_path = vim.fn.resolve(vue_language_server_path)
+	-- Navigate from the binary up to the package's node_modules/@vue/language-server
+	vue_language_server_path = vim.fn.fnamemodify(vue_language_server_path, ":h:h")
+end
 local tsserver_filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue" }
 local vue_plugin = {
 	name = "@vue/typescript-plugin",
