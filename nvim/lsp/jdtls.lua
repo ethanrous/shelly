@@ -50,24 +50,19 @@ local function get_jdtls_jvm_args()
 	return unpack(args)
 end
 
-local root_markers1 = {
+local root_markers = {
 	-- Multi-module projects
 	"mvnw", -- Maven
 	"gradlew", -- Gradle
 	"settings.gradle", -- Gradle
 	"settings.gradle.kts", -- Gradle
-	-- Use git directory as last resort for multi-module maven projects
-	-- In multi-module maven projects it is not really possible to determine what is the parent directory
-	-- and what is submodule directory. And jdtls does not break if the parent directory is at higher level than
-	-- actual parent pom.xml so propagating all the way to root git directory is fine
-	".git",
-}
-local root_markers2 = {
 	-- Single-module projects
 	"build.xml", -- Ant
 	"pom.xml", -- Maven
 	"build.gradle", -- Gradle
 	"build.gradle.kts", -- Gradle
+	-- Use git directory as last resort for multi-module maven projects
+	".git",
 }
 
 ---@type vim.lsp.Config
@@ -96,6 +91,15 @@ return {
 		})
 	end,
 	filetypes = { "java" },
-	root_markers = { root_markers1, root_markers2 },
-	init_options = {},
+	root_markers = root_markers,
+	settings = {
+		java = {
+			import = {
+				gradle = {
+					wrapper = { enabled = true },
+					annotationProcessing = { enabled = true },
+				},
+			},
+		},
+	},
 }
