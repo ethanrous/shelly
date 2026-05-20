@@ -3,7 +3,8 @@
     "allow": [
       "mcp__playwright__:*",
       "mcp__playwright__*"
-    ]
+    ],
+    "defaultMode": "auto"
   },
   "enabledPlugins": {
     "everything-claude-code@everything-claude-code": true,
@@ -35,5 +36,6 @@
     }
   },
   "effortLevel": "xhigh",
-  "skipDangerousModePermissionPrompt": true
+  "skipDangerousModePermissionPrompt": true,
+  "skipAutoPermissionPrompt": true
 }

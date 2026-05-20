@@ -35,6 +35,10 @@ gp() {
     git pull $*
 }
 
+gpf() {
+    git push --force-with-lease
+}
+
 gft() {
     git fetch --tags --force
 }
@@ -55,10 +59,10 @@ git_wip() {
         case "$1" in
         "--ai")
             ai=true
-        ;;
+            ;;
         *)
             answer="$1"
-        ;;
+            ;;
         esac
         shift
     done
