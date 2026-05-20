@@ -34,3 +34,19 @@ oil.setup({
 })
 
 vim.keymap.set("n", "<LEADER>n", "<Cmd>Oil<CR>", { noremap = true, silent = true, desc = "Open Oil" })
+
+vim.keymap.set("n", "<LEADER>R", function()
+	vim.ui.input({ prompt = "Remote (host or user@host:/path/): " }, function(input)
+		if not input or input == "" then
+			return
+		end
+		local host, path = input:match("^([^:]+):(.*)$")
+		if not host then
+			host, path = input, ""
+		end
+		if path ~= "" and not path:match("/$") then
+			path = path .. "/"
+		end
+		vim.cmd("edit oil-ssh://" .. host .. "/" .. path)
+	end)
+end, { noremap = true, silent = true, desc = "Open Oil over SSH" })

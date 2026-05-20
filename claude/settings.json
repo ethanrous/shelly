@@ -37,5 +37,9 @@
   },
   "effortLevel": "xhigh",
   "skipDangerousModePermissionPrompt": true,
+<<<<<<< Updated upstream
+=======
+  "agentPushNotifEnabled": true,
+>>>>>>> Stashed changes
   "skipAutoPermissionPrompt": true
 }
