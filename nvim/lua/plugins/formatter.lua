@@ -18,10 +18,12 @@ end
 local function js_formatters(bufnr)
 	local path = vim.api.nvim_buf_get_name(bufnr)
 	if file_matches_prefix(path, eslint_path_prefixes) then
-		return { "eslint" }
+		return { "eslint_d" }
 	end
 	return { "prettier" }
 end
+
+local eslint_d_root = vim.fn.expand("~/.local/share/eslint_d_shim")
 
 conform.setup({
 	log_level = vim.log.levels.DEBUG,
@@ -29,21 +31,20 @@ conform.setup({
 		xml = { command = "prettier", args = { "--plugin=@prettier/plugin-xml", "$FILENAME" } },
 		templ = { command = "templ fmt" },
 		ruff = { command = "ruff", args = { "format" } },
-		eslint = {
-			command = require("conform.util").from_node_modules("eslint"),
-			args = { "--fix", "$FILENAME" },
-			stdin = false,
+		eslint_d = {
+			env = {
+				ESLINT_D_ROOT = eslint_d_root,
+				ESLINT_D_PPID = "auto",
+			},
 			cwd = require("conform.util").root_file({
-				".eslintrc",
-				".eslintrc.js",
-				".eslintrc.cjs",
-				".eslintrc.json",
-				".eslintrc.yaml",
-				".eslintrc.yml",
 				"eslint.config.js",
 				"eslint.config.mjs",
 				"eslint.config.cjs",
 				"eslint.config.ts",
+				".eslintrc",
+				".eslintrc.js",
+				".eslintrc.cjs",
+				".eslintrc.json",
 				"package.json",
 			}),
 		},
