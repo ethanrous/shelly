@@ -5,7 +5,7 @@ vim.pack.add({
 
 require("copilot").setup({
 	filetypes = { ["*"] = true },
-	copilot_model = "gpt-41-copilot",
+	-- copilot_model = "gpt-41-copilot",
 	suggestion = {
 		enabled = true,
 		auto_trigger = true,
