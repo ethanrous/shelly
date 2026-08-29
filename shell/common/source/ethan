@@ -15,8 +15,8 @@ alias tab='wezterm cli set-tab-title'
 alias sbp='source ~/.${SHELL_NAME}rc'
 alias sync='$SHELLY/shell/common/auto-loader.bash'
 alias claude-local='ANTHROPIC_BASE_URL=http://localhost:1234/ claude --dangerously-skip-permissions --system-prompt-file ~/.claude/CLAUDE.md'
-# alias claude-local='ANTHROPIC_BASE_URL=http://localhost:1234/ claude --dangerously-skip-permissions --system-prompt-file ~/tmp/CLAUDE.md'
-# alias claude='claude --dangerously-skip-permissions'
+alias rg='rg --hidden'
+alias k='kubectl'
 
 ### ENV ###
 export EDITOR="nvim"

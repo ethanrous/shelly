@@ -1,0 +1,16 @@
+{
+  "lastChangelogVersion": "0.84.1",
+  "theme": "dark",
+  "defaultProvider": "lucy",
+  "defaultModel": "Qwen3.8-27B-Q4_K_M",
+  "defaultThinkingLevel": "medium",
+  "packages": [
+    "npm:pi-mcp-adapter",
+    "npm:pi-subagents",
+    "npm:pi-web-access"
+  ],
+  "reserveTokens": 80000,
+  "timeoutMs": 36000000,
+  "workflowTimeoutMs": 36000000,
+  "globalTimeoutMs": 36000000
+}

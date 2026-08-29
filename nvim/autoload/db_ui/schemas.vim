@@ -233,8 +233,8 @@ let s:clickhouse = {
 
 let s:redshift = {
       \ 'args': ['-A', '-c'],
-      \ 'schemes_query': "SELECT DISTINCT table_schema AS schema_name FROM information_schema.tables ORDER BY 1",
-      \ 'schemes_tables_query': "SELECT table_schema, table_name FROM information_schema.tables",
+      \ 'schemes_query': "SELECT DISTINCT schemaname AS schema_name FROM pg_catalog.pg_tables WHERE schemaname NOT LIKE 'pg_%' AND schemaname != 'information_schema' ORDER BY 1",
+      \ 'schemes_tables_query': "SELECT schemaname AS table_schema, tablename AS table_name FROM pg_catalog.pg_tables WHERE schemaname NOT LIKE 'pg_%' AND schemaname != 'information_schema' UNION ALL SELECT schemaname, viewname FROM pg_catalog.pg_views WHERE schemaname NOT LIKE 'pg_%' AND schemaname != 'information_schema'",
       \ 'cell_line_number': 2,
       \ 'cell_line_pattern': '^-\++-\+',
       \ 'parse_results': {results,min_len -> s:results_parser(filter(results, '!empty(v:val)')[1:-2], '|', min_len)},

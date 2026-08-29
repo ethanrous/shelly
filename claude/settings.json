@@ -5,6 +5,20 @@
     ],
     "defaultMode": "auto"
   },
+  "model": "opus[1m]",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "rtk hook claude"
+          }
+        ]
+      }
+    ]
+  },
   "enabledPlugins": {
     "everything-claude-code@everything-claude-code": true,
     "frontend-design@claude-plugins-official": true,
@@ -36,6 +50,8 @@
   },
   "effortLevel": "xhigh",
   "skipDangerousModePermissionPrompt": true,
+  "theme": "dark",
   "agentPushNotifEnabled": true,
-  "skipAutoPermissionPrompt": true
+  "skipAutoPermissionPrompt": true,
+  "zeroDataRetention": false
 }

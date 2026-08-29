@@ -37,6 +37,19 @@ Implications when editing:
 - `sync` re-runs the full auto-loader in the current shell; prefer it over `source ~/.zshrc` because it also re-sources common files and the machine file.
 - `ls` and `e` are overridden as shell functions (see `shell/common/source/ethan`), so scripts in this repo that call `ls` get `eza` if installed. Use `/bin/ls` or `/usr/bin/ls` to bypass.
 
+## Pi config (`pi/`)
+
+`pi/` mirrors the user-editable files of the pi agent at `~/.pi/agent/` and is symlinked in by `setup.{zsh,bash}` via the same `symlinkInto` helper used for Claude:
+
+- `pi/settings.json` → `~/.pi/agent/settings.json`
+- `pi/AGENTS.md` → `~/.pi/agent/AGENTS.md`
+- `pi/mcp.json` → `~/.pi/agent/mcp.json`
+- `pi/models.json` → `~/.pi/agent/models.json` (custom `lucy` provider; deliberately contains **no** API key — the key lives in `~/.pi/agent/auth.json` under `lucy`, which is per-machine and never committed)
+
+Everything else under `~/.pi/agent/` is deliberately **not** symlinked and stays per-machine: `auth.json` (auth secrets), `models-store.json`, `mcp-*.json` caches, `sessions/`, `missions/`, `npm/` (installed packages, ~150MB), `bin/` (downloaded binaries), `run-history.jsonl`. New packages referenced by `settings.json`'s `packages` list are reinstalled by pi on the target machine.
+
+When adding a new item to sync: drop it under `pi/`, then add a `symlinkInto` line in **both** `shell/zsh/setup.zsh` and `shell/bash/setup.bash`.
+
 ## Neovim config (`nvim/`)
 
 - Entrypoint: `nvim/init.lua` → `require("config")` → `nvim/lua/config/init.lua` which loads `settings`, `keyboard`, `highlight`, `lazy`, `helpers`, `snippets`, `lsp` in that order.

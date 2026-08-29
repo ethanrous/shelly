@@ -75,3 +75,11 @@ symlinkInto $SHELLY/claude/settings.json ~/.claude/settings.json
 symlinkInto $SHELLY/claude/rules ~/.claude/rules
 symlinkInto $SHELLY/claude/commands ~/.claude/commands
 symlinkInto $SHELLY/claude/skills/vue-best-practices ~/.claude/skills/vue-best-practices
+
+# Pi config: link the user-editable files under ~/.pi/agent into the repo.
+# Runtime state (auth.json, models-store.json, mcp-*.json, sessions/, missions/,
+# npm/, bin/, run-history.jsonl) is deliberately left alone.
+symlinkInto $SHELLY/pi/settings.json ~/.pi/agent/settings.json
+symlinkInto $SHELLY/pi/AGENTS.md ~/.pi/agent/AGENTS.md
+symlinkInto $SHELLY/pi/mcp.json ~/.pi/agent/mcp.json
+symlinkInto $SHELLY/pi/models.json ~/.pi/agent/models.json

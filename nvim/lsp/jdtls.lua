@@ -47,6 +47,7 @@ local function get_jdtls_jvm_args()
 		local arg = string.format("--jvm-arg=%s", a)
 		table.insert(args, arg)
 	end
+	table.insert(args, "-Xmx8g")
 	return unpack(args)
 end
 

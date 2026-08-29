@@ -147,6 +147,10 @@ local function safeDelete(mode, lhs)
 	end
 end
 
+vim.keymap.set("n", "<leader>wr", function()
+	vim.opt.wrap = not vim.opt.wrap:get()
+end, { desc = "Toggle line wrap" })
+
 -- Remove conflicting keymaps --
 safeDelete("n", "gri")
 safeDelete("n", "grt")

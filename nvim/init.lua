@@ -27,6 +27,7 @@ vim.lsp.enable({
 	"vtsls",
 	"vue_ls",
 	"yamlls",
+	"helm_ls",
 	"copilot",
 	"groovyls",
 	"terraformls",

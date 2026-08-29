@@ -67,7 +67,6 @@ return {
 		"yml",
 		"yaml.docker-compose",
 		"yaml.gitlab",
-		"yaml.helm-values",
 	},
 	root_markers = { ".git" },
 	settings = {

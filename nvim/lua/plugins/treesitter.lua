@@ -29,12 +29,15 @@ require("nvim-treesitter").install({
 	"regex",
 	"vim",
 	"yaml",
+	"helm",
 	"tsx",
 	"rust",
 	"vue",
+	"csv",
 })
 
 vim.treesitter.language.register("tsx", { "javascript", "typescript.tsx" })
+vim.treesitter.language.register("csv", "dbout")
 
 vim.api.nvim_create_autocmd("FileType", {
 	callback = function(args)

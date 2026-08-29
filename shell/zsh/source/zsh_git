@@ -145,10 +145,11 @@ git_trunk_name() {
 
 # Get the name of the current git repository
 git_repo_name() {
-    basename $(git rev-parse --show-toplevel)
+    basename $(git remote get-url origin) .git
 }
 
-# Create a new worktree, based on main and switch to it
+# Create a new worktree, based on main and switch to it, creating a new branch if it doesn't exist on origin yet.
+# If the worktree already exists, switch to it.
 gwrk() {
     local branch="$1"
 
@@ -157,14 +158,37 @@ gwrk() {
         return 1
     fi
 
+    local repo_root_path=~/repos/$(git_repo_name)
     local new_wrktr_path=~/.worktrees/$(git_repo_name)/"$branch"
     if [[ -d "$new_wrktr_path" ]]; then
         cd "$new_wrktr_path"
         return
     fi
 
-    git worktree add -b "$branch" "$new_wrktr_path" $(git_trunk_name) || return 1
-    cd "$new_wrktr_path"
+    # Make sure we have the latest origin branches and tags
+    git fetch
+
+    if [[ -d "$new_wrktr_path" ]]; then
+        echo "Worktree path $new_wrktr_path already exists, switching to it..."
+        cd "$new_wrktr_path"
+        return
+    fi
+
+    if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
+        echo "Branch $branch exists on origin, checking it out..."
+        git worktree add "$new_wrktr_path" "$branch" || return 1
+        cd "$new_wrktr_path"
+    else
+        echo "Branch $branch does not exist on origin, creating it based on $(git_trunk_name)..."
+        git worktree add -b "$branch" "$new_wrktr_path" $(git_trunk_name) || return 1
+        cd "$new_wrktr_path"
+        # git push --set-upstream -u origin "$branch" || return 1
+    fi
+
+    # Copy .env file from repo root to new worktree if it exists and isn't already present in the new worktree
+    if [[ -f "$repo_root_path/.env" && ! -f "$new_wrktr_path/.env" ]]; then
+        cp "$repo_root_path/.env" "$new_wrktr_path/.env"
+    fi
 }
 
 # Rebase the current branch on top of the trunk branch (or an input branch, if provided)
@@ -175,6 +199,6 @@ grb() {
     local target_branch="${target_branch#origin/}"
     echo "Rebasing on top of origin/$target_branch"
 
-    git fetch origin
+    git fetch
     git rebase -i "origin/$target_branch"
 }

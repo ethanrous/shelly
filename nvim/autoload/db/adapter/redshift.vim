@@ -13,12 +13,11 @@ endfunction
 
 function! db#adapter#redshift#filter(url) abort
   let pg_url = substitute(a:url, '^redshift:', 'postgresql:', '')
-  return db#adapter#postgresql#filter(pg_url)
+  return db#adapter#postgresql#interactive(pg_url, ['--csv', '-v', 'ON_ERROR_STOP=1'])
 endfunction
 
 function! db#adapter#redshift#input(url, in) abort
-  let pg_url = substitute(a:url, '^redshift:', 'postgresql:', '')
-  return db#adapter#postgresql#input(pg_url, a:in)
+  return db#adapter#redshift#filter(a:url) + ['-f', a:in]
 endfunction
 
 function! db#adapter#redshift#complete_database(url) abort

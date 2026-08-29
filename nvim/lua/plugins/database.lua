@@ -1,6 +1,7 @@
 vim.pack.add({
 	"https://github.com/tpope/vim-dadbod",
 	"https://github.com/kristijanhusak/vim-dadbod-ui",
+	"https://github.com/kristijanhusak/vim-dadbod-completion",
 })
 
 -- Register our custom Redshift adapter (autoload/db/adapter/redshift.vim).
@@ -16,46 +17,70 @@ vim.g.db_ui_auto_execute_table_helpers = 1
 
 -- Force result buffer to open below the query buffer within the same column,
 -- keeping the sidebar full-height on the left. Closes any existing dbout window first.
-vim.api.nvim_create_autocmd("FileType", {
-	pattern = "dbout",
-	callback = function()
-		local dbout_win = vim.api.nvim_get_current_win()
-		local dbout_buf = vim.api.nvim_win_get_buf(dbout_win)
-
-		-- Close any other existing dbout windows
-		for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-			if win ~= dbout_win then
-				local buf = vim.api.nvim_win_get_buf(win)
-				if vim.bo[buf].filetype == "dbout" then
-					vim.api.nvim_win_close(win, true)
-				end
-			end
-		end
-
-		-- Find the query (sql) window to split below it
-		for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-			local buf = vim.api.nvim_win_get_buf(win)
-			local ft = vim.bo[buf].filetype
-			if ft == "sql" then
-				vim.api.nvim_win_close(dbout_win, true)
-				vim.api.nvim_set_current_win(win)
-				vim.cmd("belowright split")
-				vim.api.nvim_win_set_buf(0, dbout_buf)
-				vim.api.nvim_win_set_height(0, 20)
-				break
-			end
-		end
-	end,
-})
+-- vim.api.nvim_create_autocmd("FileType", {
+-- 	pattern = "dbout",
+-- 	callback = function()
+-- 		local dbout_win = vim.api.nvim_get_current_win()
+-- 		local dbout_buf = vim.api.nvim_win_get_buf(dbout_win)
+--
+-- 		-- Close any other existing dbout windows
+-- 		for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+-- 			if win ~= dbout_win then
+-- 				local buf = vim.api.nvim_win_get_buf(win)
+-- 				if vim.bo[buf].filetype == "dbout" then
+-- 					vim.api.nvim_win_close(win, true)
+-- 				end
+-- 			end
+-- 		end
+--
+-- 		-- Find the query (sql) window to split below it
+-- 		for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+-- 			local buf = vim.api.nvim_win_get_buf(win)
+-- 			local ft = vim.bo[buf].filetype
+-- 			if ft == "sql" then
+-- 				vim.api.nvim_win_close(dbout_win, true)
+-- 				vim.api.nvim_set_current_win(win)
+-- 				vim.cmd("belowright split")
+-- 				vim.api.nvim_win_set_buf(0, dbout_buf)
+-- 				vim.api.nvim_win_set_height(0, 20)
+-- 				break
+-- 			end
+-- 		end
+-- 	end,
+-- })
 
 -- Table helpers for the redshift scheme
 vim.g.db_ui_table_helpers = {
 	redshift = {
 		List = 'SELECT * FROM "{schema}"."{table}" LIMIT 200',
 		Count = 'SELECT COUNT(*) FROM "{schema}"."{table}"',
+		Columns = "SELECT column_name FROM information_schema.columns WHERE table_schema = '{schema}' AND table_name = '{table}' ORDER BY ordinal_position",
 	},
 }
 
 -- Keymaps
 vim.keymap.set("n", "<Leader>db", "<cmd>DBUIToggle<cr>", { desc = "Toggle DB UI" })
 vim.keymap.set("n", "<Leader>df", "<cmd>DBUIFindBuffer<cr>", { desc = "DB UI find buffer" })
+
+-- Auto-enable csvview on query result buffers (output is CSV via --csv psql flag).
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "dbout",
+	callback = function()
+		vim.cmd("resize " .. math.floor(vim.o.lines / 2))
+		require("csvview").enable(0)
+	end,
+})
+
+-- Wrap and format SQL query buffers on save.
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = { "sql", "mysql", "plsql" },
+	callback = function()
+		vim.opt_local.wrap = true
+		require("conform").formatters_by_ft.sql = { "sql_formatter" }
+	end,
+})
+
+require("conform").formatters.sql_formatter = {
+	command = vim.fn.expand("~/Library/pnpm/nodejs/24.10.0/bin/sql-formatter"),
+	args = { "-l", "postgresql" },
+}

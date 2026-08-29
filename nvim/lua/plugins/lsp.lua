@@ -2,9 +2,11 @@ vim.pack.add({
 	"https://github.com/mason-org/mason.nvim",
 	"https://github.com/artemave/workspace-diagnostics.nvim",
 	"https://github.com/folke/lazydev.nvim",
+	"https://github.com/qvalentin/helm-ls.nvim",
 })
 
 require("mason").setup()
+require("helm-ls").setup()
 
 require("lazydev").setup({
 	library = {

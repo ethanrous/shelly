@@ -6,6 +6,7 @@ vim.pack.add({
 	"https://github.com/lukas-reineke/indent-blankline.nvim",
 	"https://github.com/brenoprata10/nvim-highlight-colors",
 	"https://github.com/RRethy/vim-illuminate",
+	"https://github.com/MeanderingProgrammer/render-markdown.nvim",
 })
 
 -- Snacks
@@ -177,6 +178,12 @@ require("nvim-highlight-colors").setup({
 	enable_tailwind = true,
 	enable_hex = true,
 	disable = { "NvimTree" },
+})
+
+-- Render-markdown (renders markdown in LSP hover windows and markdown buffers)
+-- ponytail: noice sets filetype="noice" on its buffers, so we must include it
+require("render-markdown").setup({
+	file_types = { "markdown", "noice" },
 })
 
 -- Illuminate (highlight other occurrences of word under cursor)

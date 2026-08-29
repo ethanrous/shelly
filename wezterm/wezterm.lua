@@ -4,7 +4,7 @@ local wezterm = require("wezterm")
 -- This will hold the configuration.
 local config = wezterm.config_builder()
 
-config.term = "wezterm"
+config.term = "xterm-256color"
 
 -- For example, changing the color scheme:
 config.font = wezterm.font("JetBrains Mono")
@@ -256,7 +256,9 @@ config.keys = {
 		key = "w",
 		mods = "ALT",
 		action = wezterm.action_callback(function(_, _)
-			resurrect.state_manager.save_state(resurrect.workspace_state.get_workspace_state())
+			local workspace_state = resurrect.workspace_state.get_workspace_state()
+			resurrect.state_manager.save_state(workspace_state)
+			resurrect.state_manager.write_current_state(workspace_state.workspace, "workspace")
 		end),
 	},
 	{
@@ -373,6 +375,10 @@ wezterm.on("format-tab-title", function(tab, _, _, _, _, _)
 end)
 
 wezterm.on("gui-startup", resurrect.state_manager.resurrect_on_gui_startup)
+
+wezterm.on("resurrect.state_manager.periodic_save.finished", function()
+	resurrect.state_manager.write_current_state(wezterm.mux.get_active_workspace(), "workspace")
+end)
 
 resurrect.state_manager.set_max_nlines(5000)
 

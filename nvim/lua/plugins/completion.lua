@@ -51,6 +51,11 @@ require("blink.cmp").setup({
 	cmdline = { enabled = false },
 	sources = {
 		default = { "lsp", "path", "snippets", "buffer" },
+		per_filetype = {
+			sql = { "dadbod", "buffer" },
+			mysql = { "dadbod", "buffer" },
+			plsql = { "dadbod", "buffer" },
+		},
 		providers = {
 			snippets = { opts = { prefer_doc_trig = true } },
 			path = {
@@ -60,6 +65,7 @@ require("blink.cmp").setup({
 					end,
 				},
 			},
+			dadbod = { name = "Dadbod", module = "vim_dadbod_completion.blink" },
 		},
 	},
 	signature = {
