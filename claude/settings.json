@@ -48,9 +48,10 @@
       }
     }
   },
-  "effortLevel": "xhigh",
+  "effortLevel": "high",
   "skipDangerousModePermissionPrompt": true,
   "theme": "dark",
+  "skipWorkflowUsageWarning": true,
   "agentPushNotifEnabled": true,
   "skipAutoPermissionPrompt": true,
   "zeroDataRetention": false

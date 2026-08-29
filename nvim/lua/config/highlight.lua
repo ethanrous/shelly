@@ -47,6 +47,9 @@ end
 -- 	end,
 -- })
 
+-- used by the statusline's macro-recording and LSP-status indicators
+vim.api.nvim_set_hl(0, "StatusLineDiagnosticError", { link = "DiagnosticError" })
+
 -- highlight on yank
 local highlight_group = vim.api.nvim_create_augroup("YankHighlight", { clear = true })
 vim.api.nvim_create_autocmd("TextYankPost", {

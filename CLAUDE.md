@@ -70,11 +70,11 @@ When adding a new item to sync: drop it under `pi/`, then add a `symlinkInto` li
 - `claude/settings.json` → `~/.claude/settings.json`
 - `claude/rules/` → `~/.claude/rules/` (the files loaded into Claude's system prompt)
 - `claude/commands/` → `~/.claude/commands/` (custom slash commands)
-- `claude/skills/vue-best-practices/` → `~/.claude/skills/vue-best-practices/`
+- `claude/skills/` → `~/.claude/skills/` (the whole dir is one symlink, so every skill under `claude/skills/` syncs — adding a skill needs no setup-script change)
 
 Everything else in `~/.claude/` is deliberately **not** symlinked and stays per-machine. That includes: `projects/` (per-project state and memory), `sessions/`, `history.jsonl`, `plugins/` (installed plugin cache), `settings.local.json`, `cache/`, `telemetry/`, `shell-snapshots/`, and similar runtime dirs. `~/.claude.json` is also left alone — it's mostly startup/migration/onboarding state even though it contains `mcpServers`.
 
-When adding a new item to sync: drop it under `claude/`, then add a `symlinkInto` line in **both** `shell/zsh/setup.zsh` and `shell/bash/setup.bash`.
+When adding a new **top-level** item to sync: drop it under `claude/`, then add a `symlinkInto` line in **both** `shell/zsh/setup.zsh` and `shell/bash/setup.bash`. Adding a new skill is the exception — just drop it under `claude/skills/`; the directory symlink already covers it.
 
 `symlinkInto` is idempotent — it short-circuits if the destination is already a symlink pointing at the right source. On a fresh machine where the destination already exists as a real dir, it will `rm -rf` first (matching the aggressive style of the rest of the setup script), so don't run setup on a machine with unsynced local Claude config you care about.
 

@@ -2,7 +2,6 @@
 
 alias lucy='ssh root@lucy'
 alias nvim-lucy='nvim oil-ssh://root@lucy//mnt/user'
-alias du='gdu'
 
 colorscript() {
     ~/repos/external/shell-color-scripts/colorscript.sh $@
@@ -30,6 +29,7 @@ add_to_path "/opt/homebrew/bin" true
 add_to_path "/opt/homebrew/sbin" true
 add_to_path "/opt/homebrew/opt/python@3.12/libexec/bin" true
 add_to_path "$PNPM_HOME" true
+add_to_path "$PNPM_HOME/bin" true
 add_to_path "$HOME/.cargo/bin" true
 
 export CPATH="/opt/homebrew/include/"

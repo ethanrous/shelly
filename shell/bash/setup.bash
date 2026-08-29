@@ -70,7 +70,6 @@ symlinkInto() {
 	ln -s $src $dest
 }
 
-mkdir -p ~/.claude/skills
 symlinkInto $SHELLY/claude/settings.json ~/.claude/settings.json
 symlinkInto $SHELLY/claude/rules ~/.claude/rules
 symlinkInto $SHELLY/claude/commands ~/.claude/commands
@@ -83,3 +82,4 @@ symlinkInto $SHELLY/pi/settings.json ~/.pi/agent/settings.json
 symlinkInto $SHELLY/pi/AGENTS.md ~/.pi/agent/AGENTS.md
 symlinkInto $SHELLY/pi/mcp.json ~/.pi/agent/mcp.json
 symlinkInto $SHELLY/pi/models.json ~/.pi/agent/models.json
+symlinkInto $SHELLY/claude/skills ~/.claude/skills

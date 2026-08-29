@@ -28,8 +28,52 @@ local get_recording_macro = function()
 	return ""
 end
 
-local function lint_progress()
-	return ""
+local function lsp_status()
+	if vim.bo.buftype ~= "" then
+		return ""
+	end
+
+	local filetype = vim.bo.filetype
+	if filetype == "" then
+		return ""
+	end
+
+	local attached = {}
+	for _, client in ipairs(vim.lsp.get_clients({ bufnr = 0 })) do
+		attached[client.name] = true
+	end
+
+	-- copilot attaches to every filetype, so it can't signal whether the
+	-- filetype's actual language server came up.
+	local matches = {}
+	for _, name in ipairs(require("config.lsp_servers")) do
+		if name ~= "copilot" then
+			local ok, config = pcall(function()
+				return vim.lsp.config[name]
+			end)
+
+			if ok and config and vim.tbl_contains(config.filetypes or {}, filetype) then
+				table.insert(matches, { name = name, config = config })
+			end
+		end
+	end
+
+	if #matches == 0 then
+		return "%#StatusLineDiagnosticError#" .. "⚠ no LSP"
+	end
+
+	for _, match in ipairs(matches) do
+		if attached[match.name] then
+			return ""
+		end
+	end
+
+	local first = matches[1]
+	local cmd = type(first.config.cmd) == "table" and first.config.cmd[1] or nil
+	if cmd and vim.fn.executable(cmd) == 0 then
+		return "%#StatusLineDiagnosticError#" .. "⚠ " .. first.name .. " missing"
+	end
+	return "%#StatusLineDiagnosticError#" .. "⚠ " .. first.name .. " not attached"
 end
 
 local colors = {
@@ -66,7 +110,7 @@ require("lualine").setup({
 		lualine_x = {},
 		lualine_y = {},
 		lualine_z = {
-			lint_progress,
+			lsp_status,
 			get_location,
 			get_recording_macro,
 			"diagnostics",

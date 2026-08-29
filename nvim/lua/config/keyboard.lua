@@ -150,10 +150,13 @@ end
 vim.keymap.set("n", "<leader>wr", function()
 	vim.opt.wrap = not vim.opt.wrap:get()
 end, { desc = "Toggle line wrap" })
+-- Reload config
+vim.keymap.set("n", "<leader>sv", "<cmd>source $MYVIMRC<CR>", { desc = "Reload config" })
 
 -- Remove conflicting keymaps --
 safeDelete("n", "gri")
 safeDelete("n", "grt")
 safeDelete("n", "grr")
 safeDelete({ "n", "x" }, "gra")
+safeDelete({ "n", "x" }, "grx")
 safeDelete("n", "grn")
