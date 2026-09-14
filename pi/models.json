@@ -1,20 +1,16 @@
 {
   "providers": {
-    "lucy": {
+    "lucy-vllm": {
       "api": "openai-completions",
       "baseUrl": "https://llm.arcticio.net/v1",
+      "apiKey": "none",
       "models": [
         {
-          "id": "Qwen3.6-35B-A3B-UD-IQ4_XS",
-          "contextWindow": 96000,
-          "maxTokens": 80000,
-          "compat": { "thinkingFormat": "qwen" }
-        },
-        {
-          "id": "Qwen3.8-27B-Q4_K_M",
-          "contextWindow": 96000,
-          "maxTokens": 80000,
-          "compat": { "thinkingFormat": "qwen" },
+          "id": "qwen3.8-27b",
+          "contextWindow": 128000,
+          "maxTokens": 32000,
+          "input": ["text", "image"],
+          "compat": { "thinkingFormat": "reasoning_effort" },
           "reasoning": true,
           "thinkingLevelMap": {
             "off": null,

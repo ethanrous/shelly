@@ -1,16 +1,21 @@
 {
-  "lastChangelogVersion": "0.84.1",
+  "lastChangelogVersion": "0.84.3",
   "theme": "dark",
-  "defaultProvider": "lucy",
-  "defaultModel": "Qwen3.8-27B-Q4_K_M",
+  "defaultProvider": "lucy-vllm",
+  "defaultModel": "qwen3.8-27b",
   "defaultThinkingLevel": "medium",
   "packages": [
     "npm:pi-mcp-adapter",
-    "npm:pi-subagents",
-    "npm:pi-web-access"
+    "npm:pi-web-access",
+    "npm:pi-hermes-memory",
+    "npm:@tintinweb/pi-subagents",
+    "npm:pi-mono-ask-user-question",
+    "npm:pi-blackhole"
   ],
   "reserveTokens": 80000,
   "timeoutMs": 36000000,
   "workflowTimeoutMs": 36000000,
-  "globalTimeoutMs": 36000000
+  "globalTimeoutMs": 36000000,
+  "httpIdleTimeoutMs": 0,
+  "hideThinkingBlock": true
 }
