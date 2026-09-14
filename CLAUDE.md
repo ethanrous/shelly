@@ -68,7 +68,7 @@ When adding a new item to sync: drop it under `pi/`, then add a `symlinkInto` li
 `claude/` mirrors a subset of `~/.claude/` and is symlinked in by `setup.{zsh,bash}` via a `symlinkInto` helper:
 
 - `claude/settings.json` → `~/.claude/settings.json`
-- `claude/rules/` → `~/.claude/rules/` (the files loaded into Claude's system prompt)
+- `claude/CLAUDE.md` → `~/.claude/CLAUDE.md` (global user instructions)
 - `claude/commands/` → `~/.claude/commands/` (custom slash commands)
 - `claude/skills/` → `~/.claude/skills/` (the whole dir is one symlink, so every skill under `claude/skills/` syncs — adding a skill needs no setup-script change)
 

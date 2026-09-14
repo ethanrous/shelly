@@ -48,8 +48,7 @@ function _G.shelly_tabline()
 		local bufnr = vim.fn.tabpagebuflist(i)[winnr]
 		local bufname = vim.fn.bufname(bufnr)
 
-		local label = format_diffview_bufname(bufname)
-			or vim.fn.fnamemodify(bufname, ":t")
+		local label = format_diffview_bufname(bufname) or vim.fn.fnamemodify(bufname, ":t")
 		if label == "" then
 			label = "[No Name]"
 		end
@@ -80,6 +79,49 @@ vim.o.statusline = "%!v:lua.shelly_statusline()"
 -- Diffview
 local diff_actions = require("diffview.actions")
 require("diffview").setup({
+	-- Relinks the deleted-line filler to DiffviewDiffDeleteDim so it renders as
+	-- a dim hatch rather than a full-width red block.
+	enhanced_diff_hl = true,
+	hooks = {
+		-- Diff windows drop their gutters and wrap. Every option listed in a
+		-- view's winopts is saved per buffer by diffview and restored when the
+		-- buffer leaves the view, so these never persist into normal windows.
+		view_post_layout = function(view)
+			for _, layout in pairs(view.winopts or {}) do
+				for _, winopts in pairs(layout) do
+					if winopts.diff ~= false then
+						winopts.wrap = false
+						winopts.signcolumn = "no"
+						winopts.foldcolumn = "0"
+					end
+				end
+			end
+		end,
+		-- ibl builds its @ibl.indent.char.N groups from the global config, so a
+		-- per-buffer highlight list cannot recolour them; winhighlight remaps
+		-- them for the diff window. diffview owns winhighlight in its windows
+		-- and resets it whenever it attaches a buffer, so the remap is appended
+		-- on every attach.
+		diff_buf_win_enter = function(_, winid)
+			if not vim.wo[winid].diff then
+				return
+			end
+			local groups = require("ibl.config").get_config(0).indent.highlight
+			local remaps = {}
+			for i = 1, type(groups) == "table" and #groups or 1 do
+				remaps[#remaps + 1] = ("@ibl.indent.char.%d:IblDiff"):format(i)
+			end
+			remaps = table.concat(remaps, ",")
+			local cur = vim.wo[winid].winhighlight
+			if not cur:find(remaps, 1, true) then
+				vim.api.nvim_set_option_value(
+					"winhighlight",
+					cur == "" and remaps or (cur .. "," .. remaps),
+					{ win = winid, scope = "local" }
+				)
+			end
+		end,
+	},
 	keymaps = {
 		view = {
 			{
@@ -95,6 +137,10 @@ require("diffview").setup({
 		},
 	},
 })
+
+-- diffview runs hl.setup() at require time, before setup() merges the user
+-- config, so enhanced_diff_hl only lands on the next ColorScheme event.
+require("diffview.hl").update_diff_hl()
 
 vim.keymap.set({ "n", "v" }, "<LEADER>gd", function()
 	require("diffview").toggle({})

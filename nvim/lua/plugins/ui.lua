@@ -25,6 +25,13 @@ require("snacks").setup({
 			enabled = true,
 			hl = "SnacksIndentChunk",
 		},
+		-- Diff windows are left to ibl, which draws its guides there in IblDiff.
+		filter = function(buf, win)
+			return vim.g.snacks_indent ~= false
+				and vim.b[buf].snacks_indent ~= false
+				and vim.bo[buf].buftype == ""
+				and not vim.wo[win].diff
+		end,
 	},
 })
 

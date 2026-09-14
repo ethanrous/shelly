@@ -71,7 +71,7 @@ symlinkInto() {
 }
 
 symlinkInto $SHELLY/claude/settings.json ~/.claude/settings.json
-symlinkInto $SHELLY/claude/rules ~/.claude/rules
+symlinkInto $SHELLY/claude/CLAUDE.md ~/.claude/CLAUDE.md
 symlinkInto $SHELLY/claude/commands ~/.claude/commands
 symlinkInto $SHELLY/claude/skills/vue-best-practices ~/.claude/skills/vue-best-practices
 
