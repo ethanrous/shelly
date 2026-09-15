@@ -66,4 +66,5 @@ symlinkInto $SHELLY/pi/settings.json ~/.pi/agent/settings.json
 symlinkInto $SHELLY/pi/AGENTS.md ~/.pi/agent/AGENTS.md
 symlinkInto $SHELLY/pi/mcp.json ~/.pi/agent/mcp.json
 symlinkInto $SHELLY/pi/models.json ~/.pi/agent/models.json
+symlinkInto $SHELLY/pi/keybindings.json ~/.pi/agent/keybindings.json
 symlinkInto $SHELLY/claude/skills ~/.claude/skills

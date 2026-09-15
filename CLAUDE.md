@@ -45,6 +45,7 @@ Implications when editing:
 - `pi/AGENTS.md` → `~/.pi/agent/AGENTS.md`
 - `pi/mcp.json` → `~/.pi/agent/mcp.json`
 - `pi/models.json` → `~/.pi/agent/models.json` (custom `lucy` provider; deliberately contains **no** API key — the key lives in `~/.pi/agent/auth.json` under `lucy`, which is per-machine and never committed)
+- `pi/keybindings.json` → `~/.pi/agent/keybindings.json` (user keybindings, e.g. the Alt+T/Ctrl+T thinking toggle)
 
 Everything else under `~/.pi/agent/` is deliberately **not** symlinked and stays per-machine: `auth.json` (auth secrets), `models-store.json`, `mcp-*.json` caches, `sessions/`, `missions/`, `npm/` (installed packages, ~150MB), `bin/` (downloaded binaries), `run-history.jsonl`. New packages referenced by `settings.json`'s `packages` list are reinstalled by pi on the target machine.
 
