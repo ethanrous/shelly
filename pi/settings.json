@@ -8,14 +8,19 @@
     "npm:pi-mcp-adapter",
     "npm:pi-web-access",
     "npm:pi-hermes-memory",
-    "npm:@tintinweb/pi-subagents",
+    "git:github.com/ethanrous/pi-subagents@master",
     "npm:pi-mono-ask-user-question",
-    "npm:pi-blackhole"
+    "npm:pi-blackhole",
+    "npm:pi-token-speed",
+    "npm:pi-thinking-tail"
   ],
   "reserveTokens": 80000,
   "timeoutMs": 36000000,
   "workflowTimeoutMs": 36000000,
   "globalTimeoutMs": 36000000,
   "httpIdleTimeoutMs": 0,
-  "hideThinkingBlock": true
+  "hideThinkingBlock": true,
+  "skills": [
+    "~/.claude/skills"
+  ]
 }

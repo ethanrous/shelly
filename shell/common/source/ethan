@@ -21,6 +21,8 @@ alias k='kubectl'
 ### ENV ###
 export EDITOR="nvim"
 export CLAUDE_CODE_NO_FLICKER=1
+# Keep pi-mcp-adapter from opening MCP UI widgets in the browser.
+export MCP_UI_VIEWER=none
 export FPATH="$HOME/.docker/completions:$FPATH"
 
 ### Funcs ###
