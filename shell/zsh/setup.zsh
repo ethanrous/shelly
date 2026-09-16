@@ -68,4 +68,5 @@ symlinkInto $SHELLY/pi/mcp.json ~/.pi/agent/mcp.json
 symlinkInto $SHELLY/pi/models.json ~/.pi/agent/models.json
 symlinkInto $SHELLY/pi/keybindings.json ~/.pi/agent/keybindings.json
 symlinkInto $SHELLY/pi/hermes-memory-config.json ~/.pi/agent/hermes-memory-config.json
+symlinkInto $SHELLY/pi/web-search.json ~/.pi/agent/web-search.json
 symlinkInto $SHELLY/claude/skills ~/.claude/skills
