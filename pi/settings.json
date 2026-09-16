@@ -14,12 +14,12 @@
     "npm:pi-token-speed",
     "npm:pi-thinking-tail"
   ],
-  "reserveTokens": 80000,
+  "reserveTokens": 24576,
   "timeoutMs": 36000000,
   "workflowTimeoutMs": 36000000,
   "globalTimeoutMs": 36000000,
   "httpIdleTimeoutMs": 0,
-  "hideThinkingBlock": true,
+  "hideThinkingBlock": false,
   "skills": [
     "~/.claude/skills"
   ]

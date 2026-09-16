@@ -46,6 +46,15 @@
             "xhigh": "xhigh",
             "max": null
           }
+        },
+        {
+          "id": "ornith-9b",
+          "contextWindow": 65536,
+          "maxTokens": 8192,
+          "input": [
+            "text"
+          ],
+          "reasoning": true
         }
       ]
     }
