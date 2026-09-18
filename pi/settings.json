@@ -22,5 +22,10 @@
   "hideThinkingBlock": false,
   "skills": [
     "~/.claude/skills"
-  ]
+  ],
+  "tokenSpeed": {
+    "countStrategy": "estimate",
+    "useProviderTokens": true,
+    "slidingWindow": 2000
+  }
 }

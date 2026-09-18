@@ -49,7 +49,7 @@
         },
         {
           "id": "ornith-9b",
-          "contextWindow": 65536,
+          "contextWindow": 122880,
           "maxTokens": 8192,
           "input": [
             "text"
