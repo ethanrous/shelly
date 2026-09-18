@@ -1,3 +1,4 @@
 {
-  "reviewEnabled": false
+  "reviewEnabled": false,
+  "llmModelOverride": "ornith-9b"
 }

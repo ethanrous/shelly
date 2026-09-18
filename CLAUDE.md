@@ -47,6 +47,14 @@ Implications when editing:
 - `pi/models.json` → `~/.pi/agent/models.json` (custom `lucy` provider; deliberately contains **no** API key — the key lives in `~/.pi/agent/auth.json` under `lucy`, which is per-machine and never committed)
 - `pi/keybindings.json` → `~/.pi/agent/keybindings.json` (user keybindings, e.g. the Alt+T/Ctrl+T thinking toggle)
 - `pi/hermes-memory-config.json` → `~/.pi/agent/hermes-memory-config.json` (pi-hermes-memory extension settings)
+- `pi/web-search.json` → `~/.pi/agent/web-search.json` (pi-web-access settings)
+- `pi/pi-blackhole-config.json` → `~/.pi/agent/pi-blackhole/pi-blackhole-config.json` (pi-blackhole compaction and memory settings; the rest of `~/.pi/agent/pi-blackhole/` is per-session runtime state and stays per-machine)
+- `pi/extensions/` → `~/.pi/agent/extensions/` (local pi extensions; the whole dir is one symlink and pi auto-discovers `*.ts` in it, so adding an extension needs no setup-script or `settings.json` change)
+
+Local extensions in `pi/extensions/`. Both patch pi internals, so a pi upgrade can silently disable them; the fallback is pi's stock behavior. The repo has no `node_modules`, so editor diagnostics about unresolved `@earendil-works/*` imports are expected; pi resolves them at load time. Apply edits with `/reload` in pi.
+
+- `thinking-stats.ts` - puts a spinner, elapsed time, and token count on the collapsed thinking label (`Thinking... 42.1s (1.3k tokens)`, then `Thought for 11.2s (756 tokens)`). It wraps `AssistantMessageComponent.prototype.updateContent` and sets `hiddenThinkingLabel` per component. The `pi-thinking-tail` package replaces the same method outright, so the wrapper is re-installed on `session_start` to stay outermost.
+- `keep-chat-on-compaction.ts` - keeps the full rendered chat on screen across compactions; only the model context is compacted. It wraps `InteractiveMode.prototype.handleEvent` and, for a successful `compaction_end`, turns `chatContainer.clear` and `renderSessionEntries` into no-ops for that one call, so pi only appends the `[compaction]` block. `/reload`, `/resume`, and tree navigation still rebuild the chat from the compacted context.
 
 Everything else under `~/.pi/agent/` is deliberately **not** symlinked and stays per-machine: `auth.json` (auth secrets), `models-store.json`, `mcp-*.json` caches, `sessions/`, `missions/`, `npm/` (installed packages, ~150MB), `bin/` (downloaded binaries), `run-history.jsonl`. New packages referenced by `settings.json`'s `packages` list are reinstalled by pi on the target machine.
 

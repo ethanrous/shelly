@@ -73,7 +73,6 @@ symlinkInto() {
 symlinkInto $SHELLY/claude/settings.json ~/.claude/settings.json
 symlinkInto $SHELLY/claude/CLAUDE.md ~/.claude/CLAUDE.md
 symlinkInto $SHELLY/claude/commands ~/.claude/commands
-symlinkInto $SHELLY/claude/skills/vue-best-practices ~/.claude/skills/vue-best-practices
 
 # Pi config: link the user-editable files under ~/.pi/agent into the repo.
 # Runtime state (auth.json, models-store.json, mcp-*.json, sessions/, missions/,
@@ -85,4 +84,6 @@ symlinkInto $SHELLY/pi/models.json ~/.pi/agent/models.json
 symlinkInto $SHELLY/pi/keybindings.json ~/.pi/agent/keybindings.json
 symlinkInto $SHELLY/pi/hermes-memory-config.json ~/.pi/agent/hermes-memory-config.json
 symlinkInto $SHELLY/pi/web-search.json ~/.pi/agent/web-search.json
+symlinkInto $SHELLY/pi/pi-blackhole-config.json ~/.pi/agent/pi-blackhole/pi-blackhole-config.json
+symlinkInto $SHELLY/pi/extensions ~/.pi/agent/extensions
 symlinkInto $SHELLY/claude/skills ~/.claude/skills

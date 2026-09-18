@@ -1,8 +1,8 @@
 {
-  "lastChangelogVersion": "0.84.3",
+  "lastChangelogVersion": "0.85.1",
   "theme": "dark",
-  "defaultProvider": "lucy-vllm",
-  "defaultModel": "qwen3.8-27b",
+  "defaultProvider": "lucy",
+  "defaultModel": "ornith-9b",
   "defaultThinkingLevel": "medium",
   "packages": [
     "npm:pi-mcp-adapter",
@@ -19,7 +19,7 @@
   "workflowTimeoutMs": 36000000,
   "globalTimeoutMs": 36000000,
   "httpIdleTimeoutMs": 0,
-  "hideThinkingBlock": false,
+  "hideThinkingBlock": true,
   "skills": [
     "~/.claude/skills"
   ],
