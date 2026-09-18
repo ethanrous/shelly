@@ -23,8 +23,15 @@ interface ThinkingStats {
 	spanStart?: number;
 	/** Time of the latest thinking_end in the span in progress. */
 	lastEnd?: number;
-	/** Number of thinking_delta events received. */
-	deltas: number;
+	/** Estimated token count of the streamed thinking text. */
+	tokens: number;
+}
+
+/** One token per word or punctuation character. Independent of how the server batches tokens into deltas. */
+const TOKEN_REGEX = /\w+|[^\s\w]/g;
+
+function estimateTokens(text: string): number {
+	return text ? (text.match(TOKEN_REGEX)?.length ?? 0) : 0;
 }
 
 /** Stats per assistant message, keyed by message.timestamp. */
@@ -55,9 +62,9 @@ function thinkingCharCount(message: AssistantMessage): number {
 	return chars;
 }
 
-/** Streamed delta count when available, otherwise an estimate of 4 characters per token. */
+/** Estimated from the streamed deltas when available, otherwise 4 characters per token. */
 function formatTokens(message: AssistantMessage, stats: ThinkingStats | undefined): string {
-	if (stats && stats.deltas > 0) return `${formatCount(stats.deltas)} tokens`;
+	if (stats && stats.tokens > 0) return `${formatCount(stats.tokens)} tokens`;
 	return `~${formatCount(Math.ceil(thinkingCharCount(message) / 4))} tokens`;
 }
 
@@ -159,12 +166,12 @@ export default function thinkingStatsExtension(pi: ExtensionAPI): void {
 		if (type === "thinking_start" || type === "thinking_delta") {
 			let stats = statsByMessage.get(message.timestamp);
 			if (!stats) {
-				stats = { elapsedMs: 0, deltas: 0 };
+				stats = { elapsedMs: 0, tokens: 0 };
 				statsByMessage.set(message.timestamp, stats);
 			}
 			stats.spanStart ??= Date.now();
 			stats.lastEnd = undefined;
-			if (type === "thinking_delta") stats.deltas++;
+			if (type === "thinking_delta") stats.tokens += estimateTokens(event.assistantMessageEvent.delta ?? "");
 			startTicker();
 		} else if (type === "thinking_end") {
 			// Another thinking block may follow, so the span stays open until other content arrives.
