@@ -8,11 +8,12 @@
     "npm:pi-mcp-adapter",
     "npm:pi-web-access",
     "npm:pi-hermes-memory",
-    "git:github.com/ethanrous/pi-subagents@master",
+    "/Users/erousseau/repos/pi-subagents",
     "npm:pi-mono-ask-user-question",
     "npm:pi-blackhole",
     "npm:pi-token-speed",
-    "npm:pi-thinking-tail"
+    "npm:pi-thinking-tail",
+    "npm:pi-bg-tasks"
   ],
   "reserveTokens": 24576,
   "timeoutMs": 36000000,

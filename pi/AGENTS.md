@@ -32,4 +32,10 @@
     - Never use high, xhigh, or max reasoning levels on Qwen3.8-27B subagents. Always medium.
   - **Concurrency: at most 2 subagents at a time, one of each type.** Each GPU serves ONE stream at a time; anything else on the same model queues behind it at full speed rather than running in parallel. So two Qwen3.8-27B subagents (or you plus a Qwen subagent) do not run concurrently: the second waits until the first finishes. Two explorers likewise queue on the 3080. One explorer plus one Qwen subagent run on separate GPUs and do not interfere. Batch work accordingly and wait for agents to finish before starting more. The good pattern is: explorer gathers the facts, Qwen subagent does the thinking or the change.
 
+- Waiting on long-running commands:
+  - **Never wait by polling.** Do not append `&` to a command and then run `sleep N; pgrep ...` loops across tool calls. Every poll is a full model turn and re-sends the whole context.
+  - If you need the result before you can continue, run the command in the foreground in a single `bash` call and let it block. There is no default timeout; a 20-minute download in one call is fine and costs no model turns.
+  - If you can do other work meanwhile, run it with `bash` `run_in_background: true`, keep working, and rely on the completion notification. Do not call `bg_output` in a loop to check on it.
+  - Subagents run in print mode, where nothing can wake you after your turn ends. In a subagent, always use the foreground form.
+
 - Searching strings across files: **Always use `rg` (ripgrep), never `grep`, when searching for strings across files.** `rg` is significantly faster than `grep -r`. Reserve `grep` only for cases where `rg` is unavailable or a specific flag is needed that `rg` doesn't support.
