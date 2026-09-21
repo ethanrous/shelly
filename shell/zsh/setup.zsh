@@ -70,4 +70,5 @@ symlinkInto $SHELLY/pi/hermes-memory-config.json ~/.pi/agent/hermes-memory-confi
 symlinkInto $SHELLY/pi/web-search.json ~/.pi/agent/web-search.json
 symlinkInto $SHELLY/pi/pi-blackhole-config.json ~/.pi/agent/pi-blackhole/pi-blackhole-config.json
 symlinkInto $SHELLY/pi/extensions ~/.pi/agent/extensions
+symlinkInto $SHELLY/pi/skills ~/.pi/agent/skills
 symlinkInto $SHELLY/claude/skills ~/.claude/skills

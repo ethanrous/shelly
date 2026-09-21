@@ -6,9 +6,12 @@
       "models": [
         {
           "id": "qwen3.8-27b",
-          "contextWindow": 128000,
+          "contextWindow": 200000,
           "maxTokens": 32000,
-          "input": ["text", "image"],
+          "input": [
+            "text",
+            "image"
+          ],
           "compat": {
             "thinkingFormat": "reasoning_effort"
           },
@@ -27,7 +30,9 @@
           "id": "qwen3.8-flash-next",
           "contextWindow": 65536,
           "maxTokens": 16384,
-          "input": ["text"],
+          "input": [
+            "text"
+          ],
           "compat": {
             "thinkingFormat": "reasoning_effort"
           },
@@ -46,8 +51,13 @@
           "id": "ornith-9b",
           "contextWindow": 122880,
           "maxTokens": 8192,
-          "input": ["text"],
-          "reasoning": true
+          "input": [
+            "text"
+          ],
+          "reasoning": true,
+          "compat": {
+            "thinkingFormat": "qwen-chat-template"
+          }
         }
       ]
     }

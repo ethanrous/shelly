@@ -8,7 +8,7 @@
     "npm:pi-mcp-adapter",
     "npm:pi-web-access",
     "npm:pi-hermes-memory",
-    "/Users/erousseau/repos/pi-subagents",
+    "git:github.com/ethanrous/pi-subagents@master",
     "npm:pi-mono-ask-user-question",
     "npm:pi-blackhole",
     "npm:pi-token-speed",
