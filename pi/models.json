@@ -28,7 +28,7 @@
         },
         {
           "id": "ornith-1.5-35b",
-          "contextWindow": 122880,
+          "contextWindow": 188416,
           "maxTokens": 16384,
           "input": [
             "text",
