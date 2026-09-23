@@ -30,5 +30,6 @@
   "observerPreambleMaxTokens": 0,
   "agentMaxTurns": 16,
   "memory": true,
-  "debugLog": false
+  "debugLog": false,
+  "statusBar": false
 }
