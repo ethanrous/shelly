@@ -27,6 +27,19 @@
           }
         },
         {
+          "id": "ornith-1.5-35b",
+          "contextWindow": 122880,
+          "maxTokens": 16384,
+          "input": [
+            "text",
+            "image"
+          ],
+          "reasoning": true,
+          "compat": {
+            "thinkingFormat": "qwen-chat-template"
+          }
+        },
+        {
           "id": "qwen3.8-flash-next",
           "contextWindow": 65536,
           "maxTokens": 16384,
