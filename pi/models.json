@@ -3,6 +3,9 @@
     "lucy": {
       "api": "openai-completions",
       "baseUrl": "https://llm.arcticio.net/v1",
+      "targetedCompaction": {
+        "enabled": true
+      },
       "models": [
         {
           "id": "qwen3.8-27b",
@@ -13,7 +16,8 @@
             "image"
           ],
           "compat": {
-            "thinkingFormat": "reasoning_effort"
+            "thinkingFormat": "reasoning_effort",
+            "sendSessionAffinityHeaders": true
           },
           "reasoning": true,
           "thinkingLevelMap": {
@@ -29,14 +33,16 @@
         {
           "id": "ornith-1.5-35b",
           "contextWindow": 188416,
-          "maxTokens": 16384,
+          "maxTokens": 32768,
           "input": [
             "text",
             "image"
           ],
           "reasoning": true,
           "compat": {
-            "thinkingFormat": "qwen-chat-template"
+            "thinkingFormat": "qwen-chat-template",
+            "thinkingTokenBudgetField": "thinking_token_budget",
+            "sendSessionAffinityHeaders": true
           }
         },
         {
