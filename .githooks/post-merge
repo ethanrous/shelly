@@ -1,0 +1,17 @@
+#!/bin/sh
+# Re-run shelly setup after a merge/pull so that any synced symlinks which were
+# added or removed by the pull get (re)linked. Invoked by git via
+# `git config core.hooksPath .githooks`. post-merge fires on every merge-style
+# pull, including fast-forwards (and on rebased pulls, since pull.rebase=true).
+# Caveat: a pull that stops for conflict resolution does not fire this hook.
+#
+# Only acts when checked out inside the shelly repo, so this hook is harmless
+# if ever copied elsewhere.
+SHELLY="$(git rev-parse --show-toplevel 2>/dev/null)"
+
+if [ -z "$SHELLY" ] || [ ! -f "$SHELLY/shell/zsh/setup.zsh" ]; then
+    exit 0
+fi
+
+# Run the light symlink-only setup (not setup.bash, which installs Rust/Homebrew).
+SHELLY="$SHELLY" "$SHELLY/shell/zsh/setup.zsh"

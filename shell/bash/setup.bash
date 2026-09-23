@@ -5,6 +5,13 @@ if [[ "$SHELLY" == "" ]]; then
 	exit 1
 fi
 
+# Point git at the repo-tracked hooks (see .githooks/post-merge), which re-run
+# this setup after every pull. Written to THIS repo's .git/config only, so it
+# never affects git hooks in any other repository. No-op outside a work tree.
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+	git config core.hooksPath .githooks
+fi
+
 # Make sure to source shelly when new shell is launched
 if [ ! -f ~/.bashrc ]; then
 	echo "making ~/.bashrc"

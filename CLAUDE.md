@@ -20,6 +20,8 @@ After cloning, the actual wiring is done by `shell/{zsh,bash}/setup.{zsh,bash}`.
 
 There is a submodule at `shell/zsh/plugins/zsh-vi-mode` — remember `git submodule update --init` when cloning fresh.
 
+**Setup also runs after every `git pull`, via a git hook.** `.githooks/post-merge` re-runs the light symlink-only `setup.zsh` so that any synced file added or removed by the pull gets (re)linked. It's activated with `git config core.hooksPath .githooks` (set automatically by the setup scripts); this lives in *this* repo's `.git/config` only, so it never affects hooks in other repos. Note: `post-merge` fires on every merge-style pull including fast-forwards and rebases (`pull.rebase=true`), but **not** on a pull that stops for conflict resolution.
+
 ## Shell config architecture (the non-obvious part)
 
 The shell config uses a three-layer sourcing model driven by `$SHELL_NAME` (which the user's rc file exports as `zsh` or `bash`):
