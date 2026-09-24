@@ -32,7 +32,7 @@
         },
         {
           "id": "ornith-1.5-35b",
-          "contextWindow": 188416,
+          "contextWindow": 114560,
           "maxTokens": 32768,
           "input": [
             "text",
