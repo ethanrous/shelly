@@ -2,7 +2,7 @@
   "lastChangelogVersion": "0.86.1",
   "theme": "dark",
   "defaultProvider": "lucy",
-  "defaultModel": "ornith-9b",
+  "defaultModel": "ornith-1.5-35b",
   "defaultThinkingLevel": "medium",
   "packages": [
     "npm:pi-mcp-adapter",
@@ -22,7 +22,8 @@
   "httpIdleTimeoutMs": 0,
   "hideThinkingBlock": true,
   "skills": [
-    "~/.claude/skills"
+    "~/.claude/skills/fixing-pr-checks",
+    "~/.claude/skills/resolve-pr-comments"
   ],
   "tokenSpeed": {
     "countStrategy": "estimate",
