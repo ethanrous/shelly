@@ -19,3 +19,12 @@
 - **Never poll.** Don't append `&` then sleep/pgrep loops — every poll is a full turn that resends context. For a result you need before continuing, run it foreground in one `bash` call. For parallelizable work, use `run_in_background: true` and rely on the completion notification (no `bg_output` loops). Subagents always use the foreground form.
 
 - **Search with `rg`, never `grep`** — ripgrep is much faster. Reserve grep only when rg is unavailable or needs a flag rg lacks.
+
+- **Code comments are durable, not per-PR noise.** Agents over-document and churn the same comments across PRs. A comment must carry a fact only prose can — otherwise delete it.
+  - **Only comment what the code can't express.** Justified only for non-obvious intent, constraint, tradeoff, invariant, or external behavior that clear names, types, tests, or an API contract don't already convey.
+  - **Comment "why," not "what."** Never narrate what the code says, restate identifiers, or explain obvious branches.
+  - **No docstrings by default; no line-by-line narration.** At most one concise docstring per function/class, only when it states intent or a contract.
+  - **Never put review/session metadata in code.** No `PR #…`, review-round notes, "was wrong in an earlier version" notes, or session/ticket IDs — that's a diary, not documentation. If such a reference sits inside an otherwise-useful explanation, strip just the reference, never the surrounding why. Exception: identifiers that are themselves data (a test/sample key like `BEL-300001`, an `atlassian.net/browse/` URL in a fixture) stay — deleting them corrupts the sample.
+  - **No untracked `TODO:`/`FIXME:` markers.** Pending work lives in Jira; a bare marker is an unenforced promise. Do the work, file the ticket, or delete it.
+  - **Delete stale comments when you touch the code; don't rewrite untouched files.** Remove a wrong/misleading comment — don't re-explain it.
+  - **Relevance test:** if removing it would lose a fact only prose carries, keep it; otherwise delete it.
