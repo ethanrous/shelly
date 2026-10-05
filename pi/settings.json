@@ -1,8 +1,8 @@
 {
-  "lastChangelogVersion": "0.86.1",
+  "lastChangelogVersion": "0.87.1",
   "theme": "dark",
   "defaultProvider": "lucy",
-  "defaultModel": "ornith-1.5-35b",
+  "defaultModel": "swift-1.5-27b",
   "defaultThinkingLevel": "medium",
   "packages": [
     "npm:pi-mcp-adapter",

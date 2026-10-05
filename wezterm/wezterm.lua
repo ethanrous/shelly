@@ -343,8 +343,6 @@ end
 
 local function tab_title(tab_info)
 	local title = tab_info.tab_title
-	-- if the tab title is explicitly set, take that
-
 	if title and #title > 0 then
 		return getTabIndexString(tab_info) .. title
 	end
@@ -364,13 +362,74 @@ local function tab_title(tab_info)
 	return getTabIndexString(tab_info) .. string.basename(dir) .. " " .. proc
 end
 
-wezterm.on("format-tab-title", function(tab, _, _, _, _, _)
-	local title = tab_title(tab)
+-- Deterministic per-repo tab color. The repo name is hashed so the same repo
+-- always gets the same hue; tabs not inside a repo get a stable random color.
+local function hash_string(s)
+	local h = 5381
+	for i = 1, #s do
+		h = (h * 33 + s:byte(i)) % 4294967296 -- djb2, kept under 2^32 for float safety
+	end
+	return h
+end
 
+-- Walk up from `dir` to the nearest git root and return that repo's directory name.
+local function path_parent(dir)
+	local rev = string.reverse(dir)
+	local _, slash = string.find(rev, "/")
+	if not slash then
+		return dir
+	end
+	return string.reverse(string.sub(rev, slash + 1))
+end
+
+local function repo_basename(dir)
+	local cur = dir
+	while cur and #cur > 0 do
+		local fh = io.open(cur .. "/.git", "r")
+		if fh then
+			fh:close()
+			return string.basename(cur)
+		end
+		local parent = path_parent(cur)
+		if parent == cur then
+			break
+		end
+		cur = parent
+	end
+	return nil
+end
+
+local function resolve_tab_colors(tab)
+	local dir = tab.active_pane.current_working_dir.file_path
+	local repo = dir and repo_basename(dir)
+	if not repo then
+		return nil
+	end
+	local hue = hash_string(repo) % 360
+	return string.format("hsl(%d, 40%%, 29%%)", hue), string.format("hsl(%d, 30%%, 17%%)", hue)
+end
+
+local function is_active_tab(tab, tabs)
+	for _, candidate in ipairs(tabs) do
+		if candidate.tab_id == tab.tab_id then
+			return candidate.is_active == true
+		end
+	end
+	return tab.is_active == true
+end
+
+wezterm.on("format-tab-title", function(tab, tabs, _, _, _, _)
+	local title = tab_title(tab)
+	local active_color, inactive_color = resolve_tab_colors(tab)
+	if not active_color then
+		return " " .. title .. " "
+	end
+
+	local is_active = is_active_tab(tab, tabs)
 	return {
-		{ Text = " " },
-		{ Text = title },
-		{ Text = " " },
+		{ Background = { Color = is_active and active_color or inactive_color } },
+		{ Foreground = { Color = is_active and "#f0f0f0" or "#8f96a3" } },
+		{ Text = " " .. title .. " " },
 	}
 end)
 

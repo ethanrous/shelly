@@ -8,8 +8,8 @@
       },
       "models": [
         {
-          "id": "qwen3.8-27b",
-          "contextWindow": 124576,
+          "id": "swift-1.5-27b",
+          "contextWindow": 204800,
           "maxTokens": 32000,
           "input": [
             "text",

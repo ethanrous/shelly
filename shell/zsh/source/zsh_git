@@ -133,11 +133,6 @@ git_check() {
     git diff --name-only -G "console."
 }
 
-# Delete local branches that have been removed from remote
-git_clean() {
-    git branch -vv | grep ': gone]' | awk '{print $1}' | xargs git branch -D
-}
-
 # Get the name of the trunk branch (e.g., origin/main or origin/master)
 git_trunk_name() {
     git rev-parse --abbrev-ref origin/HEAD
@@ -146,6 +141,23 @@ git_trunk_name() {
 # Get the name of the current git repository
 git_repo_name() {
     basename $(git remote get-url origin) .git
+}
+
+# Delete local branches that have been removed from remote
+git_clean() {
+    git fetch --prune
+    local repo_name=$(git_repo_name)
+
+    while IFS= read -r line; do
+        # First check if the branch has a worktree associated with it, and remove the worktree if it does.
+        if git worktree list | grep -q "$line"; then
+            echo "Removing worktree for branch: $line"
+            worktree_path=$(git worktree list | grep "$line" | awk '{print $1}')
+            git worktree remove "$worktree_path" || true
+        fi
+
+        git branch -D "$line"
+    done < <(git branch -vv | grep ': gone]' | sed -E 's/\+ //g' | awk '{print $1}')
 }
 
 # Create a new worktree, based on main and switch to it, creating a new branch if it doesn't exist on origin yet.
@@ -176,6 +188,10 @@ gwrk() {
 
     if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
         echo "Branch $branch exists on origin, checking it out..."
+        git worktree add "$new_wrktr_path" "$branch" || return 1
+        cd "$new_wrktr_path"
+    elif git branch | grep -q "$branch"; then
+        echo "Branch $branch exists locally, checking it out..."
         git worktree add "$new_wrktr_path" "$branch" || return 1
         cd "$new_wrktr_path"
     else

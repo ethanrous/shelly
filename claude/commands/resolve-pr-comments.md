@@ -54,18 +54,22 @@ For each unresolved thread, read the file at the referenced line(s) to understan
 For each unresolved review thread, determine which category it falls into:
 
 ### Category A: Already fixed
+
 The code has already been changed to address the feedback. The thread just needs to be resolved.
 **Action:** Reply acknowledging the fix, then resolve the thread.
 
 ### Category B: Valid suggestion — fix it
+
 The feedback identifies a real issue (bug, security concern, code quality, performance) that should be addressed.
 **Action:** Fix the code, reply explaining the fix, then resolve the thread.
 
 ### Category C: Not actionable / Disagree
+
 The suggestion is a matter of preference, is incorrect, or doesn't apply. Examples: style nits that conflict with project conventions, suggestions based on incorrect assumptions.
 **Action:** Do NOT resolve. Report to the user with your reasoning and let them decide.
 
 ### Category D: Question / Discussion
+
 The comment asks a question or starts a discussion rather than suggesting a code change.
 **Action:** Do NOT resolve. Report to the user so they can respond.
 
@@ -74,6 +78,7 @@ Present your categorization to the user BEFORE making any changes or resolving a
 ## Step 5: Fix valid issues (Category B)
 
 For each Category B item:
+
 1. Read the full file to understand context
 2. Make the minimal fix that addresses the feedback
 3. Follow existing code conventions and patterns
@@ -126,3 +131,5 @@ After all actions are complete, present a summary table:
 - **Respect the project's CLAUDE.md** — follow existing conventions for code style, testing, etc.
 - **Do not create git commits** — only make code changes. The user handles version control.
 - **Run project linting/tests after fixes** if the project has `make lint` or equivalent configured
+
+If this skill is provided with no further instructions, you should automatically run the above steps to resolve PR review comments.
