@@ -1,11 +1,10 @@
 {
-  "lastChangelogVersion": "0.87.1",
+  "lastChangelogVersion": "1.0.2",
   "theme": "dark",
   "defaultProvider": "lucy",
   "defaultModel": "swift-1.5-27b",
   "defaultThinkingLevel": "medium",
   "packages": [
-    "npm:pi-mcp-adapter",
     "npm:pi-web-access",
     "npm:pi-hermes-memory",
     "git:github.com/ethanrous/pi-subagents@master",
@@ -21,6 +20,7 @@
   "globalTimeoutMs": 36000000,
   "httpIdleTimeoutMs": 0,
   "hideThinkingBlock": true,
+  "editorPaddingX": 1,
   "skills": [
     "~/.claude/skills/fixing-pr-checks",
     "~/.claude/skills/resolve-pr-comments"

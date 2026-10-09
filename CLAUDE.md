@@ -45,7 +45,7 @@ Implications when editing:
 
 - `pi/settings.json` → `~/.pi/agent/settings.json`
 - `pi/AGENTS.md` → `~/.pi/agent/AGENTS.md`
-- `pi/mcp.json` → `~/.pi/agent/mcp.json`
+- `pi/mcp.json` → `~/.pi/agent/mcp.json` (MCP server config read by pi's built-in MCP support; the slack entry pins a pre-registered client ID whose registered redirect URI is `http://localhost:3118/callback`, hence the explicit `callbackUrl`)
 - `pi/models.json` → `~/.pi/agent/models.json` (custom `lucy` provider; deliberately contains **no** API key — the key lives in `~/.pi/agent/auth.json` under `lucy`, which is per-machine and never committed)
 - `pi/keybindings.json` → `~/.pi/agent/keybindings.json` (user keybindings, e.g. the Alt+T/Ctrl+T thinking toggle)
 - `pi/hermes-memory-config.json` → `~/.pi/agent/hermes-memory-config.json` (pi-hermes-memory extension settings)
@@ -56,7 +56,7 @@ Implications when editing:
 
 Local extensions live in `pi/extensions/`; see `pi/extensions/CLAUDE.md` for what each one does and how they hook into pi.
 
-Everything else under `~/.pi/agent/` is deliberately **not** symlinked and stays per-machine: `auth.json` (auth secrets), `models-store.json`, `mcp-*.json` caches, `sessions/`, `missions/`, `npm/` (installed packages, ~150MB), `bin/` (downloaded binaries), `run-history.jsonl`. New packages referenced by `settings.json`'s `packages` list are reinstalled by pi on the target machine.
+Everything else under `~/.pi/agent/` is deliberately **not** symlinked and stays per-machine: `auth.json` (auth secrets), `models-store.json`, `mcp-auth.json` (MCP OAuth tokens) and other `mcp-*.json` caches, `sessions/`, `missions/`, `npm/` (installed packages, ~150MB), `bin/` (downloaded binaries), `run-history.jsonl`. New packages referenced by `settings.json`'s `packages` list are reinstalled by pi on the target machine.
 
 When adding a new item to sync: drop it under `pi/`, then add a `symlinkInto` line in **both** `shell/zsh/setup.zsh` and `shell/bash/setup.bash`.
 

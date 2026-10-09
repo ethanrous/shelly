@@ -1,23 +1,19 @@
 {
   "mcpServers": {
     "atlassian": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "mcp-remote",
-        "https://mcp.atlassian.com/v1/mcp"
-      ]
+      "url": "https://mcp.atlassian.com/v1/mcp"
     },
-    "github": {
-      "url": "https://api.githubcopilot.com/mcp",
-      "auth": "oauth",
-      "protocolVersion": "auto"
+    "opensearch": {
+      "url": "https://opensearch-mcp.int.onshape.com/mcp"
+    },
+    "dw": {
+      "url": "https://dw-mcp.int.onshape.com/mcp"
     },
     "slack": {
       "url": "https://mcp.slack.com/mcp",
-      "auth": "oauth",
       "oauth": {
-        "clientId": "1601185624273.8899143856786"
+        "clientId": "1601185624273.8899143856786",
+        "callbackUrl": "http://localhost:3118/callback"
       }
     }
   }
