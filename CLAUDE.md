@@ -45,7 +45,7 @@ Implications when editing:
 
 - `pi/settings.json` → `~/.pi/agent/settings.json`
 - `pi/AGENTS.md` → `~/.pi/agent/AGENTS.md`
-- `pi/mcp.json` → `~/.pi/agent/mcp.json` (MCP server config read by pi's built-in MCP support; the slack entry pins a pre-registered client ID whose registered redirect URI is `http://localhost:3118/callback`, hence the explicit `callbackUrl`)
+- `pi/mcp.json` → `~/.pi/agent/mcp.json` (MCP server config read by pi's built-in MCP support)
 - `pi/models.json` → `~/.pi/agent/models.json` (custom `lucy` provider; deliberately contains **no** API key — the key lives in `~/.pi/agent/auth.json` under `lucy`, which is per-machine and never committed)
 - `pi/keybindings.json` → `~/.pi/agent/keybindings.json` (user keybindings, e.g. the Alt+T/Ctrl+T thinking toggle)
 - `pi/hermes-memory-config.json` → `~/.pi/agent/hermes-memory-config.json` (pi-hermes-memory extension settings)
