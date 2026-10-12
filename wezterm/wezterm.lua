@@ -148,6 +148,117 @@ local function spawn_tab_to_right(window, _)
 	new_tab:activate()
 end
 
+local saved_tab_counts = {}
+
+-- Number of tabs in a saved workspace or window state file, or nil for a saved tab.
+local function saved_tab_count(path, epoch)
+	local cached = saved_tab_counts[path]
+	if cached and cached.epoch == epoch then
+		return cached.count
+	end
+
+	local count
+	local fh = io.open(path, "r")
+	if fh then
+		local ok, state = pcall(wezterm.json_parse, fh:read("a"))
+		fh:close()
+		if ok and type(state) == "table" then
+			if state.tabs then
+				count = #state.tabs
+			elseif state.window_states then
+				count = 0
+				for _, window_state in ipairs(state.window_states) do
+					count = count + #window_state.tabs
+				end
+			end
+		end
+	end
+
+	saved_tab_counts[path] = { epoch = epoch, count = count }
+	return count
+end
+
+-- Selector over every saved resurrect state, newest first, labelled with save time and tab count.
+-- Relies on BSD stat for modification times.
+local function pick_saved_state(win, pane)
+	local out = ""
+	local find = io.popen(
+		string.format(
+			'find "%s" -type f -name "*.json" -print0 | xargs -0 stat -f "%%m %%N"',
+			resurrect.state_manager.save_state_dir
+		),
+		"r"
+	)
+	if find then
+		out = find:read("a")
+		find:close()
+	end
+
+	local saves = {}
+	for line in out:gmatch("[^\n]+") do
+		local epoch, path, kind, name = line:match("^(%d+) (.*/([^/]+)/([^/]+)%.json)$")
+		if epoch then
+			table.insert(saves, { epoch = tonumber(epoch), path = path, kind = kind, name = name })
+		end
+	end
+	table.sort(saves, function(a, b)
+		return a.epoch > b.epoch
+	end)
+
+	if #saves == 0 then
+		wezterm.emit("resurrect.error", "No existing state files to select")
+		return
+	end
+
+	local short_kind = { workspace = "ws", window = "win", tab = "tab" }
+	local choices = {}
+	for i, save in ipairs(saves) do
+		local count = saved_tab_count(save.path, save.epoch)
+		local tabs = count and (count .. (count == 1 and " tab" or " tabs")) or ""
+		table.insert(choices, {
+			id = tostring(i),
+			label = string.format(
+				"%s  %-3s  %7s  %s",
+				os.date("%Y-%m-%d %H:%M", save.epoch),
+				short_kind[save.kind] or save.kind,
+				tabs,
+				save.name
+			),
+		})
+	end
+
+	win:perform_action(
+		wezterm.action.InputSelector({
+			title = "Load State",
+			description = "Select State to Load and press Enter = accept, Esc = cancel, / = filter",
+			fuzzy_description = "Search State to Load: ",
+			choices = choices,
+			fuzzy = true,
+			action = wezterm.action_callback(function(_, _, id, _)
+				local save = saves[tonumber(id)]
+				if not save then
+					return
+				end
+				local opts = {
+					spawn_in_workspace = true,
+					relative = true,
+					restore_text = true,
+					on_pane_restore = resurrect.tab_state.default_on_pane_restore,
+				}
+				local state = resurrect.state_manager.load_state(save.name, save.kind)
+				if save.kind == "workspace" then
+					resurrect.workspace_state.restore_workspace(state, opts)
+				elseif save.kind == "window" then
+					resurrect.window_state.restore_window(pane:window(), state, opts)
+				elseif save.kind == "tab" then
+					resurrect.tab_state.restore_tab(pane:tab(), state, opts)
+				end
+			end),
+		}),
+		pane
+	)
+end
+
 config.keys = {
 	-- Turn off the default CMD-m Hide action, allowing CMD-m to
 	-- be potentially recognized and handled by the tab
@@ -264,29 +375,7 @@ config.keys = {
 	{
 		key = "r",
 		mods = "ALT",
-		action = wezterm.action_callback(function(win, pane)
-			resurrect.fuzzy_loader.fuzzy_load(win, pane, function(id, _)
-				local type = string.match(id, "^([^/]+)") -- match before '/'
-				id = string.match(id, "([^/]+)$") -- match after '/'
-				id = string.match(id, "(.+)%..+$") -- remove file extention
-				local opts = {
-					spawn_in_workspace = true,
-					relative = true,
-					restore_text = true,
-					on_pane_restore = resurrect.tab_state.default_on_pane_restore,
-				}
-				if type == "workspace" then
-					local state = resurrect.state_manager.load_state(id, "workspace")
-					resurrect.workspace_state.restore_workspace(state, opts)
-				elseif type == "window" then
-					local state = resurrect.state_manager.load_state(id, "window")
-					resurrect.window_state.restore_window(pane:window(), state, opts)
-				elseif type == "tab" then
-					local state = resurrect.state_manager.load_state(id, "tab")
-					resurrect.tab_state.restore_tab(pane:tab(), state, opts)
-				end
-			end)
-		end),
+		action = wezterm.action_callback(pick_saved_state),
 	},
 }
 
@@ -341,13 +430,23 @@ local function getTabIndexString(tab_info)
 	return indexName
 end
 
+-- Working directory of the tab's active pane without a trailing slash, or nil when it is unknown.
+local function tab_cwd(tab_info)
+	local cwd = tab_info.active_pane.current_working_dir
+	local dir = cwd and cwd.file_path
+	if not dir then
+		return nil
+	end
+	return (string.gsub(dir, "(.)/+$", "%1"))
+end
+
 local function tab_title(tab_info)
 	local title = tab_info.tab_title
 	if title and #title > 0 then
 		return getTabIndexString(tab_info) .. title
 	end
 
-	local dir = tab_info.active_pane.current_working_dir.file_path
+	local dir = tab_cwd(tab_info) or ""
 	local proc = tab_info.active_pane.foreground_process_name
 	if string.starts(dir, "/Users/erousseau/repos/") then
 		dir = string.trim_prefix(dir, "/Users/erousseau/repos/")
@@ -362,8 +461,6 @@ local function tab_title(tab_info)
 	return getTabIndexString(tab_info) .. string.basename(dir) .. " " .. proc
 end
 
--- Deterministic per-repo tab color. The repo name is hashed so the same repo
--- always gets the same hue; tabs not inside a repo get a stable random color.
 local function hash_string(s)
 	local h = 5381
 	for i = 1, #s do
@@ -372,7 +469,6 @@ local function hash_string(s)
 	return h
 end
 
--- Walk up from `dir` to the nearest git root and return that repo's directory name.
 local function path_parent(dir)
 	local rev = string.reverse(dir)
 	local _, slash = string.find(rev, "/")
@@ -382,6 +478,7 @@ local function path_parent(dir)
 	return string.reverse(string.sub(rev, slash + 1))
 end
 
+-- Walk up from `dir` to the nearest git root and return that repo's directory name.
 local function repo_basename(dir)
 	local cur = dir
 	while cur and #cur > 0 do
@@ -399,8 +496,9 @@ local function repo_basename(dir)
 	return nil
 end
 
+-- Active and inactive tab backgrounds, with the hue hashed from the repo name. Nil outside a repo.
 local function resolve_tab_colors(tab)
-	local dir = tab.active_pane.current_working_dir.file_path
+	local dir = tab_cwd(tab)
 	local repo = dir and repo_basename(dir)
 	if not repo then
 		return nil
@@ -435,18 +533,114 @@ end)
 
 wezterm.on("gui-startup", resurrect.state_manager.resurrect_on_gui_startup)
 
-wezterm.on("resurrect.state_manager.periodic_save.finished", function()
-	resurrect.state_manager.write_current_state(wezterm.mux.get_active_workspace(), "workspace")
-end)
-
 resurrect.state_manager.set_max_nlines(5000)
 
-resurrect.state_manager.periodic_save({
-	interval_seconds = 60,
-	save_tabs = true,
-	save_windows = true,
-	save_workspaces = true,
-})
+local save_interval_seconds = 60
+local save_retention_days = 30
+
+-- Layout, working directories and alt-screen programs of a pane tree. Scrollback, geometry and focus are left out.
+local function pane_tree_signature(node)
+	if not node then
+		return ""
+	end
+	return string.format(
+		"{%s|%s|%s|%s|%s}",
+		node.domain or "",
+		node.cwd or "",
+		node.process and table.concat(node.process.argv or {}, " ") or "",
+		pane_tree_signature(node.right),
+		pane_tree_signature(node.bottom)
+	)
+end
+
+local function window_signature(state)
+	local tabs = {}
+	for i, tab in ipairs(state.tabs) do
+		tabs[i] = tab.title .. pane_tree_signature(tab.pane_tree)
+	end
+	return table.concat(tabs, "\n")
+end
+
+local window_snapshots = {}
+
+-- Saves the window to a dated file. While its tabs and panes stay the same, each save overwrites that file.
+local function snapshot_window(mux_win)
+	local state = resurrect.window_state.get_window_state(mux_win)
+	local signature = window_signature(state)
+	local id = mux_win:window_id()
+	local snapshot = window_snapshots[id]
+	if not snapshot or snapshot.signature ~= signature then
+		local title = state.title
+		-- Keeps the file name under the 255 byte limit without splitting a UTF-8 character.
+		if #title > 180 then
+			title = title:sub(1, 180):gsub("[\xC2-\xF4][\x80-\xBF]*$", "")
+		end
+		snapshot = {
+			signature = signature,
+			name = string.format("%s_%s_%d", title, os.date("%Y-%m-%d_%H-%M-%S"), id),
+		}
+		window_snapshots[id] = snapshot
+	end
+	resurrect.state_manager.save_state(state, snapshot.name)
+end
+
+local function save_titled_tabs(mux_win)
+	for _, mux_tab in ipairs(mux_win:tabs()) do
+		if mux_tab:get_title() ~= "" then
+			resurrect.state_manager.save_state(resurrect.tab_state.get_tab_state(mux_tab))
+		end
+	end
+end
+
+local function save_workspace()
+	local state = resurrect.workspace_state.get_workspace_state()
+	resurrect.state_manager.save_state(state)
+	resurrect.state_manager.write_current_state(state.workspace, "workspace")
+end
+
+-- Deletes saved window and tab states last written more than `save_retention_days` ago.
+local function prune_saved_states()
+	local dir = resurrect.state_manager.save_state_dir
+	local ok, _, stderr = wezterm.run_child_process({
+		"/usr/bin/find",
+		dir .. "window",
+		dir .. "tab",
+		"-type",
+		"f",
+		"-name",
+		"*.json",
+		"-mmin",
+		"+" .. save_retention_days * 24 * 60,
+		"-delete",
+	})
+	if not ok then
+		error(stderr)
+	end
+end
+
+local function attempt(what, fn, ...)
+	local ok, err = pcall(fn, ...)
+	if not ok then
+		wezterm.log_error("resurrect: " .. what .. " failed: " .. tostring(err))
+	end
+end
+
+-- Saves all state every `save_interval_seconds`. WezTerm discards an error raised in a timer callback,
+-- so the timer is re-armed first and each step logs its own failure.
+local function schedule_save()
+	wezterm.time.call_after(save_interval_seconds, function()
+		schedule_save()
+		attempt("workspace save", save_workspace)
+		for _, gui_win in ipairs(wezterm.gui.gui_windows()) do
+			local mux_win = gui_win:mux_window()
+			attempt("window save", snapshot_window, mux_win)
+			attempt("tab save", save_titled_tabs, mux_win)
+		end
+		attempt("pruning saved states", prune_saved_states)
+	end)
+end
+
+schedule_save()
 
 wezterm.on("resurrect.error", function(err)
 	wezterm.log_error("ERROR!")
