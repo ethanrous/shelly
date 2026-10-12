@@ -79,4 +79,5 @@ symlinkInto $SHELLY/pi/pi-blackhole-config.json ~/.pi/agent/pi-blackhole/pi-blac
 symlinkInto $SHELLY/pi/extensions ~/.pi/agent/extensions
 symlinkInto $SHELLY/pi/instructions ~/.pi/agent/instructions
 symlinkInto $SHELLY/pi/skills ~/.pi/agent/skills
+symlinkInto $SHELLY/pi/pi-hermes-memory/skills ~/.pi/agent/pi-hermes-memory/skills
 symlinkInto $SHELLY/claude/skills ~/.claude/skills

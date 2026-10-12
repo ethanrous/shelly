@@ -1,0 +1,43 @@
+---
+name: "create-jira-ticket"
+description: "Create a Jira ticket in any team project (GROW, BEL, …) via the atlassian MCP without the missing-field / reserved-word / permission fumbles"
+version: 4
+created: "2026-09-28"
+updated: "2026-10-06"
+---
+## When to Use
+Use when the user asks to create a Jira story/task/bug ticket (e.g. "create a ticket for X", "open a Jira story", "log this as a ticket"). This is a WRITE action on a shared board — always confirm the summary with the user first, then create. The team's projects are GROW and BEL (the two most common); cloudId is the same for every project on the instance.
+
+## Procedure
+1. Confirm the summary with the user before creating — this is a WRITE action on a shared board, and the assignee defaults to the user, not 'unassigned'.
+2. Use the atlassian MCP (tools are named atlassian_<tool>). The team's Jira instance is: cloudId = "44b4be60-410b-466f-9e5b-98d889f52f50" (site belmonttechinc.atlassian.net). cloudId is instance-wide, NOT per-project — pass it on EVERY atlassian call.
+3. Pick the projectKey. The two projects we work on most are GROW and BEL. Pass the 3-letter key (e.g., projectKey = "GROW").
+4. You do NOT need to precompute the ticket number. createJiraIssue returns the new issue key automatically (e.g., GROW-740), and Jira rejects duplicates — if the number is taken it will tell you. Skip precomputing; just create and read back the key. (You may still run the JQL search to confirm the highest existing number for your own sanity, but it is not required.) Never use the LIMIT keyword unquoted.
+5. Look up the project's issue types with getJiraProjectIssueTypesMetadata (needs cloudId AND projectIdOrKey) to see what's available, then pass issueTypeName as the human-readable name (e.g., "Story", "Bug", "Task") — not the numeric id. If unsure which types exist, fetch this first.
+6. Create with createJiraIssue, passing ALL required fields: cloudId (required), projectKey (required), issueTypeName (required), summary (required). Pass description as a Markdown string (contentFormat defaults to markdown).
+7. ALWAYS pass args as a STRUCTURED OBJECT, never as a JSON string. Passing args as a stringified JSON blob makes the proxy drop it and fail with 'Invalid arguments for tool createJiraIssue'. Pass the real object.
+8. Always set the assignee explicitly at creation by passing additional_fields.assignee as a FULL USER OBJECT: {"accountId": "609944b0b050a70069819cf5", "accountType": "atlassian"} (the user's working account). Do NOT pass assignee_account_id at creation — Jira rejects the whole call with "Field 'assignee_account_id' cannot be set. It is not on the appropriate screen." (verified 2026-07: the create screen only exposes `assignee`, and it wants the full user object, not a bare account id.) If a ticket was ever created with the WRONG assignee, fix it with editJiraIssue using the same full user object; there is no deleteJiraIssue tool, and transitions are status-only, so a mis-assigned ticket must be corrected in place.
+9. Do NOT pass additional_fields.components (or any field) unless you have write permission for it. The account cannot create new components — passing components returns 'You do not have permission to create new components' and the ticket is rejected. Omit it entirely, or reference an existing component name.
+10. Optional: set status. First call getTransitionsForJiraIssue (needs cloudId + issueIdOrKey) to get a valid transition id, then transitionJiraIssue with cloudId + issueIdOrKey + transition as a NESTED OBJECT {"transition": {"id": "<id>"}} — a flat transition_id string is rejected by the schema.
+11. Report back the issue key and webUrl (https://belmonttechinc.atlassian.net/browse/<KEY>) so the user can open it.
+12. Before opening a PR for this ticket, transition it to In Progress. Our release/CI automation keys off the ticket status and only picks up changes once the ticket is In Progress — a ticket left 'To Do' when the PR opens won't be tracked. Set it with getTransitionsForJiraIssue (cloudId + issueIdOrKey) to list transitions, pick the one whose name maps to In Progress, then transitionJiraIssue (cloudId + issueIdOrKey + transition:{id}). Do this BEFORE opening the PR, not after.
+## Pitfalls
+1. Forgetting required params on createJiraIssue: cloudId, projectKey, issueTypeName, and summary are all required. The first attempt that omits any of them fails with 'Required at cloudId / projectKey / issueTypeName / summary'. Always pass all four.
+2. Omitting cloudId on any atlassian call: lookupJiraAccountId, getJiraProjectIssueTypesMetadata, searchJiraIssuesUsingJql, getTransitionsForJiraIssue, and transitionJiraIssue all reject a call without cloudId. cloudId is instance-wide, so it is the same for GROW and BEL, and any other project.
+3. Omitting projectIdOrKey on getJiraProjectIssueTypesMetadata: it requires BOTH cloudId AND projectIdOrKey (e.g., "GROW").
+4. Using the LIMIT keyword in JQL unquoted: searchJiraIssuesUsingJql validates JQL and rejects reserved words — 'LIMIT' is reserved and returns 'LIMIT is a reserved JQL word. You must surround it in quotation marks'. Avoid it; use ORDER BY created DESC and take the first result instead.
+5. Passing issueTypeIds (numeric) instead of issueTypeName: createJiraIssue takes issueTypeName as the human-readable type name (Story / Bug / Task), not the numeric id. Issue type ids are per-project, so look them up with getJiraProjectIssueTypesMetadata rather than hardcoding it.
+6. BEL Bug tickets REQUIRE `components` and `customfield_10300` ("Found in build", free text) at creation — omitting either returns 400 'Components is required.' / 'Found in build is required.'. The old belief that components must be omitted is wrong: the account cannot CREATE new components, but referencing an EXISTING one is fine and required. For infrastructure/WAF/networking bugs pass {"components": [{"name": "Operations: Infrastructure"}]} and {"customfield_10300": "N/A"} (match whatever a recent comparable BEL ticket used if you can see one). Put both inside additional_fields.
+7. Passing extra fields as TOP-LEVEL args to createJiraIssue: the proxy schema rejects them with 'data must NOT have additional properties'. All non-core fields (components, customfield_*, priority, labels, fixVersions, assignee) must go inside the single `additional_fields` object.
+8. Leaving the assignee to Jira's default: tickets left 'automatic'/unassigned never reach the user. Always pass the assignee explicitly via additional_fields.assignee as a full user object.
+9. Passing assignee_account_id at creation: Jira rejects the ENTIRE create call with 'Field "assignee_account_id" cannot be set. It is not on the appropriate screen' (verified 2026-07 on GROW). The create screen only exposes `assignee`, and it must be a full user object {"accountId": "...", "accountType": "atlassian"} inside additional_fields — never a bare account-id string under any other field name.
+10. Opening the PR while the ticket is still 'To Do' breaks automation: our release pipeline reads the ticket status and only acts on In Progress tickets. Always transition the ticket to In Progress BEFORE opening the PR (getTransitionsForJiraIssue → transitionJiraIssue), never after.
+11. Passing args as a JSON string instead of a structured object: the proxy drops the payload and returns 'Invalid arguments for tool ...'. Always pass args as the real object, not a stringified version.
+12. Calling transitionJiraIssue without first fetching valid transition ids: use getTransitionsForJiraIssue first. Wrong transition ids are rejected, and transitions are per-project/workflow.
+13. Passing a flat transition_id string to transitionJiraIssue: the schema requires a NESTED transition object — {"transition": {"id": "21"}}. A flat transition_id fails validation with 'data must have required property transition, data must NOT have additional properties'.
+## Verification
+1. createJiraIssue returns the new issue key (e.g. BEL-12 or GROW-739) with no 'Required at …' validation error and no 'You do not have permission' error.
+2. The returned issue has an explicit assignee (not 'unassigned)' automatic) and the correct status.
+3. Confirm the new number is one past the highest existing key for that project, so there is no key collision.
+4. Before opening a PR, the ticket has been transitioned to In Progress (getTransitionsForJiraIssue → transitionJiraIssue), so the release automation picks it up.
+5. Report the webUrl (https://belmonttechinc.atlassian.net/browse/<KEY>) so the user can open the ticket.

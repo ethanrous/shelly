@@ -53,10 +53,12 @@ Implications when editing:
 - `pi/pi-blackhole-config.json` → `~/.pi/agent/pi-blackhole/pi-blackhole-config.json` (pi-blackhole compaction and memory settings; the rest of `~/.pi/agent/pi-blackhole/` is per-session runtime state and stays per-machine)
 - `pi/extensions/` → `~/.pi/agent/extensions/` (local pi extensions; the whole dir is one symlink and pi auto-discovers `*.ts` in it, so adding an extension needs no setup-script or `settings.json` change)
 - `pi/instructions/` → `~/.pi/agent/instructions/` (global-scope instruction files with `applyTo:` glob frontmatter that the `instruction-files` extension injects into the system prompt when a matching file is in play: `code-comments` applies to every file type (`applyTo: "*"`), `python-conventions` to `*.py`, `markdown` to `*.md`; the whole dir is one symlink, so adding a file needs no setup-script change)
+- `pi/skills/` → `~/.pi/agent/skills/` (pi-native skills; the whole dir is one symlink, so adding a skill needs no setup-script change)
+- `pi/pi-hermes-memory/skills/` → `~/.pi/agent/pi-hermes-memory/skills/` (procedural skills managed by the pi-hermes-memory extension's skill tooling; the whole dir is one symlink, so skills created, patched, or deleted in any session land in this repo — commit them when you want them to propagate to other machines)
 
 Local extensions live in `pi/extensions/`; see `pi/extensions/CLAUDE.md` for what each one does and how they hook into pi.
 
-Everything else under `~/.pi/agent/` is deliberately **not** symlinked and stays per-machine: `auth.json` (auth secrets), `models-store.json`, `mcp-auth.json` (MCP OAuth tokens) and other `mcp-*.json` caches, `sessions/`, `missions/`, `npm/` (installed packages, ~150MB), `bin/` (downloaded binaries), `run-history.jsonl`. New packages referenced by `settings.json`'s `packages` list are reinstalled by pi on the target machine.
+Everything else under `~/.pi/agent/` is deliberately **not** symlinked and stays per-machine: `auth.json` (auth secrets), `models-store.json`, `mcp-auth.json` (MCP OAuth tokens) and other `mcp-*.json` caches, `sessions/`, `missions/`, `npm/` (installed packages, ~150MB), `bin/` (downloaded binaries), `run-history.jsonl`, and the rest of `~/.pi/agent/pi-hermes-memory/` (the memory store itself: `MEMORY.md`, `USER.md`, `failures.md`, `sessions.db` and its recovery/retired shadow files — only its `skills/` subdirectory is synced, see above). New packages referenced by `settings.json`'s `packages` list are reinstalled by pi on the target machine.
 
 When adding a new item to sync: drop it under `pi/`, then add a `symlinkInto` line in **both** `shell/zsh/setup.zsh` and `shell/bash/setup.bash`.
 
