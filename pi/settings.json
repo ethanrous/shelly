@@ -12,7 +12,8 @@
     "npm:pi-blackhole",
     "npm:pi-token-speed",
     "npm:pi-thinking-tail",
-    "npm:pi-bg-tasks"
+    "npm:pi-bg-tasks",
+    "git:github.com/DietrichGebert/ponytail"
   ],
   "reserveTokens": 24576,
   "timeoutMs": 36000000,
@@ -21,10 +22,6 @@
   "httpIdleTimeoutMs": 0,
   "hideThinkingBlock": true,
   "editorPaddingX": 1,
-  "skills": [
-    "~/.claude/skills/fixing-pr-checks",
-    "~/.claude/skills/resolve-pr-comments"
-  ],
   "tokenSpeed": {
     "countStrategy": "estimate",
     "useProviderTokens": true,

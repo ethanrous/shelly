@@ -94,6 +94,9 @@ symlinkInto $SHELLY/pi/web-search.json ~/.pi/agent/web-search.json
 symlinkInto $SHELLY/pi/pi-blackhole-config.json ~/.pi/agent/pi-blackhole/pi-blackhole-config.json
 symlinkInto $SHELLY/pi/extensions ~/.pi/agent/extensions
 symlinkInto $SHELLY/pi/instructions ~/.pi/agent/instructions
+# All skills for both agents live in pi/skills; each tool links its own path to it.
 symlinkInto $SHELLY/pi/skills ~/.pi/agent/skills
-symlinkInto $SHELLY/pi/pi-hermes-memory/skills ~/.pi/agent/pi-hermes-memory/skills
-symlinkInto $SHELLY/claude/skills ~/.claude/skills
+symlinkInto $SHELLY/pi/skills ~/.claude/skills
+# Earlier repo revisions tracked the hermes extension's skills dir; drop a
+# leftover symlink so the extension can keep that dir per-machine.
+[[ -L ~/.pi/agent/pi-hermes-memory/skills ]] && rm ~/.pi/agent/pi-hermes-memory/skills
