@@ -17,7 +17,7 @@ if $isMac && ! which brew &>/dev/null; then
 
 fi
 
-brew install eza btop neovim nvm wezterm ripgrep gh
+brew install eza btop neovim nvm wezterm ripgrep gh ast-grep
 
 $SHELLY/shell/zsh/setup.zsh
 $SHELLY/shell/bash/setup.bash

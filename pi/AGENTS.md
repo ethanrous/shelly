@@ -36,7 +36,7 @@
   - **No untracked `TODO:`/`FIXME:` markers.** A marker is valid only when attached to an existing ticket key; pending work without a ticket belongs in Jira. Do the work, file the ticket, or delete the marker.
   - **Delete stale comments when you touch the code; don't rewrite untouched files.** Remove a wrong/misleading comment — don't re-explain it.
   - **Relevance test:** if removing it would lose a fact only prose carries, keep it; otherwise delete it.
-  - **Language-specific convention files load on touch.** The `instruction-files` extension injects the matching convention file (e.g. Python, Markdown) from the global or project instruction scopes once the session touches such a file — follow it for that file type.
+  - **Language-specific convention files load on touch.** The matching convention file (e.g. Python, Markdown) from the global or project instruction scopes is injected once the session touches such a file — follow it for that file type.
 
 ## How to be the most productive agent:
 

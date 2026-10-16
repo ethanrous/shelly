@@ -52,10 +52,10 @@ Implications when editing:
 - `pi/web-search.json` → `~/.pi/agent/web-search.json` (pi-web-access settings)
 - `pi/pi-blackhole-config.json` → `~/.pi/agent/pi-blackhole/pi-blackhole-config.json` (pi-blackhole compaction and memory settings; the rest of `~/.pi/agent/pi-blackhole/` is per-session runtime state and stays per-machine)
 - `pi/extensions/` → `~/.pi/agent/extensions/` (local pi extensions; the whole dir is one symlink and pi auto-discovers `*.ts` in it, so adding an extension needs no setup-script or `settings.json` change)
-- `pi/instructions/` → `~/.pi/agent/instructions/` (global-scope instruction files with `applyTo:` glob frontmatter that the `instruction-files` extension injects into the system prompt when a matching file is in play: `code-comments` applies to every file type (`applyTo: "*"`), `python-conventions` to `*.py`, `markdown` to `*.md`; the whole dir is one symlink, so adding a file needs no setup-script change)
+- `pi/instructions/` → `~/.pi/agent/instructions/` (global-scope instruction files with `applyTo:` glob frontmatter, injected into the system prompt when a matching file is in play; the whole dir is one symlink, so adding a file needs no setup-script change)
 - `pi/skills/` → `~/.pi/agent/skills/` **and** `~/.claude/skills/` (the single canonical home for all skills, shared by pi and Claude Code — one repo dir, one symlink per agent; pi discovers skills recursively while Claude Code only looks one level deep, so keep the layout flat)
 
-Local extensions live in `pi/extensions/`; see `pi/extensions/CLAUDE.md` for what each one does and how they hook into pi.
+Local extensions live in `pi/extensions/`; see `pi/extensions/CLAUDE.md` for how they load and how to develop them.
 
 Everything else under `~/.pi/agent/` is deliberately **not** symlinked and stays per-machine: `auth.json` (auth secrets), `models-store.json`, `mcp-auth.json` (MCP OAuth tokens) and other `mcp-*.json` caches, `sessions/`, `missions/`, `npm/` (installed packages, ~150MB), `bin/` (downloaded binaries), `run-history.jsonl`, and the rest of `~/.pi/agent/pi-hermes-memory/` (the memory store itself: `MEMORY.md`, `USER.md`, `failures.md`, `sessions.db` and its recovery/retired shadow files — including its `skills/` subdirectory, where the extension writes newly generated skills; move a generated skill into `pi/skills/` to share it across machines). New packages referenced by `settings.json`'s `packages` list are reinstalled by pi on the target machine.
 
