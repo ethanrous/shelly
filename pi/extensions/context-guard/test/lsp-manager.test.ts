@@ -37,7 +37,7 @@ test("defaultServerCommand builds the jdtls command line", { skip: !findExecutab
 	assert.equal(command.name, "jdtls");
 	assert.equal(command.args[0], "-data");
 	assert.match(command.args[1], /pi-context-guard\/jdtls\/[0-9a-f]{16}$/);
-	assert.equal(command.args[2], "--jvm-arg=-Xmx2G");
+	assert.equal(command.args[2], "--jvm-arg=-Xmx8G");
 });
 
 test("references returns file locations and drops non-file URIs", async (t) => {
