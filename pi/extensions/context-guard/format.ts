@@ -1,6 +1,7 @@
 import { isAbsolute, relative } from "node:path";
-import { CAP_MAX_BYTES, CAP_MAX_LINES, FIND_SYMBOL_LIMIT, SKELETON_COMMENT_MAX_LINES } from "./config.ts";
+import { CAP_MAX_BYTES, CAP_MAX_LINES, FIND_SYMBOL_LIMIT, REFERENCES_LIMIT, SKELETON_COMMENT_MAX_LINES } from "./config.ts";
 import { exceedsCap, measure } from "./output-cap.ts";
+import type { Reference } from "./references.ts";
 import type { Definition, FileSource } from "./symbols.ts";
 
 export interface TreeNode {
@@ -136,4 +137,24 @@ export function formatSource(def: Definition, source: FileSource, cwd: string): 
 export function formatOversize(def: Definition, nested: readonly TreeNode[], cwd: string, note: string): string {
 	const head = `${displayPath(def.file, cwd)}:${def.startLine}-${def.endLine}  ${def.kind} ${qualifiedName(def)}`;
 	return [head, def.signature, ...outlineRows(nested, 0, 1), note].join("\n");
+}
+
+export function formatReferences(symbol: string, label: string, refs: readonly Reference[], cwd: string, note?: string): string {
+	const notes = note ? [note] : [];
+	if (refs.length === 0) return [`No references to "${symbol}" found ${label}.`, ...notes].join("\n");
+	const lines = [`${plural(refs.length, "reference")} to "${symbol}" ${label}`, ...notes];
+	const shown = refs.slice(0, REFERENCES_LIMIT);
+	let current = "";
+	for (const ref of shown) {
+		if (ref.file !== current) {
+			current = ref.file;
+			lines.push(displayPath(ref.file, cwd));
+		}
+		lines.push(`  ${ref.line}${ref.enclosing ? ` (in ${ref.enclosing})` : ""}  ${ref.text}`);
+	}
+	if (refs.length > shown.length) {
+		const files = new Set(refs.map((r) => r.file)).size;
+		lines.push(`showing ${shown.length} of ${refs.length} in ${plural(files, "file")}; narrow with path`);
+	}
+	return lines.join("\n");
 }

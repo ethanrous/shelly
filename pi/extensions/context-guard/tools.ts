@@ -10,6 +10,7 @@ import {
 	formatNotFound,
 	formatOutline,
 	formatOversize,
+	formatReferences,
 	formatSkeleton,
 	formatSource,
 	qualifiedName,
@@ -17,6 +18,7 @@ import {
 } from "./format.ts";
 import { CLASS_LIKE, languageForFile, SUPPORTED_EXTENSIONS } from "./languages.ts";
 import { exceedsCap, expandHome, measure, type TextSize } from "./output-cap.ts";
+import { describeReferences, syntacticReferences } from "./references.ts";
 import {
 	type Definition,
 	type FileSource,
@@ -25,6 +27,7 @@ import {
 	parseSymbolName,
 	readSource,
 	type SearchOptions,
+	type SymbolName,
 } from "./symbols.ts";
 
 export interface ToolContext {
@@ -145,4 +148,33 @@ export async function runReadSymbol(params: { symbol: string; path?: string; ful
 		parts.push(choice.declarations.map((d) => `declared at ${displayPath(d.file, ctx.cwd)}:${d.nodeStartLine}`).join("\n"));
 	}
 	return parts.join("\n\n");
+}
+
+export function syntacticLabel(sym: SymbolName, narrowed: boolean): string {
+	return narrowed
+		? `(syntactic: name matches in files that can see ${sym.qualifier.join(".")}; may include same-named members of other classes)`
+		: "(syntactic: name matches; may include unrelated symbols with the same name)";
+}
+
+async function syntacticResult(
+	symbol: string,
+	sym: SymbolName,
+	defs: readonly Definition[],
+	options: SearchOptions,
+	ctx: ToolContext,
+	note?: string,
+): Promise<string> {
+	const { refs, narrowed } = await syntacticReferences(sym, defs, options);
+	await describeReferences(refs, options);
+	const missing =
+		sym.qualifier.length > 0 && defs.length === 0 ? `Note: no definition of "${symbol}" found; showing every use of "${sym.name}".` : undefined;
+	const notes = [missing, note].filter((n): n is string => n !== undefined).join("\n") || undefined;
+	return formatReferences(symbol, syntacticLabel(sym, narrowed), refs, ctx.cwd, notes);
+}
+
+export async function runFindReferences(params: { symbol: string; path?: string; precise?: boolean }, ctx: ToolContext): Promise<string> {
+	const sym = parseSymbolName(params.symbol);
+	const options = searchOptions(ctx, await resolvePath(params.path, ctx));
+	const defs = await findDefinitions(sym, options);
+	return syntacticResult(params.symbol, sym, defs, options, ctx);
 }
