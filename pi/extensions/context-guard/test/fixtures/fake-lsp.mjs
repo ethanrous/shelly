@@ -11,7 +11,15 @@ function send(message) {
 function handle(message) {
 	if (message.method === "initialize") {
 		send({ jsonrpc: "2.0", id: message.id, result: { capabilities: { referencesProvider: true } } });
-		if (mode === "java") {
+		if (mode === "java-broken") {
+			send({ jsonrpc: "2.0", method: "language/status", params: { type: "ProjectStatus", message: "WARNING" } });
+			send({
+				jsonrpc: "2.0",
+				method: "textDocument/publishDiagnostics",
+				params: { uri: "file:///repo/buildSrc/build.gradle", diagnostics: [{ severity: 1, message: "The supplied phased action failed with an exception.\nBuild file ..." }] },
+			});
+		}
+		if (mode === "java" || mode === "java-broken") {
 			setTimeout(() => send({ jsonrpc: "2.0", method: "language/status", params: { type: "ServiceReady", message: "ServiceReady" } }), 20);
 		}
 		if (mode === "python" || mode === "crash") {
@@ -21,6 +29,10 @@ function handle(message) {
 	}
 	if (message.method === "textDocument/references") {
 		if (mode === "crash") process.exit(3);
+		if (mode === "java-broken") {
+			send({ jsonrpc: "2.0", id: message.id, result: [] });
+			return;
+		}
 		const { textDocument, position } = message.params;
 		send({
 			jsonrpc: "2.0",

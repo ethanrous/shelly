@@ -25,7 +25,7 @@ export interface LspLocation {
 }
 
 export type PreciseResult =
-	| { status: "ok"; server: string; locations: LspLocation[] }
+	| { status: "ok"; server: string; locations: LspLocation[]; warning?: string }
 	| { status: "loading"; server: string }
 	| { status: "unavailable"; reason: string };
 
@@ -58,6 +58,7 @@ const SIGKILL_AFTER_MS = 10_000;
 const EXIT_SETTLE_MS = 1000;
 const PYRIGHT_FILES_FOUND = /^(Found \d+ source files?|No source files found)/;
 const PYRIGHT_SETTLE_MS = 5000;
+const BUILD_FILE = /(?:\.gradle|\.gradle\.kts|\/pom\.xml)$/;
 
 interface Server {
 	key: string;
@@ -73,6 +74,8 @@ interface Server {
 	lastUsed: number;
 	idleTimer: NodeJS.Timeout | undefined;
 	stderrTail: string;
+	importStatus: string | undefined;
+	buildErrors: Map<string, string>;
 }
 
 const delay = (ms: number) =>
@@ -122,6 +125,21 @@ function toLocations(result: unknown): LspLocation[] {
 		locations.push({ file: fileURLToPath(item.uri), line: start.line, character: start.character });
 	}
 	return locations;
+}
+
+// jdtls reports ServiceReady even when the build import fails, so import problems travel with the results.
+function recordImportProblem(server: Server, method: string, params: unknown): void {
+	const p = params as
+		| { type?: unknown; message?: unknown; uri?: unknown; diagnostics?: Array<{ severity?: unknown; message?: unknown }> }
+		| undefined;
+	if (method === "language/status" && p?.type === "ProjectStatus") {
+		server.importStatus = p.message === "OK" ? undefined : `project import status ${String(p.message)}`;
+	}
+	if (method === "textDocument/publishDiagnostics" && typeof p?.uri === "string" && BUILD_FILE.test(p.uri)) {
+		const error = p.diagnostics?.find((d) => d.severity === 1);
+		if (error) server.buildErrors.set(p.uri, `build import failed: ${String(error.message).split("\n")[0]}`);
+		else server.buildErrors.delete(p.uri);
+	}
 }
 
 export class LspManager {
@@ -185,7 +203,8 @@ export class LspManager {
 					{ textDocument: { uri }, position: { line, character }, context: { includeDeclaration: false } },
 					this.requestTimeoutMs,
 				);
-				return { status: "ok", server: server.name, locations: toLocations(result) };
+				const warning = server.buildErrors.values().next().value ?? server.importStatus;
+				return { status: "ok", server: server.name, locations: toLocations(result), ...(warning ? { warning } : {}) };
 			} catch (error) {
 				return await this.failure(server, error as Error);
 			}
@@ -225,6 +244,7 @@ export class LspManager {
 			onNotification: (method, params) => {
 				const p = params as { type?: unknown; message?: unknown } | undefined;
 				if (lang === "java" && method === "language/status" && p?.type === "ServiceReady") markReady();
+				if (lang === "java") recordImportProblem(server, method, params);
 				if (lang === "python" && method === "window/logMessage" && typeof p?.message === "string" && PYRIGHT_FILES_FOUND.test(p.message)) markReady();
 			},
 		});
@@ -245,6 +265,8 @@ export class LspManager {
 			lastUsed: Date.now(),
 			idleTimer: undefined,
 			stderrTail: "",
+			importStatus: undefined,
+			buildErrors: new Map(),
 		};
 		server.exited.catch(() => {});
 		const onDead = (reason: Error) => {

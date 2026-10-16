@@ -69,3 +69,23 @@ test("precise without a backend, or without a definition, falls back", async () 
 	const noDef = await runFindReferences({ symbol: "missingThing", precise: true }, ctx, backend({ status: "ok", server: "fake", locations: [] }));
 	assert.match(noDef, /Note: precise mode needs a definition and none was found; showing name matches\./);
 });
+
+test("an empty precise answer falls back to name matches and names the cause", async () => {
+	const lsp = backend({ status: "ok", server: "jdtls", locations: [], warning: "build import failed: boom" });
+	const lines = (await runFindReferences({ symbol: "DocumentService.getDocumentId", precise: true }, ctx, lsp)).split("\n");
+	assert.match(lines[0], /^2 references to "DocumentService.getDocumentId" \(syntactic: /);
+	assert.equal(lines[1], "Note: jdtls found no references (build import failed: boom); showing name matches.");
+});
+
+test("precise results carry the server's import warning", async () => {
+	const lsp = backend({ status: "ok", server: "jdtls", locations: [{ file: CALLER, line: 9, character: 24 }], warning: "project import status WARNING" });
+	assert.equal(
+		await runFindReferences({ symbol: "DocumentService.getDocumentId", precise: true }, ctx, lsp),
+		[
+			'1 reference to "DocumentService.getDocumentId" (precise: jdtls)',
+			"Note: jdtls reported a problem, so results may be incomplete: project import status WARNING.",
+			"java/com/client/Caller.java",
+			"  10 (in Caller.run)  String id = svc.getDocumentId(req);",
+		].join("\n"),
+	);
+});

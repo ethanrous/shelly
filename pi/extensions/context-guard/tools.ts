@@ -186,7 +186,7 @@ export function utf16Column(lineText: string, codePointColumn: number): number {
 async function preciseReferences(
 	defs: readonly Definition[],
 	lsp: PreciseBackend,
-): Promise<{ refs: Reference[]; server: string } | { note: string }> {
+): Promise<{ refs: Reference[]; server: string; warning: string | undefined } | { note: string }> {
 	if (defs.length === 0) return { note: "Note: precise mode needs a definition and none was found; showing name matches." };
 	if (defs.some((d) => d.lang === "c" || d.lang === "cpp")) return { note: "Note: precise mode is not available for C/C++; showing name matches." };
 	if (defs.length > MAX_PRECISE_DEFINITIONS) {
@@ -197,6 +197,7 @@ async function preciseReferences(
 	const seen = new Set<string>();
 	const refs: Reference[] = [];
 	let server = "";
+	let warning: string | undefined;
 	for (const def of defs) {
 		const source = await readSource(def.file);
 		const character = utf16Column(source.lines[def.nameLine - 1] ?? "", def.nameColumn);
@@ -204,6 +205,7 @@ async function preciseReferences(
 		if (result.status === "loading") return { note: `Note: precise index still loading (${result.server}); retry later. Showing name matches.` };
 		if (result.status === "unavailable") return { note: `Note: precise mode unavailable: ${result.reason}. Showing name matches.` };
 		server = result.server;
+		warning ??= result.warning;
 		for (const location of result.locations) {
 			const key = `${location.file}:${location.line}:${location.character}`;
 			if (seen.has(key)) continue;
@@ -211,7 +213,7 @@ async function preciseReferences(
 			refs.push({ file: location.file, line: location.line + 1, column: location.character, text: "", enclosing: undefined });
 		}
 	}
-	return { refs: refs.sort(byLocation), server };
+	return { refs: refs.sort(byLocation), server, warning };
 }
 
 export async function runFindReferences(
@@ -225,6 +227,12 @@ export async function runFindReferences(
 	if (!params.precise) return syntacticResult(params.symbol, sym, defs, options, ctx);
 	const precise = lsp ? await preciseReferences(defs, lsp) : { note: "Note: precise mode is unavailable here; showing name matches." };
 	if ("note" in precise) return syntacticResult(params.symbol, sym, defs, options, ctx, precise.note);
+	// An empty precise answer is often a project that did not import, so name matches are shown instead.
+	if (precise.refs.length === 0) {
+		const cause = precise.warning ? ` (${precise.warning})` : "";
+		return syntacticResult(params.symbol, sym, defs, options, ctx, `Note: ${precise.server} found no references${cause}; showing name matches.`);
+	}
 	await describeReferences(precise.refs, options);
-	return formatReferences(params.symbol, `(precise: ${precise.server})`, precise.refs, ctx.cwd);
+	const note = precise.warning ? `Note: ${precise.server} reported a problem, so results may be incomplete: ${precise.warning}.` : undefined;
+	return formatReferences(params.symbol, `(precise: ${precise.server})`, precise.refs, ctx.cwd, note);
 }

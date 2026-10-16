@@ -59,6 +59,18 @@ test("java waits for ServiceReady", async (t) => {
 	assert.equal(result.status, "ok");
 });
 
+test("java reports a failed build import with its results", async (t) => {
+	const { file } = await workspace("settings.gradle", "A.java");
+	const manager = new LspManager({ resolveCommand: fake("java-broken") });
+	t.after(() => manager.shutdownAll());
+	assert.deepEqual(await manager.references("java", file, 0, 0), {
+		status: "ok",
+		server: "fake",
+		locations: [],
+		warning: "build import failed: The supplied phased action failed with an exception.",
+	});
+});
+
 test("java reports loading until the server is ready", async (t) => {
 	const { file } = await workspace("settings.gradle", "A.java");
 	const manager = new LspManager({ resolveCommand: fake("java-never"), readyWaitMs: 100 });
