@@ -145,3 +145,15 @@ test("rgFiles lists sorted matching files, honors globs, and ignores globs for a
 	assert.deepEqual(await rgFiles("nothing", dir, ["*.java"], { cwd: dir }), []);
 	assert.deepEqual(await rgFiles("fooBar", join(dir, "n.py"), ["*.java"], { cwd: dir }), [join(dir, "n.py")]);
 });
+
+test("rgFiles searches a git-ignored directory when it is the root, such as a virtualenv", async () => {
+	const dir = await tmp();
+	await run("git", ["init", "-q"], { cwd: dir });
+	await writeFile(join(dir, ".gitignore"), ".venv\n");
+	await mkdir(join(dir, ".venv", "lib", "server"), { recursive: true });
+	await writeFile(join(dir, ".venv", ".gitignore"), "*\n");
+	await writeFile(join(dir, ".venv", "lib", "server", "a.py"), "def fooBar(): pass\n");
+	await writeFile(join(dir, "b.py"), "fooBar()\n");
+	assert.deepEqual(await rgFiles("fooBar", dir, ["*.py"], { cwd: dir }), [join(dir, "b.py")]);
+	assert.deepEqual(await rgFiles("fooBar", join(dir, ".venv", "lib"), ["*.py"], { cwd: dir }), [join(dir, ".venv", "lib", "server", "a.py")]);
+});

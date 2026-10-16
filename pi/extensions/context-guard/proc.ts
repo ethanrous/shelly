@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process";
 import { accessSync, constants, statSync } from "node:fs";
+import { stat } from "node:fs/promises";
 import { basename, delimiter, join } from "node:path";
 import { StringDecoder } from "node:string_decoder";
 import { fileURLToPath } from "node:url";
@@ -217,10 +218,23 @@ export async function sgScan(rules: string, files: readonly string[], options: R
 	return matches;
 }
 
+// False outside a git repository or when git is missing.
+async function gitIgnores(path: string, signal: AbortSignal | undefined): Promise<boolean> {
+	const git = resolveBinary("git");
+	if (!git) return false;
+	try {
+		return (await run(git, ["check-ignore", "-q", "--no-index", "--", path], { cwd: path, signal, timeoutMs: 5000 })).code === 0;
+	} catch {
+		return false;
+	}
+}
+
 export async function rgFiles(regex: string, root: string, globs: readonly string[], options: RgOptions): Promise<string[]> {
 	const { rg } = await requireTools();
 	const args = ["--no-config", "-l", "-w"];
 	if (options.ignoreCase) args.push("-i");
+	// rg prunes every subdirectory of an ignored root, such as a package in a virtualenv whose .gitignore is "*".
+	if ((await stat(root)).isDirectory() && (await gitIgnores(root, options.signal))) args.push("--no-ignore");
 	for (const glob of globs) args.push("-g", glob);
 	args.push("-e", regex, "--", root);
 	const result = await run(rg, args, options);
