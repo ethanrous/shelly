@@ -1,9 +1,10 @@
 import { HINT_INTERVAL_CALLS, OUTLINE_FIRST_MIN_LINES } from "./config.ts";
 
-export const HINT_TEXT = "Hint: find_symbol / read_symbol / find_references return code by name with less output.";
+export const HINT_TEXT =
+	"Hint: read_symbol takes a name or a file:line from rg -n and returns the whole function or class; find_symbol and find_references find definitions and usages.";
 
 export const GUIDELINES: readonly string[] = [
-	"For Python, Java, and C/C++ code: use outline to see a file's structure, read_symbol to read a function, method, or class by name, find_symbol to locate definitions, and find_references for usages. Use rg for strings, config, and non-code files.",
+	"For Python, Java, and C/C++ code, read by name or location instead of line ranges: read_symbol takes a name (Class.method) or a file:line such as a match from rg -n, and returns the whole function or class. Use outline for a file's structure, find_symbol for definitions, and find_references for usages. bash line-range reads of these files (sed -n, head, tail, awk NR) that cover a function or class are blocked. Use rg for text patterns, strings, config, and non-code files.",
 	"Oversized tool output is saved to a file and not shown. Search that file with rg or view a slice with head/tail instead of paging through it.",
 ];
 
@@ -26,43 +27,88 @@ export function outlineFirstNote(displayPath: string, lines: number): string {
 	return `${displayPath} is ${lines.toLocaleString("en-US")} lines; outline shown. Use read_symbol for a symbol, or read with offset/limit for a range.`;
 }
 
-export function shellSegments(command: string): string[][] {
-	const segments: string[][] = [[]];
+export interface ShellCommand {
+	tokens: string[];
+	// True when stdin comes from the previous command through a single |.
+	piped: boolean;
+	// Parenthesis nesting, so a subshell's cd does not apply after it closes.
+	depth: number;
+}
+
+// Drops here-document bodies, which are data rather than commands.
+function stripHeredocs(command: string): string {
+	const kept: string[] = [];
+	const pending: string[] = [];
+	for (const line of command.split("\n")) {
+		if (pending.length > 0) {
+			if (line.replace(/^\t+/, "").trimEnd() === pending[0]) pending.shift();
+			continue;
+		}
+		kept.push(line);
+		for (const match of line.matchAll(/(?<!<)<<-?\s*(['"]?)([A-Za-z_][A-Za-z0-9_]*)\1/g)) pending.push(match[2]);
+	}
+	return kept.join("\n");
+}
+
+export function shellCommands(command: string): ShellCommand[] {
+	const text = stripHeredocs(command);
+	const commands: ShellCommand[] = [{ tokens: [], piped: false, depth: 0 }];
 	let token = "";
 	let inToken = false;
 	let quote: "'" | '"' | null = null;
+	let depth = 0;
 	const flush = () => {
-		if (inToken) segments[segments.length - 1].push(token);
+		if (inToken) commands[commands.length - 1].tokens.push(token);
 		token = "";
 		inToken = false;
 	};
-	for (let i = 0; i < command.length; i++) {
-		const c = command[i];
+	const split = (piped: boolean) => {
+		flush();
+		commands.push({ tokens: [], piped, depth });
+	};
+	for (let i = 0; i < text.length; i++) {
+		const c = text[i];
 		if (quote) {
 			if (c === quote) quote = null;
-			else if (c === "\\" && quote === '"' && i + 1 < command.length) token += command[++i];
+			else if (c === "\\" && quote === '"' && i + 1 < text.length) token += text[++i];
 			else token += c;
 			continue;
 		}
+		const redirect = c === "&" && (text[i - 1] === ">" || text[i - 1] === "<" || text[i + 1] === ">");
 		if (c === "'" || c === '"') {
 			quote = c;
 			inToken = true;
-		} else if (c === "\\" && i + 1 < command.length) {
-			token += command[++i];
+		} else if (c === "\\" && text[i + 1] === "\n") {
+			i++;
+		} else if (c === "\\" && i + 1 < text.length) {
+			token += text[++i];
 			inToken = true;
-		} else if (c === " " || c === "\t" || c === "\n") {
+		} else if (c === " " || c === "\t") {
 			flush();
-		} else if (c === "|" || c === ";" || c === "&") {
-			flush();
-			if (command[i + 1] === c) i++;
-			segments.push([]);
+		} else if (c === "#" && !inToken) {
+			while (i + 1 < text.length && text[i + 1] !== "\n") i++;
+		} else if (c === "\n" && !inToken && commands[commands.length - 1].tokens.length === 0) {
+			continue;
+		} else if (c === "\n" || c === ";") {
+			split(false);
+		} else if (c === "(" || c === ")") {
+			depth = c === "(" ? depth + 1 : Math.max(0, depth - 1);
+			split(false);
+		} else if (c === "|" || (c === "&" && !redirect)) {
+			const doubled = text[i + 1] === c;
+			if (doubled) i++;
+			split(c === "|" && !doubled);
 		} else {
 			token += c;
 			inToken = true;
 		}
 	}
 	flush();
-	return segments.filter((segment) => segment.length > 0);
+	return commands.filter((cmd) => cmd.tokens.length > 0);
+}
+
+export function shellSegments(command: string): string[][] {
+	return shellCommands(command).map((cmd) => cmd.tokens);
 }
 
 function searchPattern(args: string[]): string | undefined {

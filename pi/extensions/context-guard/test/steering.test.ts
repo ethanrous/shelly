@@ -6,6 +6,7 @@ import {
 	HINT_TEXT,
 	HintThrottle,
 	outlineFirstNote,
+	shellCommands,
 	shellSegments,
 	wantsOutlineFirst,
 } from "../steering.ts";
@@ -24,6 +25,35 @@ test("shellSegments splits pipelines and respects quotes", () => {
 	]);
 	assert.deepEqual(shellSegments(`grep foo\\ bar f.c`), [["grep", "foo bar", "f.c"]]);
 	assert.deepEqual(shellSegments(""), []);
+});
+
+test("shellCommands marks pipes and splits on newlines and subshells", () => {
+	assert.deepEqual(shellCommands("cat a.py | sed -n 1,5p\ncd x || (head b.py); ls"), [
+		{ tokens: ["cat", "a.py"], piped: false, depth: 0 },
+		{ tokens: ["sed", "-n", "1,5p"], piped: true, depth: 0 },
+		{ tokens: ["cd", "x"], piped: false, depth: 0 },
+		{ tokens: ["head", "b.py"], piped: false, depth: 1 },
+		{ tokens: ["ls"], piped: false, depth: 0 },
+	]);
+	assert.deepEqual(shellCommands("echo 'a\nb' \"(c)\" 2>&1 &>/dev/null"), [{ tokens: ["echo", "a\nb", "(c)", "2>&1", "&>/dev/null"], piped: false, depth: 0 }]);
+	assert.deepEqual(shellCommands("cat a.py |\n  head -5 &&\nls"), [
+		{ tokens: ["cat", "a.py"], piped: false, depth: 0 },
+		{ tokens: ["head", "-5"], piped: true, depth: 0 },
+		{ tokens: ["ls"], piped: false, depth: 0 },
+	]);
+});
+
+test("shellCommands skips comments and here-document bodies", () => {
+	assert.deepEqual(shellCommands("echo ok # (head -n 5 a.py) | x\nrg a#b"), [
+		{ tokens: ["echo", "ok"], piped: false, depth: 0 },
+		{ tokens: ["rg", "a#b"], piped: false, depth: 0 },
+	]);
+	assert.deepEqual(shellCommands("python3 - <<'E'\nprint(1) | x\nE\nls; cat <<-EOF\n\tsed -n 1p a.py\n\tEOF\nwc <<< 'w'"), [
+		{ tokens: ["python3", "-", "<<E"], piped: false, depth: 0 },
+		{ tokens: ["ls"], piped: false, depth: 0 },
+		{ tokens: ["cat", "<<-EOF"], piped: false, depth: 0 },
+		{ tokens: ["wc", "<<<", "w"], piped: false, depth: 0 },
+	]);
 });
 
 test("bashWantsHint fires for readers on supported source files", () => {
@@ -94,8 +124,11 @@ test("wantsOutlineFirst requires an unranged read of a long supported file", () 
 
 test("text constants", () => {
 	assert.equal(outlineFirstNote("src/A.java", 1234), "src/A.java is 1,234 lines; outline shown. Use read_symbol for a symbol, or read with offset/limit for a range.");
-	assert.equal(HINT_TEXT, "Hint: find_symbol / read_symbol / find_references return code by name with less output.");
+	assert.equal(
+		HINT_TEXT,
+		"Hint: read_symbol takes a name or a file:line from rg -n and returns the whole function or class; find_symbol and find_references find definitions and usages.",
+	);
 	assert.equal(GUIDELINES.length, 2);
-	assert.ok(GUIDELINES[0].startsWith("For Python, Java, and C/C++ code: use outline"));
+	assert.ok(GUIDELINES[0].startsWith("For Python, Java, and C/C++ code, read by name or location instead of line ranges"));
 	assert.ok(GUIDELINES[1].startsWith("Oversized tool output is saved to a file"));
 });

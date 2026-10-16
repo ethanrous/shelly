@@ -161,6 +161,40 @@ test("read_symbol for a decorated Python method", async () => {
 	);
 });
 
+test("read_symbol at a file:line returns the innermost function or class there", async () => {
+	assert.equal(
+		await runReadSymbol({ symbol: "py/pkg/core.py:28" }, ctx),
+		["py/pkg/core.py:27-28  function Report.render.nested", "        def nested():", '            return "build_report"'].join("\n"),
+	);
+	assert.ok((await runReadSymbol({ symbol: "py/pkg/core.py:14:5" }, ctx)).startsWith("py/pkg/core.py:10-15  function build_report\n# Builds the report."));
+	assert.ok((await runReadSymbol({ symbol: "java/com/ex/DocumentService.java:20" }, ctx)).startsWith("java/com/ex/DocumentService.java:16-22  method DocumentService.getDocumentId\n"));
+	assert.ok((await runReadSymbol({ symbol: "py/pkg/core.py:19" }, ctx)).startsWith("py/pkg/core.py:18-29  class Report  (skeleton;"));
+	assert.ok((await runReadSymbol({ symbol: "py/pkg/core.py:19", full: true }, ctx)).startsWith("py/pkg/core.py:18-29  class Report\nclass Report:\n"));
+	assert.equal(await runReadSymbol({ symbol: "py/pkg/core.py:3" }, ctx), "py/pkg/core.py:3-3  variable MAX_ROWS\nMAX_ROWS = 100");
+	assert.ok((await runReadSymbol({ symbol: "c/util.c:3:" }, ctx)).startsWith("c/util.c:1-4  function add\n"));
+	assert.ok((await runReadSymbol({ symbol: "pkg/core.py:28", path: "py" }, ctx)).startsWith("py/pkg/core.py:27-28  function Report.render.nested\n"));
+});
+
+test("read_symbol at a file:line ranks namespaces and declarations below functions and classes", async () => {
+	assert.equal(await runReadSymbol({ symbol: "cpp/geom.h:19" }, ctx), "cpp/geom.h:19-19  type geo.Id\ntypedef int Id;");
+	assert.ok((await runReadSymbol({ symbol: "cpp/geom.h:8" }, ctx)).startsWith("cpp/geom.h:8-8  constructor geo.Shape.Shape\n"));
+	assert.ok((await runReadSymbol({ symbol: "cpp/geom.h:3" }, ctx)).startsWith("cpp/geom.h:3-25  namespace geo  (skeleton;"));
+	assert.equal(
+		await runReadSymbol({ symbol: "cpp/geom.h:4" }, ctx),
+		"cpp/geom.h:4 is not inside a function or class. Read it with read and offset/limit, or see the file's structure with outline.",
+	);
+});
+
+test("read_symbol at a file:line outside any definition says so", async () => {
+	assert.equal(
+		await runReadSymbol({ symbol: "py/pkg/core.py:16" }, ctx),
+		"py/pkg/core.py:16 is not inside a function or class. Read it with read and offset/limit, or see the file's structure with outline.",
+	);
+	await assert.rejects(runReadSymbol({ symbol: "py/pkg/core.py:30" }, ctx), /^Error: py\/pkg\/core.py:30 is out of range; the file has 29 lines$/);
+	await assert.rejects(runReadSymbol({ symbol: "py/pkg/core.py:0" }, ctx), /py\/pkg\/core.py:0 is out of range/);
+	await assert.rejects(runReadSymbol({ symbol: "py/pkg/nope.py:3" }, ctx), /Path not found: py\/pkg\/nope.py/);
+});
+
 test("read_symbol suggests near names when nothing matches", async () => {
 	const text = await runReadSymbol({ symbol: "getDocumentID" }, ctx);
 	assert.equal(

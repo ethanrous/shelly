@@ -16,12 +16,13 @@ import {
 	qualifiedName,
 	type TreeNode,
 } from "./format.ts";
-import { CLASS_LIKE, languageForFile, SUPPORTED_EXTENSIONS } from "./languages.ts";
+import { CLASS_LIKE, isSupportedSource, languageForFile, SUPPORTED_EXTENSIONS } from "./languages.ts";
 import type { PreciseLang, PreciseResult } from "./lsp/manager.ts";
 import { exceedsCap, expandHome, measure, type TextSize } from "./output-cap.ts";
 import { byLocation, describeReferences, type Reference, syntacticReferences } from "./references.ts";
 import {
 	type Definition,
+	definitionAt,
 	type FileSource,
 	fileDefinitions,
 	findDefinitions,
@@ -136,7 +137,41 @@ async function renderDefinition(def: Definition, full: boolean, ctx: ToolContext
 	return formatOversize(def, await nestedNodes(def, ctx), ctx.cwd, note);
 }
 
+export interface SourceLocation {
+	path: string;
+	line: number;
+}
+
+// Accepts path:line and rg's path:line:column, with or without a trailing colon; anything else is a symbol name.
+export function parseLocation(symbol: string): SourceLocation | undefined {
+	const match = /^(.+?):(\d+)(?::\d+)?:?$/.exec(symbol.trim());
+	return match && isSupportedSource(match[1]) ? { path: match[1], line: Number(match[2]) } : undefined;
+}
+
+// A location is relative to the working directory, or to path when it is not found there.
+async function locationFile(location: SourceLocation, base: string | undefined, ctx: ToolContext): Promise<string> {
+	try {
+		return await resolvePath(location.path, ctx);
+	} catch (error) {
+		if (base === undefined) throw error;
+		return resolvePath(location.path, { ...ctx, cwd: await resolvePath(base, ctx) });
+	}
+}
+
+async function readLocation(location: SourceLocation, base: string | undefined, full: boolean, ctx: ToolContext): Promise<string> {
+	const file = await locationFile(location, base, ctx);
+	const { lineCount } = await readSource(file);
+	const shown = displayPath(file, ctx.cwd);
+	if (location.line < 1 || location.line > lineCount) throw new Error(`${shown}:${location.line} is out of range; the file has ${lineCount} lines`);
+	const defs = (await fileDefinitions([file], searchOptions(ctx, ctx.cwd))).get(file) ?? [];
+	const def = definitionAt(defs, location.line);
+	if (def) return renderDefinition(def, full, ctx);
+	return `${shown}:${location.line} is not inside a function or class. Read it with read and offset/limit, or see the file's structure with outline.`;
+}
+
 export async function runReadSymbol(params: { symbol: string; path?: string; full?: boolean }, ctx: ToolContext): Promise<string> {
+	const location = parseLocation(params.symbol);
+	if (location) return readLocation(location, params.path, params.full === true, ctx);
 	const sym = parseSymbolName(params.symbol);
 	const root = await resolvePath(params.path, ctx);
 	const defs = await findDefinitions(sym, searchOptions(ctx, root));

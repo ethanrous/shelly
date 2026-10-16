@@ -26,6 +26,13 @@
 
 - **Search with `rg`, never `grep`** — ripgrep (rg) is much faster.
 
+### Reading Code
+
+- **Read Python, Java, and C/C++ code by name or location, not by line range.** `read_symbol` takes a name (`Class.method`) or a `file:line` such as a match from `rg -n`, and returns the whole function or class. `sed -n`, `head`, `tail`, and `awk NR` reads of these files that cover a function or class are blocked.
+  - `outline` shows a file's structure, `find_symbol` finds definitions, and `find_references` finds usages (`precise: true` for exact Python and Java results).
+  - Dependencies such as `.venv` are git-ignored and skipped by default; pass `path` pointing into the package, e.g. `.venv/lib/python3.13/site-packages/<pkg>`.
+  - Use `rg` for text patterns, strings, config, and non-code files.
+
 ### Code Comments
 
 - **Code comments are durable, not per-PR noise.** Agents over-document and churn the same comments across PRs. A comment must carry a fact only prose can — otherwise delete it.

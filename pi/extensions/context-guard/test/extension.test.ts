@@ -24,8 +24,10 @@ async function setup() {
 	const tmpRoot = await mkdtemp(join(tmpdir(), "cg-ext-"));
 	const tools = new Map<string, Any>();
 	const handlers = new Map<string, Any[]>();
+	let active: string[] | undefined;
 	const pi = {
 		registerTool: (tool: Any) => tools.set(tool.name, tool),
+		getActiveTools: () => active ?? [...tools.keys()],
 		on: (event: string, handler: Any) => {
 			handlers.set(event, [...(handlers.get(event) ?? []), handler]);
 			return () => {};
@@ -47,7 +49,10 @@ async function setup() {
 	};
 	const toolResult = (over: Record<string, unknown>) =>
 		emit("tool_result", { type: "tool_result", toolCallId: "c1", input: {}, content: [], details: undefined, isError: false, toolName: "bash", ...over });
-	return { tools, emit, toolResult, tmpRoot, shutdowns: () => shutdowns };
+	const setActive = (names: string[]) => {
+		active = names;
+	};
+	return { tools, emit, toolResult, tmpRoot, setActive, shutdowns: () => shutdowns };
 }
 
 test("registers the four tools with flat parameters", async () => {
@@ -66,6 +71,32 @@ test("tool execute returns text content", async () => {
 	const result = await tools.get("find_symbol").execute("id", { name: "OTHER" }, undefined, undefined, { cwd: FIX });
 	assert.equal(result.content[0].type, "text");
 	assert.match(result.content[0].text, /^1 definition of "OTHER":/);
+});
+
+test("tool_call blocks a top-level bash line-range read of a function", async () => {
+	const { emit } = await setup();
+	const call = (over: Record<string, unknown>) =>
+		emit("tool_call", { type: "tool_call", toolCallId: "c1", toolName: "bash", input: { command: "sed -n 13,14p py/pkg/core.py" }, ...over });
+	const result = await call({});
+	assert.equal(result.block, true);
+	assert.match(result.reason, /read_symbol "py\/pkg\/core.py:12" {2}function build_report \(L12-15\)/);
+	assert.equal(await call({ parentToolCallId: "p1" }), undefined);
+	assert.equal(await call({ toolName: "read", input: { path: "py/pkg/core.py" } }), undefined);
+	assert.equal(await call({ input: { command: "sed -n 1,3p py/pkg/core.py" } }), undefined);
+	assert.equal(await call({ input: {} }), undefined);
+});
+
+test("tool_call lets the read run when read_symbol is not an active tool", async () => {
+	const { emit, setActive } = await setup();
+	setActive(["bash", "read"]);
+	assert.equal(await emit("tool_call", { type: "tool_call", toolCallId: "c1", toolName: "bash", input: { command: "sed -n 13,14p py/pkg/core.py" } }), undefined);
+});
+
+test("read_symbol documents the file:line form", async () => {
+	const { tools } = await setup();
+	const tool = tools.get("read_symbol");
+	assert.match(tool.parameters.properties.symbol.description, /file:line/);
+	assert.match(tool.description, /file:line/);
 });
 
 test("before_agent_start adds the guidelines once", async () => {

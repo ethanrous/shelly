@@ -2,6 +2,7 @@ import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { isSupportedSource } from "./languages.ts";
+import { lineReadBlock } from "./line-reads.ts";
 import { LspManager } from "./lsp/manager.ts";
 import { applyCap, cleanupSpillDirs, expandHome, measureFile } from "./output-cap.ts";
 import { bashWantsHint, GUIDELINES, HINT_TEXT, HintThrottle, outlineFirstNote, wantsOutlineFirst } from "./steering.ts";
@@ -35,6 +36,12 @@ interface ResultEvent {
 	isError: boolean;
 }
 
+interface CallEvent {
+	toolName: string;
+	parentToolCallId?: string;
+	input?: Record<string, unknown>;
+}
+
 interface EventContext {
 	cwd: string;
 	signal?: AbortSignal;
@@ -43,6 +50,8 @@ interface EventContext {
 
 const SYMBOL_DESCRIPTION =
 	"Symbol name, optionally qualified: getDocumentId, DocumentService.getDocumentId, pkg.module.func, or ns::Class::method. A * in the last segment is a wildcard (*Service).";
+const READ_SYMBOL_DESCRIPTION =
+	"Symbol name, optionally qualified (getDocumentId, DocumentService.getDocumentId, pkg.module.func, or ns::Class::method; a * in the last segment is a wildcard), or a file:line such as src/app.py:302 from rg -n, which reads the function or class containing that line.";
 const PATH_DESCRIPTION = "File or directory to search. Defaults to the working directory.";
 const CONSTRAINED_SAMPLING = { type: "json_schema", strict: "prefer" };
 
@@ -81,10 +90,10 @@ export function registerContextGuard(pi: ExtensionAPI, Type: SchemaBuilder, opti
 		name: "read_symbol",
 		label: "Read symbol",
 		description:
-			"Read the source of a function, method, class, or other symbol by name in Python, Java, or C/C++ code, without guessing line ranges. Functions and methods come back whole with their doc comment and annotations or decorators. A class comes back as a skeleton listing its members with line ranges; read a member with Class.member, or pass full: true for the whole class. An ambiguous name returns the candidates; narrow it with path or a qualified name.",
-		promptSnippet: "Read a function, method, or class by name, without line ranges (Python, Java, C/C++)",
+			"Read the source of a function, method, class, or other symbol by name or by file:line in Python, Java, or C/C++ code, without guessing line ranges. A file:line, such as a match from rg -n, returns the function or class containing that line. Functions and methods come back whole with their doc comment and annotations or decorators. A class comes back as a skeleton listing its members with line ranges; read a member with Class.member, or pass full: true for the whole class. An ambiguous name returns the candidates; narrow it with path or a qualified name.",
+		promptSnippet: "Read a function, method, or class by name or file:line, without line ranges (Python, Java, C/C++)",
 		parameters: Type.Object({
-			symbol: Type.String({ description: SYMBOL_DESCRIPTION }),
+			symbol: Type.String({ description: READ_SYMBOL_DESCRIPTION }),
 			path: Type.Optional(Type.String({ description: PATH_DESCRIPTION })),
 			full: Type.Optional(Type.Boolean({ description: "Return a whole class instead of its skeleton." })),
 		}),
@@ -136,6 +145,21 @@ export function registerContextGuard(pi: ExtensionAPI, Type: SchemaBuilder, opti
 	pi.on("before_agent_start", async (event) => {
 		const guidelines = event.systemPromptOptions.promptGuidelines;
 		for (const line of GUIDELINES) if (!guidelines.includes(line)) guidelines.push(line);
+	});
+
+	pi.on("tool_call", async (rawEvent, rawCtx) => {
+		const event = rawEvent as unknown as CallEvent;
+		const ctx = rawCtx as unknown as EventContext;
+		const command = event.input?.command;
+		if (event.parentToolCallId || event.toolName !== "bash" || typeof command !== "string") return undefined;
+		// pi blocks a call whose tool_call handler throws, so a failed check lets the command run.
+		try {
+			if (!pi.getActiveTools().includes("read_symbol")) return undefined;
+			const reason = await lineReadBlock(command, { cwd: ctx.cwd, signal: ctx.signal });
+			return reason === undefined ? undefined : { block: true, reason };
+		} catch {
+			return undefined;
+		}
 	});
 
 	async function outlineFirst(event: ResultEvent, ctx: EventContext): Promise<string | undefined> {

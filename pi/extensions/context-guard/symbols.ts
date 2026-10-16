@@ -145,16 +145,49 @@ function scoped(match: SgMatch): Scoped {
 	return { match, label: ruleKindLabel(match.ruleId), name, declQualifier: segments };
 }
 
-function enclosing(target: SgMatch, candidates: readonly Scoped[]): Scoped[] {
-	return candidates
-		.filter(
-			(s) =>
-				SCOPE_KINDS.has(s.label) &&
-				s.match.startByte <= target.startByte &&
-				s.match.endByte >= target.endByte &&
-				!(s.match.startByte === target.startByte && s.match.endByte === target.endByte),
-		)
-		.sort((a, b) => a.match.startByte - b.match.startByte);
+interface ScopeIndex {
+	nodes: Scoped[];
+	parents: number[];
+}
+
+// Scope nodes sorted by start, outer before inner, with each node's innermost container; AST ranges nest or are disjoint.
+function scopeIndex(candidates: readonly Scoped[]): ScopeIndex {
+	const nodes = candidates
+		.filter((s) => SCOPE_KINDS.has(s.label))
+		.sort((a, b) => a.match.startByte - b.match.startByte || b.match.endByte - a.match.endByte);
+	const parents: number[] = [];
+	const open: number[] = [];
+	for (let i = 0; i < nodes.length; i++) {
+		while (open.length > 0 && nodes[open[open.length - 1]].match.endByte < nodes[i].match.endByte) open.pop();
+		parents.push(open.length > 0 ? open[open.length - 1] : -1);
+		open.push(i);
+	}
+	return { nodes, parents };
+}
+
+// Scope nodes containing the target, outermost first.
+function enclosing(target: SgMatch, index: ScopeIndex): Scoped[] {
+	const contains = (s: Scoped) =>
+		s.match.startByte <= target.startByte &&
+		s.match.endByte >= target.endByte &&
+		!(s.match.startByte === target.startByte && s.match.endByte === target.endByte);
+	let low = 0;
+	let high = index.nodes.length - 1;
+	let last = -1;
+	while (low <= high) {
+		const mid = (low + high) >> 1;
+		if (index.nodes[mid].match.startByte <= target.startByte) {
+			last = mid;
+			low = mid + 1;
+		} else {
+			high = mid - 1;
+		}
+	}
+	let at = last;
+	while (at !== -1 && !contains(index.nodes[at])) at = index.parents[at];
+	const chain: Scoped[] = [];
+	for (; at !== -1; at = index.parents[at]) chain.push(index.nodes[at]);
+	return chain.reverse();
 }
 
 function finalKind(item: Scoped, chain: readonly Scoped[], lang: LangId): KindLabel {
@@ -234,10 +267,10 @@ export function definitionSite(match: SgMatch): string {
 	return `${match.file}:${line}:${column}`;
 }
 
-function buildDefinition(item: Scoped, all: readonly Scoped[], source: FileSource, scope: string[]): Definition {
+function buildDefinition(item: Scoped, index: ScopeIndex, source: FileSource, scope: string[]): Definition {
 	const { match } = item;
 	const lang = ruleLang(match.ruleId);
-	const chain = enclosing(match, all);
+	const chain = enclosing(match, index);
 	const nameAt = nameLocation(match, item.name);
 	return {
 		file: match.file,
@@ -273,6 +306,25 @@ function byPosition(a: Definition, b: Definition): number {
 	return a.file < b.file ? -1 : a.file > b.file ? 1 : a.startByte - b.startByte;
 }
 
+// Functions and classes, as opposed to namespaces and the declarations inside them.
+export const BODY_KINDS: ReadonlySet<KindLabel> = new Set<KindLabel>([...CLASS_LIKE, "function", "method", "constructor"]);
+
+// The innermost function or class spanning the line, else the smallest other declaration there. A namespace counts only on its own line.
+export function definitionAt(defs: readonly Definition[], line: number): Definition | undefined {
+	const spanning = defs.filter((d) => d.startLine <= line && line <= d.endLine);
+	const tiers = [
+		spanning.filter((d) => BODY_KINDS.has(d.kind)),
+		spanning.filter((d) => !BODY_KINDS.has(d.kind) && d.kind !== "namespace"),
+		spanning.filter((d) => d.kind === "namespace" && d.nodeStartLine === line),
+	];
+	const pool = tiers.find((tier) => tier.length > 0) ?? [];
+	let best: Definition | undefined;
+	for (const def of pool) {
+		if (!best || def.endByte - def.startByte < best.endByte - best.startByte) best = def;
+	}
+	return best;
+}
+
 export async function candidateFiles(body: string, options: SearchOptions): Promise<string[]> {
 	if ((await stat(options.root)).isFile()) {
 		if (!languageForFile(options.root)) {
@@ -290,7 +342,8 @@ export async function fileDefinitions(files: readonly string[], options: SearchO
 		const source = await readSource(file);
 		const scope = scopeOf(ruleLang(matches[0].ruleId), file, source, options.cwd);
 		const items = matches.map(scoped);
-		result.set(file, items.map((item) => buildDefinition(item, items, source, scope)).sort(byPosition));
+		const index = scopeIndex(items);
+		result.set(file, items.map((item) => buildDefinition(item, index, source, scope)).sort(byPosition));
 	}
 	for (const file of files) if (!result.has(file)) result.set(file, []);
 	return result;
@@ -306,9 +359,9 @@ export async function findDefinitions(sym: SymbolName, options: SearchOptions): 
 	for (const [file, fileHits] of hits) {
 		const source = await readSource(file);
 		const scope = scopeOf(ruleLang(fileHits[0].ruleId), file, source, options.cwd);
-		const containers = (all.get(file) ?? []).map(scoped);
+		const index = scopeIndex((all.get(file) ?? []).map(scoped));
 		for (const hit of fileHits) {
-			const def = buildDefinition(scoped(hit), containers, source, scope);
+			const def = buildDefinition(scoped(hit), index, source, scope);
 			if (matchesQualifier(def, sym.qualifier) && kindMatches(def, options.kind)) defs.push(def);
 		}
 	}
