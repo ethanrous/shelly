@@ -1,0 +1,3 @@
+# Parses C/C++ headers as C++; rules are passed inline.
+languageGlobs:
+  cpp: ["*.h", "*.hxx"]
