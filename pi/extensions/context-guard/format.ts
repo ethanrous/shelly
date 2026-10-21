@@ -24,6 +24,11 @@ export function rangeLabel(def: Definition): string {
 	return def.endLine > def.nodeStartLine ? `L${def.nodeStartLine}-${def.endLine}` : `L${def.nodeStartLine}`;
 }
 
+// A read_symbol call for the definition at a line, as listed in a blocked command's reason.
+export function definitionRow(shownPath: string, line: number, def: Definition): string {
+	return `  read_symbol "${shownPath}:${line}"  ${def.kind} ${qualifiedName(def)} (${rangeLabel(def)})`;
+}
+
 export function cell(text: string, width: number): string {
 	return `${text.padEnd(width - 1)} `;
 }
@@ -73,6 +78,20 @@ export function findNode(nodes: readonly TreeNode[], def: Definition): TreeNode 
 	for (const node of nodes) {
 		if (node.def.startByte === def.startByte && node.def.endByte === def.endByte) return node;
 		if (contains(node.def, def)) return findNode(node.children, def);
+	}
+	return undefined;
+}
+
+export interface Siblings {
+	nodes: TreeNode[];
+	parent: TreeNode | undefined;
+}
+
+// The nodes sharing a parent with def, and that parent; the root nodes when def is top level.
+export function findSiblings(roots: TreeNode[], def: Definition, parent?: TreeNode): Siblings | undefined {
+	for (const node of roots) {
+		if (node.def.startByte === def.startByte && node.def.endByte === def.endByte) return { nodes: roots, parent };
+		if (contains(node.def, def)) return findSiblings(node.children, def, node);
 	}
 	return undefined;
 }
@@ -132,6 +151,14 @@ export function formatSkeleton(def: Definition, members: readonly Definition[], 
 export function formatSource(def: Definition, source: FileSource, cwd: string): string {
 	const body = source.lines.slice(def.startLine - 1, def.endLine).join("\n");
 	return `${displayPath(def.file, cwd)}:${def.startLine}-${def.endLine}  ${def.kind} ${qualifiedName(def)}\n${body}`;
+}
+
+// The source lines within radius of a line, clipped to the definition.
+export function formatLinesAround(def: Definition, source: FileSource, line: number, radius: number, cwd: string): string {
+	const start = Math.max(def.startLine, line - radius);
+	const end = Math.min(def.endLine, line + radius);
+	const body = source.lines.slice(start - 1, end).join("\n");
+	return `${displayPath(def.file, cwd)}:${start}-${end}  lines around ${line} in ${qualifiedName(def)}\n${body}`;
 }
 
 export function formatOversize(def: Definition, nested: readonly TreeNode[], cwd: string, note: string): string {

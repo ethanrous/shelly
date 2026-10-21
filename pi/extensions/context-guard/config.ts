@@ -7,8 +7,17 @@ export const OUTLINE_FIRST_MIN_LINES = 400;
 export const FIND_SYMBOL_LIMIT = 50;
 export const REFERENCES_LIMIT = 60;
 export const NEAR_MATCH_LIMIT = 5;
+// The most definitions a blocked command's reason lists for one file.
+export const LISTED_DEFINITIONS = 5;
+// The share of a definition's lines a bash line-range read must cover to be blocked.
+export const LINE_READ_BLOCK_COVERAGE = 0.5;
+// bash line-range reads of at most this many lines are never blocked.
+export const LINE_READ_FREE_LINES = 20;
+export const DEFINITION_SEARCH_TIMEOUT_MS = 5_000;
 export const SIGNATURE_MAX_CHARS = 160;
 export const SKELETON_COMMENT_MAX_LINES = 20;
+// Source lines shown on each side of the requested line when an oversized function is read by file:line.
+export const OVERSIZE_CONTEXT_LINES = 20;
 export const SUBPROCESS_TIMEOUT_MS = 30_000;
 export const FILE_BATCH_SIZE = 2000;
 export const HINT_INTERVAL_CALLS = 10;

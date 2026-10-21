@@ -283,3 +283,160 @@ test("outline collapses to depth 1 when the full tree is over the cap", async ()
 		].join("\n"),
 	);
 });
+
+const CLASS_SKELETON_HEAD = 'py/pkg/core.py:18-29  class Report  (skeleton; read_symbol "Report.<member>" for a body, full: true for all)';
+
+test("read_symbol after returns the next definition at the same level", async () => {
+	assert.equal(
+		await runReadSymbol({ symbol: "py/pkg/core.py:12", after: 1 }, ctx),
+		[
+			"py/pkg/core.py:10-15  function build_report",
+			"# Builds the report.",
+			"# Second comment line.",
+			"def build_report(rows):",
+			'    """Return a report."""',
+			"    # build_report is not called here",
+			"    return [r for r in rows][:MAX_ROWS]",
+			"",
+			CLASS_SKELETON_HEAD,
+			"class Report:",
+			row(1, "L19", "field", 'title = "report"'),
+			row(1, "L21-22", "method", "def __init__(self, rows):"),
+			row(1, "L24-29", "method", "def render(rows):"),
+		].join("\n"),
+	);
+});
+
+test("read_symbol before returns the previous definition ahead of the target", async () => {
+	assert.equal(
+		await runReadSymbol({ symbol: "py/pkg/core.py:12", before: 1 }, ctx),
+		[
+			"py/pkg/core.py:6-7  function deco",
+			"def deco(fn):",
+			"    return fn",
+			"",
+			"py/pkg/core.py:10-15  function build_report",
+			"# Builds the report.",
+			"# Second comment line.",
+			"def build_report(rows):",
+			'    """Return a report."""',
+			"    # build_report is not called here",
+			"    return [r for r in rows][:MAX_ROWS]",
+		].join("\n"),
+	);
+});
+
+test("read_symbol by name reads neighbors and stops at the parent with a note", async () => {
+	assert.equal(
+		await runReadSymbol({ symbol: "Report.__init__", before: 1, after: 3 }, ctx),
+		[
+			"[No more definitions before Report.__init__ in Report.]",
+			"",
+			"py/pkg/core.py:21-22  method Report.__init__",
+			"    def __init__(self, rows):",
+			"        self.rows = rows",
+			"",
+			"py/pkg/core.py:24-29  method Report.render",
+			"    @staticmethod",
+			"    @deco",
+			"    def render(rows):",
+			"        def nested():",
+			'            return "build_report"',
+			"        return nested()",
+			"",
+			"[No more definitions after Report.render in Report.]",
+		].join("\n"),
+	);
+});
+
+test("read_symbol boundary note names the last neighbor returned on each side", async () => {
+	const text = await runReadSymbol({ symbol: "Report.render", before: 5 }, ctx);
+	assert.ok(text.startsWith("[No more definitions before Report.__init__ in Report.]\n\n"), text);
+});
+
+test("read_symbol neighbors skip fields and report the top-level scope", async () => {
+	const text = await runReadSymbol({ symbol: "Report.__init__", before: 1 }, ctx);
+	assert.ok(!text.includes("title"));
+	assert.equal(
+		await runReadSymbol({ symbol: "py/pkg/core.py:6", before: 1 }, ctx),
+		["[No more definitions before deco in py/pkg/core.py.]", "", "py/pkg/core.py:6-7  function deco", "def deco(fn):", "    return fn"].join("\n"),
+	);
+	assert.ok((await runReadSymbol({ symbol: "java/com/ex/DocumentService.java:18", before: 2 }, ctx)).startsWith("[No more definitions before DocumentService.DocumentService in DocumentService.]\n\njava/com/ex/DocumentService.java:12-14  constructor"));
+});
+
+test("read_symbol renders a class neighbor as a skeleton unless full", async () => {
+	assert.ok((await runReadSymbol({ symbol: "py/pkg/core.py:12", after: 1 }, ctx)).includes(`\n\n${CLASS_SKELETON_HEAD}\n`));
+	const full = await runReadSymbol({ symbol: "py/pkg/core.py:12", after: 1, full: true }, ctx);
+	assert.ok(full.includes("\n\npy/pkg/core.py:18-29  class Report\nclass Report:\n"));
+});
+
+test("read_symbol without a neighbor count or with zero is unchanged", async () => {
+	const plain = await runReadSymbol({ symbol: "Report.render" }, ctx);
+	assert.equal(await runReadSymbol({ symbol: "Report.render", before: 0, after: 0 }, ctx), plain);
+});
+
+test("read_symbol rejects invalid neighbor counts", async () => {
+	await assert.rejects(runReadSymbol({ symbol: "Report.render", after: -1 }, ctx), /^Error: after must be a non-negative integer, got -1$/);
+	await assert.rejects(runReadSymbol({ symbol: "py/pkg/core.py:12", before: 1.5 }, ctx), /before must be a non-negative integer/);
+	await assert.rejects(runReadSymbol({ symbol: "Report.render", after: Number.NaN }, ctx), /after must be a non-negative integer/);
+});
+
+test("read_symbol neighbors are skipped for candidates and misses", async () => {
+	assert.equal(await runReadSymbol({ symbol: "build_report", after: 1 }, ctx), await runReadSymbol({ symbol: "build_report" }, ctx));
+	assert.equal(await runReadSymbol({ symbol: "nope_missing", after: 1 }, ctx), await runReadSymbol({ symbol: "nope_missing" }, ctx));
+});
+
+test("read_symbol counts after from the last overload", async () => {
+	const text = await runReadSymbol({ symbol: "DocumentService.getDocumentId", before: 1, after: 1 }, ctx);
+	assert.ok(text.startsWith("java/com/ex/DocumentService.java:12-14  constructor DocumentService.DocumentService\n"));
+	assert.ok(text.includes("\n\njava/com/ex/DocumentService.java:16-22  method DocumentService.getDocumentId\n"));
+	assert.ok(text.includes("\n\njava/com/ex/DocumentService.java:24-26  method DocumentService.getDocumentId\n"));
+	assert.ok(text.includes("\n\njava/com/ex/DocumentService.java:28-31  class DocumentService.Inner  (skeleton;"));
+});
+
+test("read_symbol stops adding neighbors at the output cap and names the next one", async () => {
+	const dir = await mkdtemp(join(tmpdir(), "cg-neighbors-"));
+	const body = (name: string) => [`    void ${name}() {`, ...Array.from({ length: 150 }, (_, i) => `        int v${i} = ${i};`), "    }"];
+	await writeFile(join(dir, "Many.java"), `${["class Many {", ...body("a"), ...body("b"), ...body("c"), ...body("d"), "}"].join("\n")}\n`);
+	const text = await runReadSymbol({ symbol: "Many.a", after: 3 }, { cwd: dir });
+	assert.ok(text.includes("Many.java:2-153  method Many.a"));
+	assert.ok(text.includes("Many.java:154-305  method Many.b"));
+	assert.ok(!text.includes("method Many.c\n"));
+	assert.ok(text.endsWith("[Stopped before Many.c at Many.java:306 to stay under the output cap; read it with read_symbol Many.java:306.]"), text.slice(-200));
+});
+
+test("read_symbol at a file:line in an oversized function adds the lines around it", async () => {
+	const dir = await mkdtemp(join(tmpdir(), "cg-around-"));
+	const lines = ["class Big {", "    void huge() {", ...Array.from({ length: 450 }, (_, i) => `        int v${i} = ${i};`), "    }", "}"];
+	await writeFile(join(dir, "Big.java"), `${lines.join("\r\n")}\r\n`);
+	const big = { cwd: dir };
+	const text = await runReadSymbol({ symbol: "Big.java:100" }, big);
+	const [summary, around] = text.split("\n\n");
+	assert.ok(summary.startsWith("Big.java:2-453  method Big.huge\nvoid huge()\n[Big.huge is 452 lines; too large"), summary);
+	assert.equal(around.split("\n")[0], "Big.java:80-120  lines around 100 in Big.huge");
+	assert.equal(around.split("\n").length, 42);
+	assert.equal(around.split("\n")[1], "        int v77 = 77;");
+	assert.ok(!text.includes("\r"));
+	const edge = (await runReadSymbol({ symbol: "Big.java:3" }, big)).split("\n\n")[1];
+	assert.equal(edge.split("\n")[0], "Big.java:2-23  lines around 3 in Big.huge");
+	assert.ok(!(await runReadSymbol({ symbol: "Big.huge" }, big)).includes("lines around"));
+});
+
+test("read_symbol accepts path:Name", async () => {
+	const byName = await runReadSymbol({ symbol: "py/pkg/core.py:Report.render" }, ctx);
+	assert.equal(byName, await runReadSymbol({ symbol: "Report.render", path: "py/pkg/core.py" }, ctx));
+	assert.ok((await runReadSymbol({ symbol: "core.py:build_report", path: "py/pkg" }, ctx)).startsWith("py/pkg/core.py:10-15  function build_report"));
+	assert.ok((await runReadSymbol({ symbol: "cpp/geom.h:geo::Shape" }, ctx)).startsWith("cpp/geom.h:6-11  class geo.Shape"));
+	assert.ok((await runReadSymbol({ symbol: "geo::Shape" }, ctx)).startsWith("cpp/geom.h:6-11  class geo.Shape"));
+	assert.ok((await runReadSymbol({ symbol: "py/pkg/core.py:nope" }, ctx)).startsWith('No definition of "py/pkg/core.py:nope" found.'));
+});
+
+test("read_symbol accepts a path that is a file, with or without a location suffix", async () => {
+	const core = "py/pkg/core.py";
+	const expected = await runReadSymbol({ symbol: `${core}:12` }, ctx);
+	assert.equal(await runReadSymbol({ symbol: "core.py:12", path: `${core}:12` }, ctx), expected);
+	assert.equal(await runReadSymbol({ symbol: "core.py:12", path: core }, ctx), expected);
+	assert.equal(await runReadSymbol({ symbol: "pkg/core.py:12", path: core }, ctx), expected);
+	assert.equal(await runReadSymbol({ symbol: "core.py:build_report", path: core }, ctx), await runReadSymbol({ symbol: "build_report", path: core }, ctx));
+	await assert.rejects(runReadSymbol({ symbol: "other.py:12", path: core }, ctx), /Path not found: other.py/);
+});

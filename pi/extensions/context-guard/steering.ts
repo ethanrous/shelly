@@ -1,10 +1,10 @@
-import { HINT_INTERVAL_CALLS, OUTLINE_FIRST_MIN_LINES } from "./config.ts";
+import { HINT_INTERVAL_CALLS, LINE_READ_FREE_LINES, OUTLINE_FIRST_MIN_LINES } from "./config.ts";
 
 export const HINT_TEXT =
-	"Hint: read_symbol takes a name or a file:line from rg -n and returns the whole function or class; find_symbol and find_references find definitions and usages.";
+	"Hint: outline lists a file's functions and classes; read_symbol takes a name or a file:line from rg -n and returns the whole function or class; find_symbol and find_references find definitions and usages.";
 
 export const GUIDELINES: readonly string[] = [
-	"For Python, Java, and C/C++ code, read by name or location instead of line ranges: read_symbol takes a name (Class.method) or a file:line such as a match from rg -n, and returns the whole function or class. Use outline for a file's structure, find_symbol for definitions, and find_references for usages. bash line-range reads of these files (sed -n, head, tail, awk NR) that cover a function or class are blocked. Use rg for text patterns, strings, config, and non-code files.",
+	`For Python, Java, and C/C++ code, read by name or location instead of line ranges: read_symbol takes a name (Class.method) or a file:line such as a match from rg -n, and returns the whole function or class; after: 1 or before: 1 also returns the neighboring function or class. Use outline to list a file's functions and classes, find_symbol for definitions, and find_references for usages. bash line-range reads of these files (sed -n, head, tail, awk NR) of more than ${LINE_READ_FREE_LINES} lines that cover most of a function or class are blocked, and so are rg and grep searches of these files that match only definitions, such as rg '^def |^class '. Use rg for text patterns, strings, config, and non-code files.`,
 	"Oversized tool output is saved to a file and not shown. Search that file with rg or view a slice with head/tail instead of paging through it.",
 ];
 
@@ -70,7 +70,7 @@ export function shellCommands(command: string): ShellCommand[] {
 		const c = text[i];
 		if (quote) {
 			if (c === quote) quote = null;
-			else if (c === "\\" && quote === '"' && i + 1 < text.length) token += text[++i];
+			else if (c === "\\" && quote === '"' && i + 1 < text.length && '$`"\\\n'.includes(text[i + 1])) token += text[++i] === "\n" ? "" : text[i];
 			else token += c;
 			continue;
 		}

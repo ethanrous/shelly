@@ -1,12 +1,14 @@
 import { stat } from "node:fs/promises";
 import { resolve } from "node:path";
-import { NEAR_MATCH_LIMIT } from "./config.ts";
+import { NEAR_MATCH_LIMIT, OVERSIZE_CONTEXT_LINES } from "./config.ts";
 import {
 	buildTree,
 	displayPath,
 	findNode,
+	findSiblings,
 	formatCandidates,
 	formatDefinitions,
+	formatLinesAround,
 	formatNotFound,
 	formatOutline,
 	formatOversize,
@@ -25,6 +27,7 @@ import {
 	definitionAt,
 	type FileSource,
 	fileDefinitions,
+	BODY_KINDS,
 	findDefinitions,
 	parseSymbolName,
 	readSource,
@@ -38,7 +41,7 @@ export interface ToolContext {
 }
 
 const isContainer = (def: Definition) => CLASS_LIKE.has(def.kind) || def.kind === "namespace";
-const defSize = (def: Definition): TextSize => ({ bytes: def.endByte - def.startByte, lines: def.endLine - def.startLine + 1 });
+export const defSize = (def: Definition): TextSize => ({ bytes: def.endByte - def.startByte, lines: def.endLine - def.startLine + 1 });
 
 export async function resolvePath(path: string | undefined, ctx: ToolContext): Promise<string> {
 	const resolved = path ? resolve(ctx.cwd, expandHome(path)) : ctx.cwd;
@@ -122,7 +125,8 @@ async function skeleton(def: Definition, source: FileSource, ctx: ToolContext, n
 	return formatSkeleton(def, members, source, ctx.cwd, note);
 }
 
-async function renderDefinition(def: Definition, full: boolean, ctx: ToolContext): Promise<string> {
+// line is the requested line of a file:line read; an oversized body then also shows the lines around it.
+async function renderDefinition(def: Definition, full: boolean, ctx: ToolContext, line?: number): Promise<string> {
 	const source = await readSource(def.file);
 	if (isContainer(def) && !full) return skeleton(def, source, ctx);
 	const text = formatSource(def, source, ctx.cwd);
@@ -134,7 +138,8 @@ async function renderDefinition(def: Definition, full: boolean, ctx: ToolContext
 		return skeleton(def, source, ctx, `[${name} is ${lines} lines; too large to return whole. Read members with read_symbol, or search ${path} with rg.]`);
 	}
 	const note = `[${name} is ${lines} lines; too large to return whole. Search ${path} with rg -n '<pattern>', or read a range with offset/limit.]`;
-	return formatOversize(def, await nestedNodes(def, ctx), ctx.cwd, note);
+	const summary = formatOversize(def, await nestedNodes(def, ctx), ctx.cwd, note);
+	return line === undefined ? summary : `${summary}\n\n${formatLinesAround(def, source, line, OVERSIZE_CONTEXT_LINES, ctx.cwd)}`;
 }
 
 export interface SourceLocation {
@@ -148,42 +153,124 @@ export function parseLocation(symbol: string): SourceLocation | undefined {
 	return match && isSupportedSource(match[1]) ? { path: match[1], line: Number(match[2]) } : undefined;
 }
 
-// A location is relative to the working directory, or to path when it is not found there.
-async function locationFile(location: SourceLocation, base: string | undefined, ctx: ToolContext): Promise<string> {
+// path:Name, where Name may be qualified (Class.method, ns::Class::method); splits at the first colon that ends a source file path and is not part of ::.
+export function parseNamedSymbol(symbol: string): { path: string; name: string } | undefined {
+	for (let i = symbol.indexOf(":"); i > 0; i = symbol.indexOf(":", i + 1)) {
+		if (symbol[i + 1] === ":" || i + 1 >= symbol.length) continue;
+		if (isSupportedSource(symbol.slice(0, i))) return { path: symbol.slice(0, i), name: symbol.slice(i + 1) };
+	}
+	return undefined;
+}
+
+const stripSuffix = (path: string) => parseLocation(path)?.path ?? parseNamedSymbol(path)?.path ?? path;
+
+// A file path is relative to the working directory, or to base: a directory it is searched in, or a file it names or ends.
+async function locationFile(path: string, base: string | undefined, ctx: ToolContext): Promise<string> {
 	try {
-		return await resolvePath(location.path, ctx);
+		return await resolvePath(path, ctx);
 	} catch (error) {
 		if (base === undefined) throw error;
-		return resolvePath(location.path, { ...ctx, cwd: await resolvePath(base, ctx) });
+		const root = await resolvePath(base, ctx);
+		if (!(await stat(root)).isDirectory()) {
+			const normalized = resolve("/", path);
+			if (root === resolve(ctx.cwd, expandHome(path)) || root.endsWith(normalized)) return root;
+			throw error;
+		}
+		return resolvePath(path, { ...ctx, cwd: root });
 	}
 }
 
-async function readLocation(location: SourceLocation, base: string | undefined, full: boolean, ctx: ToolContext): Promise<string> {
-	const file = await locationFile(location, base, ctx);
+export interface NeighborRange {
+	before: number;
+	after: number;
+}
+
+function neighborCount(value: number | undefined, name: string): number {
+	if (value === undefined) return 0;
+	if (!Number.isInteger(value) || value < 0) throw new Error(`${name} must be a non-negative integer, got ${value}`);
+	return value;
+}
+
+const sameDefinition = (a: Definition, b: Definition) => a.startByte === b.startByte && a.endByte === b.endByte;
+
+// Wraps the rendered target text with the nearest function or class siblings on each side, in source order.
+async function withNeighbors(
+	targets: readonly Definition[],
+	rendered: string[],
+	fileDefs: readonly Definition[],
+	full: boolean,
+	range: NeighborRange,
+	ctx: ToolContext,
+	trailer: string[] = [],
+): Promise<string[]> {
+	if (range.before === 0 && range.after === 0) return [...rendered, ...trailer];
+	const roots = buildTree(fileDefs);
+	const before: string[] = [];
+	const after: string[] = [];
+	const notes = { before: undefined as string | undefined, after: undefined as string | undefined };
+	const combined = () => [...before, ...rendered, ...after, ...trailer].join("\n\n");
+	const side = async (anchor: Definition, count: number, direction: "before" | "after") => {
+		if (count === 0) return;
+		const found = findSiblings(roots, anchor);
+		if (!found) return;
+		const index = found.nodes.findIndex((n) => sameDefinition(n.def, anchor));
+		const ordered = direction === "after" ? found.nodes.slice(index + 1) : found.nodes.slice(0, index).reverse();
+		const candidates = ordered.filter((n) => BODY_KINDS.has(n.def.kind) && !targets.some((t) => sameDefinition(t, n.def)));
+		let edge = anchor;
+		for (const node of candidates.slice(0, count)) {
+			const text = await renderDefinition(node.def, full, ctx);
+			if (exceedsCap(measure([...(direction === "before" ? [text] : []), combined(), ...(direction === "after" ? [text] : [])].join("\n\n")))) {
+				const where = `${displayPath(node.def.file, ctx.cwd)}:${node.def.nodeStartLine}`;
+				notes[direction] = `[Stopped before ${qualifiedName(node.def)} at ${where} to stay under the output cap; read it with read_symbol ${where}.]`;
+				return;
+			}
+			if (direction === "before") before.unshift(text);
+			else after.push(text);
+			edge = node.def;
+		}
+		if (candidates.length < count) {
+			const scope = found.parent ? qualifiedName(found.parent.def) : displayPath(anchor.file, ctx.cwd);
+			notes[direction] = `[No more definitions ${direction} ${qualifiedName(edge)} in ${scope}.]`;
+		}
+	};
+	await side(targets[0], range.before, "before");
+	await side(targets[targets.length - 1], range.after, "after");
+	return [...(notes.before ? [notes.before] : []), ...before, ...rendered, ...after, ...(notes.after ? [notes.after] : []), ...trailer];
+}
+
+async function readLocation(location: SourceLocation, base: string | undefined, full: boolean, range: NeighborRange, ctx: ToolContext): Promise<string> {
+	const file = await locationFile(location.path, base, ctx);
 	const { lineCount } = await readSource(file);
 	const shown = displayPath(file, ctx.cwd);
 	if (location.line < 1 || location.line > lineCount) throw new Error(`${shown}:${location.line} is out of range; the file has ${lineCount} lines`);
 	const defs = (await fileDefinitions([file], searchOptions(ctx, ctx.cwd))).get(file) ?? [];
 	const def = definitionAt(defs, location.line);
-	if (def) return renderDefinition(def, full, ctx);
+	if (def) return (await withNeighbors([def], [await renderDefinition(def, full, ctx, location.line)], defs, full, range, ctx)).join("\n\n");
 	return `${shown}:${location.line} is not inside a function or class. Read it with read and offset/limit, or see the file's structure with outline.`;
 }
 
-export async function runReadSymbol(params: { symbol: string; path?: string; full?: boolean }, ctx: ToolContext): Promise<string> {
+export async function runReadSymbol(
+	params: { symbol: string; path?: string; full?: boolean; before?: number; after?: number },
+	ctx: ToolContext,
+): Promise<string> {
+	const range = { before: neighborCount(params.before, "before"), after: neighborCount(params.after, "after") };
+	const full = params.full === true;
+	const base = params.path === undefined ? undefined : stripSuffix(params.path);
 	const location = parseLocation(params.symbol);
-	if (location) return readLocation(location, params.path, params.full === true, ctx);
-	const sym = parseSymbolName(params.symbol);
-	const root = await resolvePath(params.path, ctx);
+	if (location) return readLocation(location, base, full, range, ctx);
+	const named = parseNamedSymbol(params.symbol);
+	const sym = parseSymbolName(named?.name ?? params.symbol);
+	const root = named ? await locationFile(named.path, base, ctx) : await resolvePath(base, ctx);
 	const defs = await findDefinitions(sym, searchOptions(ctx, root));
 	if (defs.length === 0) return formatNotFound(params.symbol, await nearMatches(sym.name, root, ctx), ctx.cwd);
 	const choice = chooseDefinitions(defs);
 	if (!choice) return formatCandidates(params.symbol, defs, ctx.cwd);
 	const parts: string[] = [];
-	for (const def of choice.render) parts.push(await renderDefinition(def, params.full === true, ctx));
-	if (choice.declarations.length > 0) {
-		parts.push(choice.declarations.map((d) => `declared at ${displayPath(d.file, ctx.cwd)}:${d.nodeStartLine}`).join("\n"));
-	}
-	return parts.join("\n\n");
+	for (const def of choice.render) parts.push(await renderDefinition(def, full, ctx));
+	const trailer =
+		choice.declarations.length > 0 ? [choice.declarations.map((d) => `declared at ${displayPath(d.file, ctx.cwd)}:${d.nodeStartLine}`).join("\n")] : [];
+	const fileDefs = range.before + range.after > 0 ? ((await fileDefinitions([choice.render[0].file], searchOptions(ctx, ctx.cwd))).get(choice.render[0].file) ?? []) : [];
+	return (await withNeighbors(choice.render, parts, fileDefs, full, range, ctx, trailer)).join("\n\n");
 }
 
 export function syntacticLabel(sym: SymbolName, narrowed: boolean): string {

@@ -24,6 +24,8 @@ test("shellSegments splits pipelines and respects quotes", () => {
 		["echo", "a|b"],
 	]);
 	assert.deepEqual(shellSegments(`grep foo\\ bar f.c`), [["grep", "foo bar", "f.c"]]);
+	assert.deepEqual(shellSegments(String.raw`grep "a\|b" "x\"y" "\$HOME" "c\\d" 'e\|f'`), [["grep", String.raw`a\|b`, 'x"y', "$HOME", String.raw`c\d`, String.raw`e\|f`]]);
+	assert.deepEqual(shellSegments(`rg "x\\`), [["rg", "x\\"]]);
 	assert.deepEqual(shellSegments(""), []);
 });
 
@@ -126,7 +128,7 @@ test("text constants", () => {
 	assert.equal(outlineFirstNote("src/A.java", 1234), "src/A.java is 1,234 lines; outline shown. Use read_symbol for a symbol, or read with offset/limit for a range.");
 	assert.equal(
 		HINT_TEXT,
-		"Hint: read_symbol takes a name or a file:line from rg -n and returns the whole function or class; find_symbol and find_references find definitions and usages.",
+		"Hint: outline lists a file's functions and classes; read_symbol takes a name or a file:line from rg -n and returns the whole function or class; find_symbol and find_references find definitions and usages.",
 	);
 	assert.equal(GUIDELINES.length, 2);
 	assert.ok(GUIDELINES[0].startsWith("For Python, Java, and C/C++ code, read by name or location instead of line ranges"));

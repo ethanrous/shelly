@@ -1,6 +1,7 @@
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { definitionSearchBlock } from "./definition-searches.ts";
 import { isSupportedSource } from "./languages.ts";
 import { lineReadBlock } from "./line-reads.ts";
 import { LspManager } from "./lsp/manager.ts";
@@ -12,6 +13,7 @@ export interface SchemaBuilder {
 	Object(properties: Record<string, unknown>): unknown;
 	String(options?: { description?: string }): unknown;
 	Boolean(options?: { description?: string }): unknown;
+	Integer(options?: { description?: string; minimum?: number }): unknown;
 	Optional(schema: unknown): unknown;
 }
 
@@ -90,15 +92,17 @@ export function registerContextGuard(pi: ExtensionAPI, Type: SchemaBuilder, opti
 		name: "read_symbol",
 		label: "Read symbol",
 		description:
-			"Read the source of a function, method, class, or other symbol by name or by file:line in Python, Java, or C/C++ code, without guessing line ranges. A file:line, such as a match from rg -n, returns the function or class containing that line. Functions and methods come back whole with their doc comment and annotations or decorators. A class comes back as a skeleton listing its members with line ranges; read a member with Class.member, or pass full: true for the whole class. An ambiguous name returns the candidates; narrow it with path or a qualified name.",
+			"Read the source of a function, method, class, or other symbol by name or by file:line in Python, Java, or C/C++ code, without guessing line ranges. A file:line, such as a match from rg -n, returns the function or class containing that line. Functions and methods come back whole with their doc comment and annotations or decorators. A class comes back as a skeleton listing its members with line ranges; read a member with Class.member, or pass full: true for the whole class. after: 1 also returns the next function or class at the same level; before works the same way. An ambiguous name returns the candidates; narrow it with path or a qualified name.",
 		promptSnippet: "Read a function, method, or class by name or file:line, without line ranges (Python, Java, C/C++)",
 		parameters: Type.Object({
 			symbol: Type.String({ description: READ_SYMBOL_DESCRIPTION }),
 			path: Type.Optional(Type.String({ description: PATH_DESCRIPTION })),
 			full: Type.Optional(Type.Boolean({ description: "Return a whole class instead of its skeleton." })),
+			before: Type.Optional(Type.Integer({ description: "Also return the previous N functions or classes at the same level.", minimum: 0 })),
+			after: Type.Optional(Type.Integer({ description: "Also return the next N functions or classes at the same level.", minimum: 0 })),
 		}),
 		constrainedSampling: CONSTRAINED_SAMPLING,
-		async execute(_id: string, params: { symbol: string; path?: string; full?: boolean }, signal: AbortSignal | undefined, _onUpdate: unknown, ctx: { cwd: string }) {
+		async execute(_id: string, params: { symbol: string; path?: string; full?: boolean; before?: number; after?: number }, signal: AbortSignal | undefined, _onUpdate: unknown, ctx: { cwd: string }) {
 			return textResult(await runReadSymbol(params, toolContext(ctx, signal)));
 		},
 	});
@@ -155,8 +159,10 @@ export function registerContextGuard(pi: ExtensionAPI, Type: SchemaBuilder, opti
 		// pi blocks a call whose tool_call handler throws, so a failed check lets the command run.
 		try {
 			if (!pi.getActiveTools().includes("read_symbol")) return undefined;
-			const reason = await lineReadBlock(command, { cwd: ctx.cwd, signal: ctx.signal });
-			return reason === undefined ? undefined : { block: true, reason };
+			const toolCtx = { cwd: ctx.cwd, signal: ctx.signal };
+			const found = await Promise.all([lineReadBlock(command, toolCtx), definitionSearchBlock(command, toolCtx)].map((check) => check.catch(() => undefined)));
+			const reasons = found.filter((reason) => reason !== undefined);
+			return reasons.length === 0 ? undefined : { block: true, reason: reasons.join("\n\n") };
 		} catch {
 			return undefined;
 		}

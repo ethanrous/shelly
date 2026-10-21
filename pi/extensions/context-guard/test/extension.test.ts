@@ -13,6 +13,7 @@ const FakeType = {
 	Object: (properties: Record<string, unknown>) => ({ type: "object", properties }),
 	String: (options = {}) => ({ type: "string", ...options }),
 	Boolean: (options = {}) => ({ type: "boolean", ...options }),
+	Integer: (options = {}) => ({ type: "integer", ...options }),
 	Optional: (schema: unknown) => ({ optional: true, schema }),
 };
 const lines = (n: number) => Array.from({ length: n }, (_, i) => `line ${i}`).join("\n");
@@ -58,7 +59,7 @@ async function setup() {
 test("registers the four tools with flat parameters", async () => {
 	const { tools } = await setup();
 	assert.deepEqual([...tools.keys()].sort(), ["find_references", "find_symbol", "outline", "read_symbol"]);
-	assert.deepEqual(Object.keys(tools.get("read_symbol").parameters.properties), ["symbol", "path", "full"]);
+	assert.deepEqual(Object.keys(tools.get("read_symbol").parameters.properties), ["symbol", "path", "full", "before", "after"]);
 	assert.equal(tools.get("find_references").parameters.properties.precise.schema.type, "boolean");
 	for (const tool of tools.values()) {
 		assert.ok(tool.description.length > 40, tool.name);
@@ -73,23 +74,45 @@ test("tool execute returns text content", async () => {
 	assert.match(result.content[0].text, /^1 definition of "OTHER":/);
 });
 
+const pyFunctions = (count: number, lines: number) =>
+	Array.from({ length: count }, (_, n) => [`def f${n}():`, ...Array.from({ length: lines - 1 }, (_, i) => `    v${i} = ${i}`)].join("\n")).join("\n");
+
+async function pythonDir() {
+	const dir = await mkdtemp(join(tmpdir(), "cg-ext-py-"));
+	await writeFile(join(dir, "gen.py"), `${pyFunctions(3, 30)}\n`);
+	return { cwd: dir, signal: undefined, sessionManager: { getSessionId: () => "sess" } };
+}
+
 test("tool_call blocks a top-level bash line-range read of a function", async () => {
 	const { emit } = await setup();
+	const context = await pythonDir();
 	const call = (over: Record<string, unknown>) =>
-		emit("tool_call", { type: "tool_call", toolCallId: "c1", toolName: "bash", input: { command: "sed -n 13,14p py/pkg/core.py" }, ...over });
+		emit("tool_call", { type: "tool_call", toolCallId: "c1", toolName: "bash", input: { command: "sed -n 1,30p gen.py" }, ...over }, context);
 	const result = await call({});
 	assert.equal(result.block, true);
-	assert.match(result.reason, /read_symbol "py\/pkg\/core.py:12" {2}function build_report \(L12-15\)/);
+	assert.match(result.reason, /read_symbol "gen.py:1" {2}function f0 \(L1-30\)/);
 	assert.equal(await call({ parentToolCallId: "p1" }), undefined);
-	assert.equal(await call({ toolName: "read", input: { path: "py/pkg/core.py" } }), undefined);
-	assert.equal(await call({ input: { command: "sed -n 1,3p py/pkg/core.py" } }), undefined);
+	assert.equal(await call({ toolName: "read", input: { path: "gen.py" } }), undefined);
+	assert.equal(await call({ input: { command: "sed -n 1,3p gen.py" } }), undefined);
 	assert.equal(await call({ input: {} }), undefined);
+});
+
+test("tool_call blocks a search that matches only definitions, joining reasons", async () => {
+	const { emit } = await setup();
+	const call = (command: string) => emit("tool_call", { type: "tool_call", toolCallId: "c1", toolName: "bash", input: { command } });
+	const search = await call(`rg -n "^def |^class " py/pkg/core.py`);
+	assert.equal(search.block, true);
+	assert.match(search.reason, /^Blocked: rg -n '\^def \|\^class ' py\/pkg\/core.py matches only function and class definitions/);
+	const context = await pythonDir();
+	const both = await emit("tool_call", { type: "tool_call", toolCallId: "c1", toolName: "bash", input: { command: `sed -n 1,30p gen.py; rg -n "def f0" gen.py` } }, context);
+	assert.match(both.reason, /^Blocked: sed -n 1,30p gen.py reads source code by line number[^]*\n\nBlocked: rg -n 'def f0' gen.py matches only/);
+	assert.equal(await call(`rg -n "^def |^MAX" py/pkg/core.py`), undefined);
 });
 
 test("tool_call lets the read run when read_symbol is not an active tool", async () => {
 	const { emit, setActive } = await setup();
 	setActive(["bash", "read"]);
-	assert.equal(await emit("tool_call", { type: "tool_call", toolCallId: "c1", toolName: "bash", input: { command: "sed -n 13,14p py/pkg/core.py" } }), undefined);
+	assert.equal(await emit("tool_call", { type: "tool_call", toolCallId: "c1", toolName: "bash", input: { command: "sed -n 12,15p py/pkg/core.py" } }), undefined);
 });
 
 test("read_symbol documents the file:line form", async () => {

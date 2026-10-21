@@ -74,21 +74,6 @@ test("leaves other commands alone", () => {
 
 const ctx = { cwd: FIX };
 
-test("lineReadBlock lists the definitions a line-range read overlaps", async () => {
-	assert.equal(
-		await lineReadBlock("cd py && sed -n 20,26p pkg/core.py", ctx),
-		[
-			"Blocked: sed -n 20,26p pkg/core.py reads source code by line number, so nothing in this command ran. Read the code in that range by name or location instead:",
-			'  read_symbol "py/pkg/core.py:18"  class Report (L18-29)',
-			'  read_symbol "py/pkg/core.py:21"  method Report.__init__ (L21-22)',
-			'  read_symbol "py/pkg/core.py:24"  method Report.render (L24-29)',
-			"read_symbol takes a name or a file:line and returns the whole function or class, and outline shows a file's structure. Read lines outside them with read and offset/limit. Rerun the rest of the command without the line-range read.",
-		].join("\n"),
-	);
-	const tail = await lineReadBlock("tail -n 3 java/com/ex/DocumentService.java", ctx);
-	assert.ok(tail?.includes('  read_symbol "java/com/ex/DocumentService.java:28"  class DocumentService.Inner (L28-31)'), tail);
-});
-
 test("lineReadBlock lets module-level, missing, and non-code reads run", async () => {
 	assert.equal(await lineReadBlock("sed -n 1,3p py/pkg/core.py", ctx), undefined);
 	assert.equal(await lineReadBlock("sed -n 1,3p py/pkg/missing.py", ctx), undefined);
@@ -98,17 +83,6 @@ test("lineReadBlock lets module-level, missing, and non-code reads run", async (
 	assert.equal(await lineReadBlock("head -n 4 cpp/geom.h", ctx), undefined);
 });
 
-test("lineReadBlock lists each location once", async () => {
-	const text = await lineReadBlock("head -n 8 c/util.c; sed -n 1,3p c/util.c", ctx);
-	assert.equal(text?.match(/read_symbol "/g)?.length, 2, text);
-	assert.ok(text?.startsWith("Blocked: head -n 8 c/util.c; sed -n 1,3p c/util.c reads"), text);
-	const dir = await mkdtemp(join(tmpdir(), "cg-one-"));
-	await writeFile(join(dir, "one.h"), "struct Point { int x; int len() const { return x; } };\n");
-	const one = await lineReadBlock("head -n 1 one.h", { cwd: dir });
-	assert.equal(one?.match(/read_symbol "/g)?.length, 1, one);
-	assert.ok(one?.includes('  read_symbol "one.h:1"  method Point.len (L1)'), one);
-});
-
 test("lineReadBlock shortens a long list of definitions", async () => {
 	const dir = await mkdtemp(join(tmpdir(), "cg-lines-"));
 	await writeFile(join(dir, "many.py"), Array.from({ length: 8 }, (_, i) => `def f${i}():\n    return ${i}\n`).join("\n"));
@@ -116,4 +90,77 @@ test("lineReadBlock shortens a long list of definitions", async () => {
 	assert.ok(text?.includes('  read_symbol "many.py:13"  function f4 (L13-14)'), text);
 	assert.ok(text?.includes("  and 3 more; outline many.py lists them all"), text);
 	assert.ok(!text?.includes("function f5"), text);
+});
+
+const bigFunction = (name: string, lines: number) => [`def ${name}():`, ...Array.from({ length: lines - 1 }, (_, i) => `    v${i} = ${i}`)].join("\n");
+
+test("lineReadBlock allows a narrow read inside a large function", async () => {
+	const dir = await mkdtemp(join(tmpdir(), "cg-narrow-"));
+	await writeFile(join(dir, "big.py"), `${bigFunction("big", 258)}\n`);
+	assert.equal(await lineReadBlock("sed -n 139p big.py", { cwd: dir }), undefined);
+	assert.equal(await lineReadBlock("sed -n 100,140p big.py", { cwd: dir }), undefined);
+});
+
+test("lineReadBlock allows a full read of a function too large to return whole", async () => {
+	const dir = await mkdtemp(join(tmpdir(), "cg-huge-"));
+	await writeFile(join(dir, "huge.py"), `${bigFunction("huge", 450)}\n`);
+	assert.equal(await lineReadBlock("sed -n 1,450p huge.py", { cwd: dir }), undefined);
+});
+
+const functionsFile = async (count: number, lines: number, extra = "") => {
+	const dir = await mkdtemp(join(tmpdir(), "cg-fns-"));
+	await writeFile(join(dir, "gen.py"), `${Array.from({ length: count }, (_, n) => bigFunction(`f${n}`, lines)).join("\n")}\n${extra}`);
+	return { cwd: dir };
+};
+
+test("lineReadBlock lists the definitions a line-range read overlaps", async () => {
+	const klass = ["class K:", `    ${bigFunction("m", 29).replaceAll("\n", "\n    ")}`].join("\n");
+	const gen = await functionsFile(3, 10, `${klass}\n`);
+	const text = await lineReadBlock("sed -n 1,50p gen.py", gen);
+	assert.ok(text?.startsWith("Blocked: sed -n 1,50p gen.py reads source code by line number, so nothing in this command ran. Read the code in that range by name or location instead:\n"), text);
+	assert.deepEqual(
+		text?.split("\n").filter((line) => line.startsWith("  read_symbol")),
+		[
+			'  read_symbol "gen.py:1"  function f0 (L1-10)',
+			'  read_symbol "gen.py:11"  function f1 (L11-20)',
+			'  read_symbol "gen.py:21"  function f2 (L21-30)',
+			'  read_symbol "gen.py:31"  class K (L31-60)',
+			'  read_symbol "gen.py:32"  method K.m (L32-60)',
+		],
+	);
+});
+
+test("lineReadBlock lists each location once", async () => {
+	const gen = await functionsFile(3, 10);
+	const text = await lineReadBlock("head -n 25 gen.py; sed -n 1,22p gen.py", gen);
+	assert.equal(text?.match(/read_symbol "/g)?.length, 3, text);
+	assert.ok(text?.startsWith("Blocked: head -n 25 gen.py; sed -n 1,22p gen.py reads"), text);
+});
+
+test("lineReadBlock blocks a window covering half of a small function", async () => {
+	const gen = await functionsFile(1, 50);
+	assert.ok(await lineReadBlock("sed -n 1,25p gen.py", gen));
+	assert.equal(await lineReadBlock("sed -n 1,24p gen.py", gen), undefined);
+});
+
+test("lineReadBlock lists only the functions a range mostly covers", async () => {
+	const gen = await functionsFile(3, 30);
+	assert.equal(await lineReadBlock("sed -n 20,41p gen.py", gen), undefined);
+	const text = await lineReadBlock("sed -n 25,66p gen.py", gen);
+	assert.equal(text?.match(/read_symbol "/g)?.length, 1, text);
+	assert.ok(text?.includes('  read_symbol "gen.py:31"  function f1 (L31-60)'), text);
+});
+
+test("lineReadBlock runs a read of 20 lines even when it covers a whole function", async () => {
+	const dir = await mkdtemp(join(tmpdir(), "cg-free-"));
+	await writeFile(join(dir, "gen.py"), `${bigFunction("pad", 10)}\n${bigFunction("target", 20)}\n`);
+	assert.equal(await lineReadBlock("sed -n 11,30p gen.py", { cwd: dir }), undefined);
+	assert.equal(await lineReadBlock("head -n 20 gen.py", { cwd: dir }), undefined);
+});
+
+test("lineReadBlock blocks a read of 21 lines that covers half of a function", async () => {
+	const dir = await mkdtemp(join(tmpdir(), "cg-free-"));
+	await writeFile(join(dir, "gen.py"), `${bigFunction("pad", 10)}\n${bigFunction("target", 20)}\n`);
+	const text = await lineReadBlock("sed -n 10,30p gen.py", { cwd: dir });
+	assert.ok(text?.includes('  read_symbol "gen.py:11"  function target (L11-30)'), text);
 });
