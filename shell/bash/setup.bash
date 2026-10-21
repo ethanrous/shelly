@@ -61,6 +61,11 @@ weztermName=wezterm.lua
 weztermPath=~/.config/wezterm/wezterm.lua
 linkConfigFile $SHELLY/wezterm/$weztermName $weztermPath
 
+# Key repeat instead of the accent picker when holding a key in WezTerm.
+if $isMac; then
+	defaults write com.github.wez.wezterm ApplePressAndHoldEnabled -bool false
+fi
+
 # Claude Code config: replace each item under ~/.claude with a symlink into the
 # repo. Runtime state (sessions/, history.jsonl, projects/ which contains
 # memory, plugins/, etc.) is deliberately left alone.
