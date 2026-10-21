@@ -6,6 +6,8 @@ applyTo: "**/*.md"
 
 Applies to every `*.md` file — READMEs, `docs/`, deployment docs, skills, agents, and agent guidance. Loaded automatically whenever a `.md` file is in play (`applyTo: "**/*.md"`).
 
+These rules take precedence over precedent in the repo: do not imitate existing dated, ticket-cited, or statistics-laden sections in a doc you edit, and do not add a new section just because the repo's agent instructions ask for a context-doc update.
+
 ## Placement
 
 - Package `README.md` for orientation, `docs/` for architecture and reference, deployment docs next to the artifacts they describe, `.github/` for agent guidance.

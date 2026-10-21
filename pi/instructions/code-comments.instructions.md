@@ -6,6 +6,11 @@ applyTo: "*"
 
 Applies to comments and inline documentation in **any** file type — source code, YAML/JSON/TOML config, scripts, markup.
 
+## These rules override repo precedent
+
+- **Follow these rules over anything already in the repo.** Existing comments, docstrings, and docs that violate them (ticket IDs as history, dated journal sections, snapshot statistics, rollout notes, "previously/now" narration) are legacy, not a template. Never copy their style, format, or section layout, even when the file you are editing is full of them and even when the repo's own `AGENTS.md`/`CLAUDE.md` asks for a doc update (update the present-tense facts only).
+- **Self-check before finishing.** Re-read every comment and doc line you added or touched, plus the comments next to code you changed (they go stale when a flag, gate, or condition is removed), and fix violations before committing.
+
 ## What earns a comment
 
 - **Only comment what the code can't express.** A comment is justified only when it conveys a non-obvious intent, constraint, tradeoff, invariant, or external behavior that clear names, types, schema keys, or tests do not.

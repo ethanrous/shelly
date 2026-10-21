@@ -13,7 +13,8 @@
     "npm:pi-token-speed",
     "npm:pi-thinking-tail",
     "npm:pi-bg-tasks",
-    "git:github.com/DietrichGebert/ponytail"
+    "git:github.com/DietrichGebert/ponytail",
+    "npm:@datadog/pi-plugin"
   ],
   "reserveTokens": 24576,
   "timeoutMs": 36000000,

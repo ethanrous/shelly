@@ -11,6 +11,7 @@
 - **Git branches should start with the name of the ticket**, e.g. `GROW-782-update-internal-apps-cname-records`. If a ticket is not provided, ask if you should create or use one before proceeding.
 - **PR titles start with the Jira ticket key.** e.g. `GROW-782 Update internal apps CNAME records`. Work without a ticket gets a ticket first.
 - If the repo instructs you to create a worktree, ask before doing so. Do not follow the repos workflow instructions, prefer creating worktrees only when you are sure it is necessary, and create them in ~/.worktrees/ even if the repo instructs otherwise.
+- Git over SSH sometimes times out. If you see a timeout, retry the command once. If it fails again, ask for help. NEVER use HTTP for git operations. If SSH isn't working, ask for help instead of trying to fix it yourself.
 
 - **Context discovery:** before starting, double-check context — read the repo's CLAUDE.md/AGENTS.md and docs, and ask if unsure.
 
@@ -28,14 +29,19 @@
 
 ### Reading Code
 
-- **Read Python, Java, and C/C++ code by name or location, not by line range.** `read_symbol` takes a name (`Class.method`) or a `file:line` such as a match from `rg -n`, and returns the whole function or class. `sed -n`, `head`, `tail`, and `awk NR` reads of these files that cover a function or class are blocked.
-  - `outline` shows a file's structure, `find_symbol` finds definitions, and `find_references` finds usages (`precise: true` for exact Python and Java results).
+- **Read Python, Java, and C/C++ code by name or location, not by line range.** `read_symbol` takes a name (`Class.method`) or a `file:line` such as a match from `rg -n`, and returns the whole function or class. `sed -n`, `head`, `tail`, and `awk NR` reads of these files that cover a function or class are blocked, and so are `rg` and `grep` searches of them that match only definitions.
+  - `outline` lists a file's functions and classes (use it instead of `rg '^def |^class '`), `find_symbol` finds definitions, and `find_references` finds usages (`precise: true` for exact Python and Java results).
   - Dependencies such as `.venv` are git-ignored and skipped by default; pass `path` pointing into the package, e.g. `.venv/lib/python3.13/site-packages/<pkg>`.
   - Use `rg` for text patterns, strings, config, and non-code files.
+
+### Writing Code
+
+- Never use adhoc python scripts to do replacement work. ALWAYS use the edit tool instead.
 
 ### Code Comments
 
 - **Code comments are durable, not per-PR noise.** Agents over-document and churn the same comments across PRs. A comment must carry a fact only prose can — otherwise delete it.
+  - **These rules override repo precedent.** Existing comments/docs that break them (ticket IDs as history, dated journal sections, snapshot statistics) are legacy, never a template to copy — even when a repo's own instructions ask for a doc update. Re-read every comment you add or touch, and the ones beside code you changed, before committing.
   - **Only comment what the code can't express.** Justified only for non-obvious intent, constraint, tradeoff, invariant, or external behavior that clear names, types, tests, or an API contract don't already convey.
   - **Comment "why", not "what".** Never narrate what the code says, restate identifiers, or explain obvious branches.
   - **Docstrings follow the Python conventions file**, which loads automatically when a `.py` file is in play: one line of purpose by default, a contract not a narration.
