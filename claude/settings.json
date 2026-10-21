@@ -5,7 +5,7 @@
     ],
     "defaultMode": "auto"
   },
-  "model": "opus[1m]",
+  "model": "opus",
   "enabledPlugins": {
     "everything-claude-code@everything-claude-code": true,
     "frontend-design@claude-plugins-official": true,
@@ -36,6 +36,14 @@
     }
   },
   "effortLevel": "high",
+  "modelSettings": {
+    "claude-haiku-5-5": {
+      "effortLevel": "high"
+    },
+    "claude-opus-5-5": {
+      "effortLevel": "xhigh"
+    }
+  },
   "skipDangerousModePermissionPrompt": true,
   "skipWorkflowUsageWarning": true,
   "theme": "dark",
