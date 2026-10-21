@@ -9,7 +9,7 @@
       "models": [
         {
           "id": "swift-1.5-27b",
-          "contextWindow": 204800,
+          "contextWindow": 109568,
           "maxTokens": 32000,
           "input": [
             "text",
