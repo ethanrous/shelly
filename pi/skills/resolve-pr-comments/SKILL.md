@@ -1,6 +1,6 @@
 ---
 name: resolve-pr-comments
-description: Use when the current branch's pull request has unresolved review comments to work through - "resolve PR comments", "address review feedback", "handle the reviewer's comments". Categorizes each unresolved thread, fixes valid issues after user approval, then replies to and resolves the threads on GitHub.
+description: "Use when the current branch's PR has unresolved review comments (\"resolve PR comments\"). Triages each thread, fixes valid ones after user approval, then replies and resolves on GitHub."
 ---
 
 # Resolve PR Review Comments

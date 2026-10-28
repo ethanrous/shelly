@@ -1,6 +1,6 @@
 ---
 name: "reviewing-github-prs"
-description: "Review a GitHub PR with gh: map existing comments first so nothing is re-raised, verify claims against a temp worktree, then submit ONE formal review (APPROVE or REQUEST_CHANGES, or COMMENT only when told) with non-duplicating inline comments under the user's account."
+description: "Review one GitHub PR with gh: map existing comments first, verify claims in a temp worktree, then submit a single formal review (APPROVE or REQUEST_CHANGES) with non-duplicating inline comments."
 version: 3
 created: "2026-10-02"
 updated: "2026-10-09"

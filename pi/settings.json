@@ -1,9 +1,15 @@
 {
-  "lastChangelogVersion": "1.0.2",
+  "lastChangelogVersion": "1.4.0",
   "theme": "dark",
   "defaultProvider": "lucy",
   "defaultModel": "swift-1.5-27b",
   "defaultThinkingLevel": "medium",
+  "compaction": {
+    "keepRecentTokens": 10000
+  },
+  "defaultTools": [
+    "+tool_search"
+  ],
   "packages": [
     "npm:pi-web-access",
     "npm:pi-hermes-memory",
@@ -14,7 +20,17 @@
     "npm:pi-thinking-tail",
     "npm:pi-bg-tasks",
     "git:github.com/DietrichGebert/ponytail",
-    "npm:@datadog/pi-plugin"
+    "npm:@datadog/pi-plugin",
+    "npm:pi-browser-use"
+  ],
+  "skills": [
+    "!skills/synced/*/built-in-browser",
+    "!skills/synced/*/chrome-browser",
+    "!skills/synced/*/computer-use",
+    "!skills/synced/*/docs",
+    "!skills/synced/*/google-workspace",
+    "!skills/synced/*/import-memory",
+    "!skills/synced/*/morning"
   ],
   "reserveTokens": 24576,
   "timeoutMs": 36000000,
@@ -22,6 +38,7 @@
   "globalTimeoutMs": 36000000,
   "httpIdleTimeoutMs": 0,
   "hideThinkingBlock": true,
+  "showCacheMissNotices": true,
   "editorPaddingX": 1,
   "tokenSpeed": {
     "countStrategy": "estimate",

@@ -15,11 +15,13 @@ export interface Invocation {
 	redirected: boolean;
 	// The file cat or nl passes unchanged into this command through a pipe.
 	piped: string | undefined;
+	// True when stdin comes from the previous command through a pipe.
+	fromPipe: boolean;
 }
 
 const ASSIGNMENT = /^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/s;
 const VARIABLE = /\$\{([A-Za-z_][A-Za-z0-9_]*)\}|\$([A-Za-z_][A-Za-z0-9_]*)/g;
-const NL_VALUE_FLAGS = new Set(["-b", "-d", "-f", "-h", "-i", "-l", "-n", "-s", "-v", "-w"]);
+export const NL_VALUE_FLAGS = new Set(["-b", "-d", "-f", "-h", "-i", "-l", "-n", "-s", "-v", "-w"]);
 // Words that run the command after them, so the program is the next word.
 const PREFIXES = new Set(["!", "{", "if", "then", "elif", "else", "while", "until", "do", "time", "command", "builtin", "exec", "nice", "nohup", "sudo", "env"]);
 // File descriptors above 2 are left out, so a quoted awk test such as 10<NR is not taken for a redirection.
@@ -102,7 +104,7 @@ export function invocations(command: string, cwd: string, home = homedir()): Inv
 		const catFile = pipeSource(exe, args) ?? (exe === "cat" || exe === "nl" ? stdin : undefined);
 		source = catFile === undefined ? undefined : resolve(dir, catFile);
 		const text = tokens.slice(first).map(quoted).join(" ");
-		found.push({ text, exe, args, dir, stdin: stdin === undefined ? undefined : resolve(dir, stdin), redirected, piped: fromPipe });
+		found.push({ text, exe, args, dir, stdin: stdin === undefined ? undefined : resolve(dir, stdin), redirected, piped: fromPipe, fromPipe: piped });
 	}
 	return found;
 }

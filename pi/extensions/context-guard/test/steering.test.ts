@@ -1,14 +1,16 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { toolCall } from "../calls.ts";
 import {
 	bashWantsHint,
+	BLOCK_RULE,
+	blockMessage,
 	GUIDELINES,
 	HINT_TEXT,
 	HintThrottle,
 	outlineFirstNote,
 	shellCommands,
 	shellSegments,
-	wantsOutlineFirst,
 } from "../steering.ts";
 
 const isSource = (p: string) => /\.(py|pyi|java|c|h|cc|cpp|cxx|hh|hpp|hxx)$/.test(p);
@@ -116,21 +118,47 @@ test("HintThrottle allows the first hint, then one per 10 calls", () => {
 	assert.equal(throttle.take(), true);
 });
 
-test("wantsOutlineFirst requires an unranged read of a long supported file", () => {
-	assert.equal(wantsOutlineFirst({ path: "a.java" }, 401, true), true);
-	assert.equal(wantsOutlineFirst({ path: "a.java" }, 400, true), false);
-	assert.equal(wantsOutlineFirst({ path: "a.md" }, 5000, false), false);
-	assert.equal(wantsOutlineFirst({ path: "a.java", offset: 1 }, 5000, true), false);
-	assert.equal(wantsOutlineFirst({ path: "a.java", limit: 50 }, 5000, true), false);
+test("toolCall writes the tool name and its JSON arguments", () => {
+	assert.equal(toolCall("read_symbol", { path: "data_insights/cheq.py", line: 510 }), 'read_symbol {"path": "data_insights/cheq.py", "line": 510}');
+	assert.equal(toolCall("read_symbol", { path: "a.py", module: true }), 'read_symbol {"path": "a.py", "module": true}');
+	assert.equal(toolCall("search", { pattern: "foo", path: "src", glob: ["*.py", "!**/t/**"], regex: undefined }), 'search {"pattern": "foo", "path": "src", "glob": ["*.py", "!**/t/**"]}');
 });
 
-test("text constants", () => {
-	assert.equal(outlineFirstNote("src/A.java", 1234), "src/A.java is 1,234 lines; outline shown. Use read_symbol for a symbol, or read with offset/limit for a range.");
+test("blockMessage states the rule once and joins the reasons", () => {
+	const parts = [
+		{ subjects: ["sed -n 1,3p a.py"], reason: "reads code by line number", calls: ['read_symbol {"path": "a.py", "line": 1, "end_line": 3}'] },
+		{ subjects: ["cat b.py"], reason: "reads a whole code file", calls: ['outline {"path": "b.py"}'], notes: ["a note"] },
+	];
 	assert.equal(
-		HINT_TEXT,
-		"Hint: outline lists a file's functions and classes; read_symbol takes a name or a file:line from rg -n and returns the whole function or class; find_symbol and find_references find definitions and usages.",
+		blockMessage(parts, true),
+		[
+			"Blocked: sed -n 1,3p a.py reads code by line number; cat b.py reads a whole code file, so nothing in this command ran.",
+			BLOCK_RULE,
+			'read_symbol {"path": "a.py", "line": 1, "end_line": 3}',
+			'outline {"path": "b.py"}',
+			"a note",
+			"Rerun the rest of the command without it.",
+		].join("\n"),
 	);
-	assert.equal(GUIDELINES.length, 2);
-	assert.ok(GUIDELINES[0].startsWith("For Python, Java, and C/C++ code, read by name or location instead of line ranges"));
-	assert.ok(GUIDELINES[1].startsWith("Oversized tool output is saved to a file"));
+	assert.ok(blockMessage(parts.slice(0, 1), false).startsWith("Blocked: sed -n 1,3p a.py reads code by line number, so it did not run.\n"));
+	assert.ok(!blockMessage(parts.slice(0, 1), false).includes("Rerun"));
+});
+
+test("text constants state the absolute rule and the field syntax", () => {
+	assert.equal(
+		outlineFirstNote("src/A.java", 1234),
+		'src/A.java is 1,234 lines; its outline is shown instead of the file. Read imports and other module-level code with read_symbol {"path": "src/A.java", "module": true}, and a function or class with read_symbol, passing path and a line from an outline row\'s range.',
+	);
+	assert.ok(outlineFirstNote("README.md", 40, true).includes("the text before the first heading with read_symbol"));
+	assert.ok(HINT_TEXT.includes('read_symbol {"path": "a.py", "module": true}'));
+	assert.ok(HINT_TEXT.includes('outline {"path": "a.py"}'));
+	assert.ok(HINT_TEXT.includes('search {"pattern": "foo", "path": "src", "glob": ["*.py"]}'));
+	assert.equal(GUIDELINES.length, 6);
+	assert.ok(GUIDELINES[0].startsWith("Read and search Python, Java, C/C++, and Markdown files only with read_symbol"));
+	assert.ok(GUIDELINES[0].includes("always blocked, whatever their size"));
+	assert.ok(GUIDELINES[1].includes('read_symbol {"path": "src/app.py", "line": 302}'));
+	assert.ok(GUIDELINES[4].includes('replace {"pattern": "pkg.old_mod", "with": "pkg.new_mod", "path": "tests", "expect": 9}'));
+	assert.ok(GUIDELINES[5].startsWith("Oversized tool output is saved to a file"));
+	const all = [HINT_TEXT, ...GUIDELINES].join("\n");
+	assert.ok(!/20 lines|offset\/limit only|file:line|path:A-B/.test(all), all);
 });

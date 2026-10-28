@@ -21,6 +21,8 @@ alias k='kubectl'
 ### ENV ###
 export EDITOR="nvim"
 export CLAUDE_CODE_NO_FLICKER=1
+# pi requests a 1h prompt cache from Anthropic models and 24h from OpenAI-style APIs.
+export PI_CACHE_RETENTION=long
 export FPATH="$HOME/.docker/completions:$FPATH"
 
 ### Funcs ###

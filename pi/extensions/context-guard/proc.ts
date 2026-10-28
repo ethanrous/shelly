@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import { accessSync, constants, statSync } from "node:fs";
 import { stat } from "node:fs/promises";
-import { basename, delimiter, join } from "node:path";
+import { basename, delimiter, isAbsolute, join, relative, resolve } from "node:path";
 import { StringDecoder } from "node:string_decoder";
 import { fileURLToPath } from "node:url";
 import { AST_GREP_MIN_VERSION, FALLBACK_BIN_DIRS, FILE_BATCH_SIZE, SUBPROCESS_TIMEOUT_MS } from "./config.ts";
@@ -227,6 +227,117 @@ async function gitIgnores(path: string, signal: AbortSignal | undefined): Promis
 	} catch {
 		return false;
 	}
+}
+
+export interface RgScope {
+	roots: readonly string[];
+	regex: boolean;
+	ignoreCase: boolean;
+	globs: readonly string[];
+}
+
+export interface RgSearch extends RgScope {
+	patterns: readonly string[];
+}
+
+export interface RgReplace extends RgScope {
+	pattern: string;
+	replacement: string;
+	// Lets the pattern match across line breaks; single-line patterns behave the same either way.
+	multiline: boolean;
+}
+
+// Calls onMatch once per match with its byte offset in the file and the matched and replacement bytes.
+export type ReplaceMatchHandler = (file: string, offset: number, match: Buffer, replacement: Buffer) => void;
+
+// Globs match paths relative to options.cwd. A gitignored directory root is searched in its own rg run with --no-ignore.
+async function eachRootGroup(roots: readonly string[], options: RunOptions, fn: (roots: readonly string[], noIgnore: boolean) => Promise<void>): Promise<void> {
+	const ignored: string[] = [];
+	const plain: string[] = [];
+	for (const root of roots) {
+		const skipped = (await stat(root)).isDirectory() && (await gitIgnores(root, options.signal));
+		(skipped ? ignored : plain).push(root);
+	}
+	if (plain.length > 0) await fn(plain, false);
+	if (ignored.length > 0) await fn(ignored, true);
+}
+
+// Streams each matching line as file, 1-based line number, and text; throws with rg's stderr when it fails without matches.
+export async function rgSearch(search: RgSearch, options: RunOptions, onMatch: (file: string, line: number, text: string) => void): Promise<void> {
+	const patterns = search.patterns.flatMap((pattern) => ["-e", pattern]);
+	const output = ["--line-number", "--with-filename", "--no-heading", "--null"];
+	await eachRootGroup(search.roots, options, (roots, noIgnore) =>
+		rgRunRoots(search, [...output, ...patterns], roots, noIgnore, options, (raw) => {
+			const nul = raw.indexOf("\0");
+			const colon = raw.indexOf(":", nul + 1);
+			if (nul === -1 || colon === -1) return false;
+			onMatch(resolve(options.cwd, raw.slice(0, nul)), Number(raw.slice(nul + 1, colon)), raw.slice(colon + 1));
+			return true;
+		}),
+	);
+}
+
+interface JsonText {
+	text?: string;
+	bytes?: string;
+}
+
+interface JsonMatch {
+	type: string;
+	data: { path: JsonText; absolute_offset: number; submatches: { match: JsonText; replacement?: JsonText; start: number }[] };
+}
+
+const jsonBytes = (value: JsonText | undefined): Buffer => (value?.bytes !== undefined ? Buffer.from(value.bytes, "base64") : Buffer.from(value?.text ?? "", "utf8"));
+
+// Streams every match of one pattern with rg's replacement; throws with rg's stderr when it fails without matches.
+export async function rgReplace(search: RgReplace, options: RunOptions, onMatch: ReplaceMatchHandler): Promise<void> {
+	// rg expands $ in replacements even with --fixed-strings.
+	const replacement = search.regex ? search.replacement : search.replacement.replaceAll("$", "$$$$");
+	const extra = ["--json", ...(search.multiline ? ["--multiline"] : []), `--replace=${replacement}`, "-e", search.pattern];
+	await eachRootGroup(search.roots, options, (roots, noIgnore) =>
+		rgRunRoots(search, extra, roots, noIgnore, options, (raw) => {
+			const event = JSON.parse(raw) as JsonMatch;
+			if (event.type !== "match") return false;
+			const file = resolve(options.cwd, jsonBytes(event.data.path).toString("utf8"));
+			for (const sub of event.data.submatches) onMatch(file, event.data.absolute_offset + sub.start, jsonBytes(sub.match), jsonBytes(sub.replacement));
+			return true;
+		}),
+	);
+}
+
+export function cwdRelative(path: string, cwd: string): string {
+	const rel = relative(cwd, path);
+	if (rel === "") return ".";
+	return rel.startsWith("..") || isAbsolute(rel) ? path : rel;
+}
+
+// Runs rg over roots; onLine returns true for a line that carried a match.
+export async function rgRunRoots(
+	scope: RgScope,
+	extraArgs: readonly string[],
+	roots: readonly string[],
+	noIgnore: boolean,
+	options: RunOptions,
+	onLine: (line: string) => boolean,
+): Promise<void> {
+	const { rg } = await requireTools();
+	const args = ["--no-config", "--color", "never", "--hidden", "-g", "!.git"];
+	if (!scope.regex) args.push("--fixed-strings");
+	if (scope.ignoreCase) args.push("--ignore-case");
+	if (noIgnore) args.push("--no-ignore");
+	for (const glob of scope.globs) args.push("-g", glob);
+	args.push(...extraArgs);
+	// Relative roots let globs with / match even when the working directory is reached through a symlink.
+	args.push("--", ...roots.map((root) => cwdRelative(root, options.cwd)));
+	let matched = false;
+	const result = await run(rg, args, {
+		...options,
+		onStdoutLine: (raw) => {
+			if (onLine(raw)) matched = true;
+		},
+	});
+	if (result.code === 0 || result.code === 1 || matched) return;
+	throw new Error(`rg failed: ${result.stderr.trim().replace(/^rg: /, "")}`);
 }
 
 export async function rgFiles(regex: string, root: string, globs: readonly string[], options: RgOptions): Promise<string[]> {

@@ -1,6 +1,7 @@
 import { extname } from "node:path";
 
 export type LangId = "python" | "java" | "c" | "cpp";
+export type DefLang = LangId | "markdown";
 export type KindLabel =
 	| "class"
 	| "interface"
@@ -15,7 +16,8 @@ export type KindLabel =
 	| "field"
 	| "variable"
 	| "type"
-	| "macro";
+	| "macro"
+	| "section";
 
 export interface Language {
 	id: LangId;
@@ -63,6 +65,19 @@ export function languageForFile(path: string): Language | undefined {
 
 export function isSupportedSource(path: string): boolean {
 	return languageForFile(path) !== undefined;
+}
+
+export const MARKDOWN_EXTENSIONS: readonly string[] = [".md", ".markdown", ".mdx"];
+export const MARKDOWN_GLOBS: readonly string[] = MARKDOWN_EXTENSIONS.map((e) => `*${e}`);
+export const OUTLINE_EXTENSIONS = `${SUPPORTED_EXTENSIONS} ${MARKDOWN_EXTENSIONS.join(" ")}`;
+
+export function isMarkdown(path: string): boolean {
+	return MARKDOWN_EXTENSIONS.includes(extname(path).toLowerCase());
+}
+
+// Files that outline and read_symbol handle: supported code and Markdown.
+export function isOutlinable(path: string): boolean {
+	return isSupportedSource(path) || isMarkdown(path);
 }
 
 export function escapeRegex(text: string): string {

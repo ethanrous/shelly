@@ -65,33 +65,41 @@ test("leaves other searches alone", () => {
 });
 
 const ctx = { cwd: FIX };
+const RULE = "Read and search Python, Java, C/C++, and Markdown files only with read_symbol, outline, search, find_symbol, and find_references; line-range reads, cat, grep, and rg on these files are always blocked, in bash and with read offset/limit.";
 
 test("definitionSearchBlock lists the definitions a search matches", async () => {
 	assert.equal(
 		await definitionSearchBlock(`cd py && rg -n "^def |^class " pkg/core.py | head -20; ls`, ctx),
 		[
-			"Blocked: rg -n '^def |^class ' pkg/core.py matches only function and class definitions, so nothing in this command ran. List or read them with these instead:",
-			'  read_symbol "py/pkg/core.py:6"  function deco (L6-7)',
-			'  read_symbol "py/pkg/core.py:12"  function build_report (L12-15)',
-			'  read_symbol "py/pkg/core.py:18"  class Report (L18-29)',
-			'  outline "py/pkg/core.py"',
-			"outline lists a file's functions, classes, and methods with their line ranges, and read_symbol takes a name or a file:line and returns the whole function or class. Rerun the rest of the command without the search.",
+			"Blocked: rg -n '^def |^class ' pkg/core.py matches only function and class definitions, so nothing in this command ran.",
+			RULE,
+			'read_symbol {"path": "py/pkg/core.py", "line": 6}  function deco (L6-7)',
+			'read_symbol {"path": "py/pkg/core.py", "line": 12}  function build_report (L12-15)',
+			'read_symbol {"path": "py/pkg/core.py", "line": 18}  class Report (L18-29)',
+			'outline {"path": "py/pkg/core.py"}',
+			"Rerun the rest of the command without it.",
 		].join("\n"),
 	);
 	const grep = await definitionSearchBlock(String.raw`grep -n "^def \|^class " py/pkg/core.py`, ctx);
-	assert.ok(grep?.includes('  read_symbol "py/pkg/core.py:18"  class Report (L18-29)'), grep);
+	assert.ok(grep?.includes('read_symbol {"path": "py/pkg/core.py", "line": 18}  class Report (L18-29)'), grep);
 	const render = await definitionSearchBlock(`grep -n -A4 "def render" py/pkg/core.py`, ctx);
-	assert.ok(render?.includes('  read_symbol "py/pkg/core.py:24"  method Report.render (L24-29)'), render);
+	assert.ok(render?.includes('read_symbol {"path": "py/pkg/core.py", "line": 24}  method Report.render (L24-29)'), render);
 	const java = await definitionSearchBlock(`rg -n "public String getDocumentId" java/com/ex/DocumentService.java`, ctx);
-	assert.equal(java?.match(/read_symbol "java\/com\/ex\/DocumentService.java:\d+" {2}method DocumentService.getDocumentId/g)?.length, 2, java);
+	assert.equal(java?.match(/read_symbol \{"path": "java\/com\/ex\/DocumentService.java", "line": \d+\} {2}method DocumentService.getDocumentId/g)?.length, 2, java);
 });
 
 test("definitionSearchBlock covers every named file", async () => {
 	const both = await definitionSearchBlock(`rg -n "^def Report|^class Report" py/pkg/core.py py/other/report.py`, ctx);
-	assert.ok(both?.includes('  read_symbol "py/pkg/core.py:18"  class Report (L18-29)'), both);
-	assert.ok(both?.includes('  read_symbol "py/other/report.py:1"  function Report (L1-2)'), both);
+	assert.ok(both?.includes('read_symbol {"path": "py/pkg/core.py", "line": 18}  class Report (L18-29)'), both);
+	assert.ok(both?.includes('read_symbol {"path": "py/other/report.py", "line": 1}  function Report (L1-2)'), both);
 	const one = await definitionSearchBlock(`rg -n "^def deco" py/pkg/core.py py/other/report.py`, ctx);
-	assert.ok(one?.includes('  outline "py/pkg/core.py"') && !one.includes('"py/other/report.py'), one);
+	assert.ok(one?.includes('outline {"path": "py/pkg/core.py"}') && !one.includes('"py/other/report.py'), one);
+});
+
+test("definitionSearchBlock expands a glob operand to the files it names", async () => {
+	const globbed = await definitionSearchBlock(`rg -n "^class Report" -A8 py/*/core.py | head -60`, ctx);
+	assert.ok(globbed?.includes('read_symbol {"path": "py/pkg/core.py", "line": 18}  class Report (L18-29)'), globbed);
+	assert.equal(await definitionSearchBlock(`rg -n "^class Report" py/*/missing.py`, ctx), undefined);
 });
 
 test("definitionSearchBlock lets searches that match other lines run", async () => {
@@ -111,12 +119,13 @@ test("definitionSearchBlock lets searches that match other lines run", async () 
 	}
 });
 
-test("definitionSearchBlock points to outline for a long list", async () => {
+test("definitionSearchBlock lists every matching definition", async () => {
 	const dir = await mkdtemp(join(tmpdir(), "cg-defs-"));
 	await writeFile(join(dir, "many.py"), Array.from({ length: 8 }, (_, i) => `def f${i}():\n    return ${i}\n`).join("\n"));
 	const text = await definitionSearchBlock(`rg -n "^def " many.py`, { cwd: dir });
-	assert.ok(text?.includes('\n  outline "many.py"  (8 matching definitions)\n'), text);
-	assert.ok(!text?.includes("read_symbol \""), text);
+	assert.equal(text?.match(/read_symbol \{/g)?.length, 8, text);
+	assert.ok(text?.includes('\noutline {"path": "many.py"}\n'), text);
+	assert.ok(!text?.includes("matching definitions"), text);
 });
 
 test("definitionSearchBlock counts a line only when it holds a header and no body", async () => {
@@ -126,13 +135,13 @@ test("definitionSearchBlock counts a line only when it holds a header and no bod
 	await writeFile(join(dir, "T.java"), "class T {\n  @Test public void foo() { bar(); }\n  void bar() {\n  }\n}\n");
 	const block = (command: string) => definitionSearchBlock(command, { cwd: dir });
 	assert.equal(await block("rg -n resolve a.py"), undefined);
-	assert.ok((await block(`rg -n "def resolve" a.py`))?.includes('  read_symbol "a.py:4"  method A.resolve (L4-5)'));
+	assert.ok((await block(`rg -n "def resolve" a.py`))?.includes('read_symbol {"path": "a.py", "line": 4}  method A.resolve (L4-5)'));
 	assert.equal(await block("rg -n foo x.cc"), undefined);
-	assert.ok((await block(`rg -n "int bar" x.cc`))?.includes('  read_symbol "x.cc:2"  function bar (L2-4)'));
+	assert.ok((await block(`rg -n "int bar" x.cc`))?.includes('read_symbol {"path": "x.cc", "line": 2}  function bar (L2-4)'));
 	assert.equal(await block("rg -n bar T.java"), undefined);
-	assert.ok((await block(`rg -n "void bar" T.java`))?.includes('  read_symbol "T.java:3"  method T.bar (L3-4)'));
+	assert.ok((await block(`rg -n "void bar" T.java`))?.includes('read_symbol {"path": "T.java", "line": 3}  method T.bar (L3-4)'));
 	await writeFile(join(dir, "s.pyi"), "def f(x: int) -> int: ...\nclass C:\n    def g(self) -> None: pass\n");
-	assert.ok((await block(`rg -n "def " s.pyi`))?.includes('  read_symbol "s.pyi:3"  method C.g (L3)'));
+	assert.ok((await block(`rg -n "def " s.pyi`))?.includes('read_symbol {"path": "s.pyi", "line": 3}  method C.g (L3)'));
 });
 
 test("definitionSearchBlock leaves the matching to rg, so a backtracking pattern returns quickly", async () => {

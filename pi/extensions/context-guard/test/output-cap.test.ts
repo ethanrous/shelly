@@ -47,10 +47,11 @@ test("exceedsCap uses strict greater-than on both limits", () => {
 	assert.equal(exceedsCap({ bytes: 10, lines: 401 }), true);
 });
 
-test("isCapExempt covers own tools, edit/write, subagent tools, and skill reads", () => {
-	for (const name of ["read_symbol", "find_references", "edit", "write", "Agent", "get_subagent_result"]) {
+test("isCapExempt covers edit/write, subagent tools, and skill reads", () => {
+	for (const name of ["edit", "write", "Agent", "get_subagent_result"]) {
 		assert.equal(isCapExempt(name, {}), true, name);
 	}
+	for (const name of ["read_symbol", "outline", "find_symbol", "find_references", "search"]) assert.equal(isCapExempt(name, {}), false, name);
 	assert.equal(isCapExempt("read", { path: "/u/.pi/agent/skills/foo/SKILL.md" }), true);
 	assert.equal(isCapExempt("read", { path: "pi/skills/rust-guidelines/references/SOURCES.md" }), true);
 	assert.equal(isCapExempt("read", { path: "src/skillset/notes.md" }), false);
@@ -76,13 +77,17 @@ test("capNotice and readNotice text", () => {
 	assert.equal(
 		capNotice({ lines: 1234, bytes: 100_352 }, "/t/x.txt", 1),
 		"[Output too large for context: 1,234 lines, 98KB, bash exit code 1. Saved to /t/x.txt.\n" +
-			"Search it with rg -n '<pattern>' /t/x.txt, or view a slice with head -n N / tail -n N.]",
+			'Find text in it with search {"pattern": "<text to find>", "path": "/t/x.txt"}, or view a slice with head -n N / tail -n N.]',
 	);
 	assert.ok(!capNotice({ lines: 5, bytes: 5 }, "/p").includes("exit code"));
 	assert.equal(
 		readNotice({ lines: 5000, bytes: 2_000_000 }, "logs/big.log"),
 		"[logs/big.log is 5,000 lines, 1.9MB: too large to return whole. " +
-			"Search it with rg -n '<pattern>' logs/big.log, then read a range with offset/limit.]",
+			'Find text in it with search {"pattern": "<text to find>", "path": "logs/big.log"}, then read a range with offset/limit.]',
+	);
+	assert.equal(
+		readNotice({ lines: 5000, bytes: 2_000_000 }, "src/big.py"),
+		'[src/big.py is 5,000 lines, 1.9MB: too large to return whole. List its structure with outline {"path": "src/big.py"}, then read parts of it with read_symbol.]',
 	);
 });
 

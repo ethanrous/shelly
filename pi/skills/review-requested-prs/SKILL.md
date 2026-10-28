@@ -1,6 +1,6 @@
 ---
 name: "review-requested-prs"
-description: "Drain the review queue: find every open PR where I am explicitly requested as a current reviewer across all repos, verify each request against the PR's live reviewers list, and fan out one background subagent per PR to perform the full review and post it using the reviewing-github-prs skill. Triggers: \"review the PRs waiting on me\", \"anything requesting my review?\", \"work my review queue\", \"go review the PRs that pinged me\", \"run my review sweep\"."
+description: "Work my review queue: find open PRs across all repos where I am a current requested reviewer, and fan out one subagent per PR to review and post via reviewing-github-prs. Use for \"anything requesting my review?\"."
 version: 4
 created: "2026-10-07"
 updated: "2026-10-09"

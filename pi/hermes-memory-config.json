@@ -1,4 +1,5 @@
 {
   "reviewEnabled": false,
-  "llmModelOverride": "ornith-9b"
+  "llmModelOverride": "ornith-9b",
+  "flushCompactTimeoutMs": 300000
 }

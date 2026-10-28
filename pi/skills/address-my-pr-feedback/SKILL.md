@@ -1,6 +1,6 @@
 ---
 name: "address-my-pr-feedback"
-description: "Sweep my open GitHub PRs in the onshape org for unaddressed review feedback and fan out one background subagent per PR to fix the comments via the resolve-pr-comments skill (fix, push, reply, resolve). PRs in personal repos are out of scope by design. Triggers: \"fix all my PR feedback\", \"address my PR comments\", \"any unaddressed feedback on my PRs?\", \"clean up my open PRs\", \"run my PR feedback sweep\"."
+description: "Sweep my open PRs in the onshape org (not personal repos) for unaddressed review feedback and fan out one subagent per PR to fix it via resolve-pr-comments. Use for \"address my PR comments\" across all my PRs."
 version: 2
 created: "2026-10-07"
 updated: "2026-10-07"

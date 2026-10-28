@@ -1,11 +1,14 @@
+import { globSync } from "node:fs";
 import { homedir } from "node:os";
 import { resolve } from "node:path";
-import { DEFINITION_SEARCH_TIMEOUT_MS, LISTED_DEFINITIONS } from "./config.ts";
+import { toolCall } from "./calls.ts";
+import { DEFINITION_SEARCH_TIMEOUT_MS } from "./config.ts";
 import { definitionRow, displayPath } from "./format.ts";
 import { invocations, isOption } from "./invocations.ts";
 import { isSupportedSource } from "./languages.ts";
 import { requireTools, resolveBinary, run, toolProblem } from "./proc.ts";
 import { BODY_KINDS, type Definition, type FileSource, fileDefinitions, readSource } from "./symbols.ts";
+import { type BlockPart, blockMessage } from "./steering.ts";
 import { searchOptions, type ToolContext } from "./tools.ts";
 
 export interface DefinitionSearch {
@@ -18,7 +21,7 @@ export interface DefinitionSearch {
 
 type Slot = "case" | "syntax" | "word" | "line";
 
-interface Grammar {
+export interface Grammar {
 	// Short options whose value is the rest of the word or the next word.
 	values: string;
 	longValues: ReadonlySet<string>;
@@ -33,7 +36,7 @@ const LONG_REJECTS = ["--file", "--invert-match", "--count", "--files-with-match
 const LONG_VALUES = ["--regexp", "--after-context", "--before-context", "--context", "--max-count"];
 const SHARED_MATCHING = { w: ["word", "-w"], "word-regexp": ["word", "-w"], x: ["line", "-x"], "line-regexp": ["line", "-x"], F: ["syntax", "-F"], "fixed-strings": ["syntax", "-F"] } as const;
 
-const GRAMMARS: Readonly<Record<"rg" | "grep", Grammar>> = {
+export const GRAMMARS: Readonly<Record<"rg" | "grep", Grammar>> = {
 	rg: {
 		values: "ABCEMTdefgjmrt",
 		longValues: new Set([
@@ -64,28 +67,36 @@ const GRAMMARS: Readonly<Record<"rg" | "grep", Grammar>> = {
 	},
 };
 
-// The matching arguments and file operands of an rg or grep call, or undefined when its output is not the matching lines.
-function searchArgs(grammar: Grammar, args: readonly string[]): { args: string[]; paths: string[] } | undefined {
-	const slots = new Map<Slot, string>();
+export interface ParsedSearch {
+	// Each option given, as its flag (-i, --glob) with its value when it takes one.
+	options: { flag: string; value?: string }[];
+	// Patterns from -e and --regexp, or the first operand when there are none and no pattern file is named.
+	patterns: string[];
+	// The operands after the pattern.
+	paths: string[];
+	// How many operands came before a bare --, when there was one.
+	separator: number | undefined;
+}
+
+// Splits an rg or grep call into its options, patterns, and file operands.
+export function parseSearch(grammar: Grammar, args: readonly string[]): ParsedSearch {
+	const options: ParsedSearch["options"] = [];
 	const patterns: string[] = [];
 	const positional: string[] = [];
-	const option = (name: string) => {
-		const found = grammar.matching[name];
-		if (found) slots.set(found[0], found[1]);
-	};
+	let separator: number | undefined;
 	for (let i = 0; i < args.length; i++) {
 		const arg = args[i];
 		if (arg === "--") {
+			separator = positional.length;
 			positional.push(...args.slice(i + 1));
 			break;
 		}
 		if (arg.startsWith("--")) {
 			const eq = arg.indexOf("=");
 			const name = eq === -1 ? arg : arg.slice(0, eq);
-			if (grammar.longRejects.has(name)) return undefined;
 			const value = eq === -1 ? (grammar.longValues.has(name) ? args[++i] : undefined) : arg.slice(eq + 1);
+			options.push({ flag: name, value });
 			if (name === "--regexp") patterns.push(value ?? "");
-			else option(name.slice(2));
 			continue;
 		}
 		if (!isOption(arg)) {
@@ -94,22 +105,45 @@ function searchArgs(grammar: Grammar, args: readonly string[]): { args: string[]
 		}
 		for (let j = 1; j < arg.length; j++) {
 			const name = arg[j];
-			if (grammar.rejects.includes(name)) return undefined;
 			if (grammar.values.includes(name)) {
 				const value = j + 1 < arg.length ? arg.slice(j + 1) : args[++i];
+				options.push({ flag: `-${name}`, value });
 				if (name === "e") patterns.push(value ?? "");
 				break;
 			}
-			option(name);
+			options.push({ flag: `-${name}` });
 		}
 	}
-	if (patterns.length === 0) {
+	const fromFile = options.some((option) => option.flag === "-f" || option.flag === "--file");
+	if (patterns.length === 0 && !fromFile) {
 		const pattern = positional.shift();
-		if (pattern === undefined) return undefined;
-		patterns.push(pattern);
+		if (pattern !== undefined) {
+			patterns.push(pattern);
+			if (separator !== undefined && separator > 0) separator--;
+		}
+	}
+	return { options, patterns, paths: positional, separator };
+}
+
+// The matching arguments and file operands of an rg or grep call, or undefined when its output is not the matching lines.
+function searchArgs(grammar: Grammar, args: readonly string[]): { args: string[]; paths: string[] } | undefined {
+	const parsed = parseSearch(grammar, args);
+	if (parsed.patterns.length === 0) return undefined;
+	const slots = new Map<Slot, string>();
+	for (const { flag } of parsed.options) {
+		if (flag.startsWith("--") ? grammar.longRejects.has(flag) : grammar.rejects.includes(flag[1])) return undefined;
+		const found = grammar.matching[flag.replace(/^-+/, "")];
+		if (found) slots.set(found[0], found[1]);
 	}
 	const matching = [...slots.values()].filter(Boolean);
-	return { args: [...matching, ...patterns.flatMap((pattern) => ["-e", pattern])], paths: positional };
+	return { args: [...matching, ...parsed.patterns.flatMap((pattern) => ["-e", pattern])], paths: parsed.paths };
+}
+
+// The files a shell glob operand names, or the operand itself when it has no glob characters or matches nothing.
+export function expandGlob(path: string, dir: string): string[] {
+	if (!/[*?[]/.test(path)) return [resolve(dir, path)];
+	const matches = globSync(path, { cwd: dir }).map((match) => resolve(dir, match));
+	return matches.length > 0 ? matches.sort() : [resolve(dir, path)];
 }
 
 // rg and grep calls that print their matching lines from named Python, Java, and C/C++ files.
@@ -119,7 +153,7 @@ export function findDefinitionSearches(command: string, cwd: string, home = home
 		if ((exe !== "rg" && exe !== "grep") || redirected) continue;
 		const parsed = searchArgs(GRAMMARS[exe], args);
 		if (!parsed || parsed.paths.length === 0) continue;
-		const files = parsed.paths.map((path) => resolve(dir, path));
+		const files = parsed.paths.flatMap((path) => expandGlob(path, dir));
 		if (files.every(isSupportedSource)) searches.push({ command: text, tool: exe, args: parsed.args, files });
 	}
 	return searches;
@@ -190,26 +224,26 @@ async function matchedDefinitions(search: DefinitionSearch, ctx: ToolContext): P
 	return matched;
 }
 
-// The reason to block an rg or grep of source files that matches only function and class definitions; undefined lets it run.
-export async function definitionSearchBlock(command: string, ctx: ToolContext): Promise<string | undefined> {
+// The reasons to block rg and grep calls of source files that match only function and class definitions.
+export async function definitionSearchParts(command: string, ctx: ToolContext): Promise<BlockPart[]> {
 	const searches = findDefinitionSearches(command, ctx.cwd);
-	if (searches.length === 0 || (await toolProblem())) return undefined;
-	const commands: string[] = [];
-	const rows: string[] = [];
+	if (searches.length === 0 || (await toolProblem())) return [];
+	const subjects: string[] = [];
+	const calls: string[] = [];
 	for (const search of searches) {
 		const matched = await matchedDefinitions(search, ctx);
 		if (!matched) continue;
-		commands.push(search.command);
+		subjects.push(search.command);
 		for (const [file, defs] of matched) {
 			const shown = displayPath(file, ctx.cwd);
-			if (defs.length <= LISTED_DEFINITIONS) rows.push(...defs.map((def) => definitionRow(shown, def.nodeStartLine, def)));
-			rows.push(`  outline "${shown}"${defs.length > LISTED_DEFINITIONS ? `  (${defs.length} matching definitions)` : ""}`);
+			calls.push(...defs.map((def) => definitionRow(shown, def.nodeStartLine, def)), toolCall("outline", { path: shown }));
 		}
 	}
-	if (rows.length === 0) return undefined;
-	return [
-		`Blocked: ${commands.join("; ")} matches only function and class definitions, so nothing in this command ran. List or read them with these instead:`,
-		...new Set(rows),
-		"outline lists a file's functions, classes, and methods with their line ranges, and read_symbol takes a name or a file:line and returns the whole function or class. Rerun the rest of the command without the search.",
-	].join("\n");
+	return subjects.length === 0 ? [] : [{ subjects, reason: "matches only function and class definitions", calls }];
+}
+
+// The reason to block an rg or grep of source files that matches only function and class definitions; undefined lets it run.
+export async function definitionSearchBlock(command: string, ctx: ToolContext): Promise<string | undefined> {
+	const parts = await definitionSearchParts(command, ctx);
+	return parts.length === 0 ? undefined : blockMessage(parts, true);
 }

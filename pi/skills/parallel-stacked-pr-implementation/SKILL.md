@@ -1,6 +1,6 @@
 ---
 name: "parallel-stacked-pr-implementation"
-description: "Implement a multi-stage change as a GitHub stacked PR using parallel subagents — \"implement each stage in parallel and open a stacked PR\", gh stack, stacked PRs with worktrees, parallel agents per branch."
+description: "Implement a multi-stage change as a GitHub stacked PR (gh stack) using parallel subagents in worktrees, one per stage or branch."
 version: 1
 created: "2026-10-06"
 updated: "2026-10-06"

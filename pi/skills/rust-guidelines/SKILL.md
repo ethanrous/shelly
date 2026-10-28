@@ -1,6 +1,6 @@
 ---
 name: rust-guidelines
-description: Pragmatic Rust Guidelines (Microsoft, version 2026.6) consolidated for agents working on Rust code. Use when writing, reviewing, refactoring, or benchmarking Rust — libraries, applications, FFI, macros, unsafe code, error handling, or async. Applies the guidelines' actionable items so code is safe, ergonomic, performant, and well-documented. Each item links back to its source guideline. Full per-point provenance with source links is in references/SOURCES.md.
+description: "Pragmatic Rust Guidelines (Microsoft, 2026.6) for agents. Use when writing, reviewing, refactoring or benchmarking Rust: libraries, FFI, macros, unsafe, errors, async."
 license: MIT
 ---
 

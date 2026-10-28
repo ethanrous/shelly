@@ -16,6 +16,20 @@
         "clientId": "1601185624273.8899143856786",
         "callbackUrl": "http://localhost:3118/callback"
       }
+    },
+    "scribe": {
+      "command": "/Applications/Scribe.app/Contents/MacOS/scribe-backend",
+      "args": ["mcp", "/Users/erousseau/Library/Application Support/scribe/mcp.sock"],
+      "description": "Ethan's local Scribe: searchable transcripts of what was said around his Mac and in calls, calendar meetings, and his notes and pages."
+    },
+    "artifacts": {
+      "url": "https://artifacts.int.onshape.com/mcp",
+      "enabled": false,
+      "description": "Artifacts Hub: publish self-contained HTML or Markdown (with mermaid) artifacts that colleagues can open, share and comment on, and read or answer their comments."
+    },
+    "artifacts-local": {
+      "url": "http://localhost:8002/mcp",
+      "description": "Artifacts Hub: publish self-contained HTML or Markdown (with mermaid) artifacts that colleagues can open, share and comment on, and read or answer their comments. Local dev server from a GROW-868 worktree (`just artifacts dev`)."
     }
   }
 }

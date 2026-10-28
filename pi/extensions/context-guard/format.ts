@@ -1,8 +1,8 @@
 import { isAbsolute, relative } from "node:path";
-import { CAP_MAX_BYTES, CAP_MAX_LINES, FIND_SYMBOL_LIMIT, REFERENCES_LIMIT, SKELETON_COMMENT_MAX_LINES } from "./config.ts";
-import { exceedsCap, measure } from "./output-cap.ts";
+import { toolCall } from "./calls.ts";
+import { CLASS_LIKE } from "./languages.ts";
 import type { Reference } from "./references.ts";
-import type { Definition, FileSource } from "./symbols.ts";
+import { BODY_KINDS, type Definition, type FileSource } from "./symbols.ts";
 
 export interface TreeNode {
 	def: Definition;
@@ -16,17 +16,25 @@ export function displayPath(file: string, cwd: string): string {
 	return rel && !rel.startsWith("..") && !isAbsolute(rel) ? rel : file;
 }
 
+// Heading text contains dots and spaces, so Markdown names are joined with " > ".
+export function containerPath(def: Definition): string {
+	return def.container.join(def.lang === "markdown" ? " > " : ".");
+}
+
 export function qualifiedName(def: Definition): string {
-	return [...def.container, def.name].join(".");
+	return [...def.container, def.name].join(def.lang === "markdown" ? " > " : ".");
 }
 
 export function rangeLabel(def: Definition): string {
 	return def.endLine > def.nodeStartLine ? `L${def.nodeStartLine}-${def.endLine}` : `L${def.nodeStartLine}`;
 }
 
+// The read_symbol call that reads the definition containing a line.
+export const readLineCall = (shownPath: string, line: number): string => toolCall("read_symbol", { path: shownPath, line });
+
 // A read_symbol call for the definition at a line, as listed in a blocked command's reason.
 export function definitionRow(shownPath: string, line: number, def: Definition): string {
-	return `  read_symbol "${shownPath}:${line}"  ${def.kind} ${qualifiedName(def)} (${rangeLabel(def)})`;
+	return `${readLineCall(shownPath, line)}  ${def.kind} ${qualifiedName(def)} (${rangeLabel(def)})`;
 }
 
 export function cell(text: string, width: number): string {
@@ -34,28 +42,30 @@ export function cell(text: string, width: number): string {
 }
 
 export function definitionLine(def: Definition, cwd: string): string {
-	const where = def.container.length > 0 ? `  (in ${def.container.join(".")})` : "";
+	const where = def.container.length > 0 ? `  (in ${containerPath(def)})` : "";
 	return `${displayPath(def.file, cwd)}:${def.nodeStartLine}  ${def.kind}  ${def.signature}${where}`;
 }
 
+// A definition as a read_symbol call followed by its kind and signature.
+function definitionCallRow(def: Definition, cwd: string): string {
+	const where = def.container.length > 0 ? `  (in ${containerPath(def)})` : "";
+	return `${readLineCall(displayPath(def.file, cwd), def.nodeStartLine)}  ${def.kind}  ${def.signature}${where}`;
+}
+
 export function formatDefinitions(symbol: string, defs: readonly Definition[], cwd: string): string {
-	const shown = defs.slice(0, FIND_SYMBOL_LIMIT);
-	const lines = [`${plural(defs.length, "definition")} of "${symbol}":`, ...shown.map((d) => definitionLine(d, cwd))];
-	if (defs.length > shown.length) lines.push(`showing ${shown.length} of ${defs.length}; narrow with path or a qualified name`);
+	const lines = [`${plural(defs.length, "definition")} of "${symbol}":`, ...defs.map((d) => definitionLine(d, cwd))];
+	if (defs.length > 0) lines.push(`Read one with ${readLineCall(displayPath(defs[0].file, cwd), defs[0].nodeStartLine)}, using the file and line of its row.`);
 	return lines.join("\n");
 }
 
 export function formatNotFound(symbol: string, near: readonly Definition[], cwd: string): string {
 	const lines = [`No definition of "${symbol}" found.`];
-	if (near.length > 0) lines.push("Similar names:", ...near.map((d) => definitionLine(d, cwd)));
+	if (near.length > 0) lines.push("Similar names:", ...near.map((d) => definitionCallRow(d, cwd)));
 	return lines.join("\n");
 }
 
 export function formatCandidates(symbol: string, defs: readonly Definition[], cwd: string): string {
-	const shown = defs.slice(0, FIND_SYMBOL_LIMIT);
-	const lines = [`${defs.length} matches for "${symbol}"; pass path or a qualified name:`, ...shown.map((d) => definitionLine(d, cwd))];
-	if (defs.length > shown.length) lines.push(`showing ${shown.length} of ${defs.length}`);
-	return lines.join("\n");
+	return [`${defs.length} matches for "${symbol}"; read one with its call, or pass path or a qualified name:`, ...defs.map((d) => definitionCallRow(d, cwd))].join("\n");
 }
 
 const contains = (outer: Definition, inner: Definition) => outer.startByte <= inner.startByte && outer.endByte >= inner.endByte;
@@ -96,92 +106,112 @@ export function findSiblings(roots: TreeNode[], def: Definition, parent?: TreeNo
 	return undefined;
 }
 
-export function outlineRows(nodes: readonly TreeNode[], maxDepth: number, depth = 0): string[] {
-	const rows: string[] = [];
-	for (const node of nodes) {
-		const collapsed = depth >= maxDepth && node.children.length > 0;
-		const suffix = collapsed ? ` (${plural(node.children.length, "member")})` : "";
-		rows.push(`${"  ".repeat(depth)}${cell(rangeLabel(node.def), 10)}${cell(node.def.kind, 13)}${node.def.signature}${suffix}`);
-		if (!collapsed) rows.push(...outlineRows(node.children, maxDepth, depth + 1));
-	}
-	return rows;
+// A member's name relative to its parent's, such as Shape.area for an out-of-line C++ method under namespace geo.
+function outlineName(def: Definition, parent: Definition | undefined): string {
+	const full = qualifiedName(def);
+	const prefix = parent ? `${qualifiedName(parent)}${def.lang === "markdown" ? " > " : "."}` : "";
+	const name = prefix && full.startsWith(prefix) ? full.slice(prefix.length) : parent ? def.name : full;
+	return CLASS_LIKE.has(def.kind) || def.kind === "namespace" ? `${def.kind} ${name}` : name;
 }
 
-// Keeps as many rows as fit under the output cap, leaving room for the footer.
-export function fitRows(header: string, rows: readonly string[], footer: (hidden: number) => string): string {
-	const kept: string[] = [];
-	let bytes = Buffer.byteLength(header) + 200;
-	for (const row of rows) {
-		const size = Buffer.byteLength(row) + 1;
-		if (kept.length + 3 > CAP_MAX_LINES || bytes + size > CAP_MAX_BYTES) break;
-		kept.push(row);
-		bytes += size;
+export function outlineRows(nodes: readonly TreeNode[], parent?: Definition, depth = 0): string[] {
+	const rows: string[] = [];
+	for (const node of nodes) {
+		rows.push(`${"  ".repeat(depth)}${cell(rangeLabel(node.def), 10)}${outlineName(node.def, parent)}`);
+		rows.push(...outlineRows(node.children, node.def, depth + 1));
 	}
-	const lines = [header, ...kept];
-	if (kept.length < rows.length) lines.push(footer(rows.length - kept.length));
-	return lines.join("\n");
+	return rows;
 }
 
 export function formatOutline(defs: readonly Definition[], path: string, lineCount: number): string {
 	const header = `${path} (${plural(lineCount, "line")})`;
 	if (defs.length === 0) return `${header}\nNo symbols found.`;
-	const roots = buildTree(defs);
-	for (const maxDepth of [Number.POSITIVE_INFINITY, 1, 0]) {
-		const text = [header, ...outlineRows(roots, maxDepth)].join("\n");
-		if (!exceedsCap(measure(text))) return text;
-	}
-	return fitRows(header, outlineRows(roots, 0), (hidden) => `(${hidden} more top-level symbols; use find_symbol with path to search this file)`);
+	return [header, ...outlineRows(buildTree(defs))].join("\n");
 }
 
-export function formatSkeleton(def: Definition, members: readonly Definition[], source: FileSource, cwd: string, note?: string): string {
+export function formatSkeleton(def: Definition, members: readonly Definition[], source: FileSource, cwd: string): string {
 	const name = qualifiedName(def);
-	const head = `${displayPath(def.file, cwd)}:${def.nodeStartLine}-${def.endLine}  ${def.kind} ${name}  (skeleton; read_symbol "${name}.<member>" for a body, full: true for all)`;
-	const comment = source.lines.slice(def.startLine - 1, def.nodeStartLine - 1).slice(0, SKELETON_COMMENT_MAX_LINES);
+	const head = `${displayPath(def.file, cwd)}:${def.nodeStartLine}-${def.endLine}  ${def.kind} ${name}  (skeleton, not source text; read a member with ${toolCall("read_symbol", { symbol: `${name}.<member>` })})`;
+	const comment = source.lines.slice(def.startLine - 1, def.nodeStartLine - 1);
 	const braces = def.lang !== "python" && def.bodyStartByte !== undefined;
 	const header =
 		def.bodyStartByte !== undefined ? source.buffer.subarray(def.startByte, def.bodyStartByte).toString("utf8").replace(/\r\n?/g, "\n").trimEnd() : def.signature;
 	const top = [head, ...comment, braces ? `${header} {` : header].join("\n");
-	const rows = members.map((m) => `  ${cell(rangeLabel(m), 10)}${cell(m.kind, 13)}${m.signature}`);
-	const bottom = [...(braces ? ["}"] : []), ...(note ? [note] : [])];
-	const text = [top, ...rows, ...bottom].join("\n");
-	if (!exceedsCap(measure(text))) return text;
-	return [fitRows(top, rows, (hidden) => `  (${hidden} more members; use outline)`), ...bottom].join("\n");
+	const rows = members.map((m) => `  ${cell(rangeLabel(m), 10)}${m.signature}`);
+	return [top, ...rows, ...(braces ? ["}"] : [])].join("\n");
 }
+
+// Names the first non-blank line after a line, or the end of the file.
+export function formatNextLineAfter(endLine: number, source: FileSource): string {
+	for (let n = endLine + 1; n <= source.lineCount; n++) {
+		const text = (source.lines[n - 1] ?? "").trimEnd();
+		if (text.trim() === "") continue;
+		return `[Next non-blank line, L${n}: ${text}]`;
+	}
+	return `[End of file after L${endLine}.]`;
+}
+
+export const formatNextLine = (def: Definition, source: FileSource): string => formatNextLineAfter(def.endLine, source);
 
 export function formatSource(def: Definition, source: FileSource, cwd: string): string {
 	const body = source.lines.slice(def.startLine - 1, def.endLine).join("\n");
 	return `${displayPath(def.file, cwd)}:${def.startLine}-${def.endLine}  ${def.kind} ${qualifiedName(def)}\n${body}`;
 }
 
-// The source lines within radius of a line, clipped to the definition.
-export function formatLinesAround(def: Definition, source: FileSource, line: number, radius: number, cwd: string): string {
-	const start = Math.max(def.startLine, line - radius);
-	const end = Math.min(def.endLine, line + radius);
-	const body = source.lines.slice(start - 1, end).join("\n");
-	return `${displayPath(def.file, cwd)}:${start}-${end}  lines around ${line} in ${qualifiedName(def)}\n${body}`;
-}
-
-export function formatOversize(def: Definition, nested: readonly TreeNode[], cwd: string, note: string): string {
-	const head = `${displayPath(def.file, cwd)}:${def.startLine}-${def.endLine}  ${def.kind} ${qualifiedName(def)}`;
-	return [head, def.signature, ...outlineRows(nested, 0, 1), note].join("\n");
-}
-
 export function formatReferences(symbol: string, label: string, refs: readonly Reference[], cwd: string, note?: string): string {
 	const notes = note ? [note] : [];
 	if (refs.length === 0) return [`No references to "${symbol}" found ${label}.`, ...notes].join("\n");
 	const lines = [`${plural(refs.length, "reference")} to "${symbol}" ${label}`, ...notes];
-	const shown = refs.slice(0, REFERENCES_LIMIT);
 	let current = "";
-	for (const ref of shown) {
+	for (const ref of refs) {
 		if (ref.file !== current) {
 			current = ref.file;
 			lines.push(displayPath(ref.file, cwd));
 		}
 		lines.push(`  ${ref.line}${ref.enclosing ? ` (in ${ref.enclosing})` : ""}  ${ref.text}`);
 	}
-	if (refs.length > shown.length) {
-		const files = new Set(refs.map((r) => r.file)).size;
-		lines.push(`showing ${shown.length} of ${refs.length} in ${plural(files, "file")}; narrow with path`);
-	}
 	return lines.join("\n");
+}
+
+// A line range widened to whole definitions, as source text.
+export function formatRange(
+	file: string,
+	span: { start: number; end: number },
+	asked: { start: number; end: number },
+	source: FileSource,
+	cwd: string,
+	footer?: string,
+): string {
+	const expanded = span.start < asked.start || span.end > asked.end;
+	const head = `${displayPath(file, cwd)}:${span.start}-${span.end}  lines ${asked.start}-${asked.end}${expanded ? " expanded to whole definitions" : ""}`;
+	return [head, ...source.lines.slice(span.start - 1, span.end), ...(footer ? [footer] : [])].join("\n");
+}
+
+// A file's module-level code in full, with each top-level function, class, or section collapsed to its first line and line range.
+export function formatModule(shownPath: string, defs: readonly Definition[], source: FileSource): string {
+	const roots = buildTree(defs.filter((d) => BODY_KINDS.has(d.kind))).map((node) => node.def).sort((a, b) => a.startLine - b.startLine);
+	const rows: { label: string; text: string }[] = [];
+	let run: number[] = [];
+	const flush = () => {
+		while (run.length > 0 && source.lines[run[0] - 1].trim() === "") run.shift();
+		while (run.length > 0 && source.lines[run[run.length - 1] - 1].trim() === "") run.pop();
+		for (const n of run) rows.push({ label: `L${n}`, text: source.lines[n - 1].trimEnd() });
+		run = [];
+	};
+	let next = 1;
+	for (const def of roots) {
+		if (def.startLine < next) continue;
+		for (let n = next; n < def.startLine; n++) run.push(n);
+		flush();
+		const label = def.endLine > def.startLine ? `L${def.startLine}-${def.endLine}` : `L${def.startLine}`;
+		rows.push({ label, text: (source.lines[def.nameLine - 1] ?? "").trimEnd() });
+		next = def.endLine + 1;
+	}
+	for (let n = next; n <= source.lineCount; n++) run.push(n);
+	flush();
+	const first = roots[0];
+	const example = first ? `, for example ${readLineCall(shownPath, first.nameLine)}` : "";
+	const header = `${shownPath} (${plural(source.lineCount, "line")}) module view: each definition is shown as its first line and line range; read one with read_symbol and its path and a line in that range${example}`;
+	const width = rows.reduce((max, row) => Math.max(max, row.label.length), 0) + 2;
+	return [header, ...rows.map((row) => `${cell(row.label, width)}${row.text}`.trimEnd())].join("\n");
 }

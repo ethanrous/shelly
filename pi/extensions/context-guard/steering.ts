@@ -1,12 +1,41 @@
-import { HINT_INTERVAL_CALLS, LINE_READ_FREE_LINES, OUTLINE_FIRST_MIN_LINES } from "./config.ts";
+import { toolCall } from "./calls.ts";
+import { HINT_INTERVAL_CALLS } from "./config.ts";
 
-export const HINT_TEXT =
-	"Hint: outline lists a file's functions and classes; read_symbol takes a name or a file:line from rg -n and returns the whole function or class; find_symbol and find_references find definitions and usages.";
+const call = toolCall;
+
+export const HINT_TEXT = `Hint: Python, Java, C/C++, and Markdown files are read and searched only with these tools, never with line-range reads, cat, grep, or rg. ${call("search", { pattern: "foo", path: "src", glob: ["*.py"] })} finds text; ${call("outline", { path: "a.py" })} lists a file's functions and classes; ${call("read_symbol", { path: "a.py", line: 12 })} reads the function or class containing a line, ${call("read_symbol", { path: "a.py", line: 12, end_line: 40 })} reads a line range widened to whole definitions, and ${call("read_symbol", { path: "a.py", module: true })} shows imports and other module-level code; find_symbol and find_references find definitions and usages.`;
 
 export const GUIDELINES: readonly string[] = [
-	`For Python, Java, and C/C++ code, read by name or location instead of line ranges: read_symbol takes a name (Class.method) or a file:line such as a match from rg -n, and returns the whole function or class; after: 1 or before: 1 also returns the neighboring function or class. Use outline to list a file's functions and classes, find_symbol for definitions, and find_references for usages. bash line-range reads of these files (sed -n, head, tail, awk NR) of more than ${LINE_READ_FREE_LINES} lines that cover most of a function or class are blocked, and so are rg and grep searches of these files that match only definitions, such as rg '^def |^class '. Use rg for text patterns, strings, config, and non-code files.`,
-	"Oversized tool output is saved to a file and not shown. Search that file with rg or view a slice with head/tail instead of paging through it.",
+	`Read and search Python, Java, C/C++, and Markdown files only with read_symbol, outline, search, find_symbol, and find_references. Line-range reads (read offset/limit, sed -n, head, tail, awk NR), whole-file reads in bash (cat, less, more, nl, bat), and grep or rg on these files are always blocked, whatever their size; the block message names the tool call to make instead. Reading one of these files with read returns its outline.`,
+	`read_symbol takes separate fields, never a colon form: symbol is only a name (func, Class.method, or a Markdown heading); path with line, such as ${call("read_symbol", { path: "src/app.py", line: 302 })}, reads the function or class containing that line; line with end_line, such as ${call("read_symbol", { path: "src/app.py", line: 280, end_line: 340 })}, reads everything the range covers widened to whole definitions; ${call("read_symbol", { path: "src/app.py", module: true })} returns imports, constants, and other module-level code in full with each top-level definition collapsed to its first line and line range. after: N or before: N adds the neighboring definitions, such as a run of related helpers or tests.`,
+	"To find code in these files, use outline for a file's structure, find_symbol for a definition, and find_references for usages, not search, rg, or grep for def or class lines.",
+	`To search for text, such as strings, config keys, log messages, or anything in non-code files, use search, not rg or grep in bash. pattern is one string or a list of strings to match any of; it matches literally unless regex: true. path is a file or directory or a list of them. glob is a glob or a list that keeps (*.py) or, with a leading !, excludes (!**/tests/**) files, in place of grep --include and grep -v. Its header counts the matching lines and files, and each match in a Python, Java, or C/C++ file names its enclosing function or class.`,
+	`To change the same text in many files or many places in one file, use replace, not repeated edit calls, sed -i, or perl -pi. It takes pattern, with, and the same path, glob, regex, and ignore_case as search, for example ${call("replace", { pattern: "pkg.old_mod", with: "pkg.new_mod", path: "tests", expect: 9 })}; pass expect with the count search reported so nothing changes if it differs.`,
+	"Oversized tool output is saved to a file and not shown. Find text in that file with search, instead of paging through it.",
 ];
+
+export const BLOCK_RULE =
+	"Read and search Python, Java, C/C++, and Markdown files only with read_symbol, outline, search, find_symbol, and find_references; line-range reads, cat, grep, and rg on these files are always blocked, in bash and with read offset/limit.";
+
+// One reason to block: what offended, why, the calls to make instead, and any notes on them.
+export interface BlockPart {
+	subjects: string[];
+	reason: string;
+	calls: string[];
+	notes?: string[];
+}
+
+// The message for blocked tool calls. A bash command ran nothing; any other tool call did not run.
+export function blockMessage(parts: readonly BlockPart[], bash: boolean): string {
+	const what = parts.map((part) => `${[...new Set(part.subjects)].join("; ")} ${part.reason}`).join("; ");
+	return [
+		`Blocked: ${what}, so ${bash ? "nothing in this command ran" : "it did not run"}.`,
+		BLOCK_RULE,
+		...new Set(parts.flatMap((part) => part.calls)),
+		...new Set(parts.flatMap((part) => part.notes ?? [])),
+		...(bash ? ["Rerun the rest of the command without it."] : []),
+	].join("\n");
+}
 
 const READERS = new Set(["grep", "rg", "sed", "cat", "head", "tail", "awk", "less"]);
 const IDENTIFIER_PATTERN = /^(?:def |class |function )?[A-Za-z_][A-Za-z0-9_]*$/;
@@ -19,12 +48,12 @@ const VALUE_FLAGS = new Set([
 	"--include", "--exclude", "--exclude-dir", "--color", "--colour",
 ]);
 
-export function wantsOutlineFirst(input: Record<string, unknown>, fileLines: number, supported: boolean): boolean {
-	return supported && input.offset === undefined && input.limit === undefined && fileLines > OUTLINE_FIRST_MIN_LINES;
-}
-
-export function outlineFirstNote(displayPath: string, lines: number): string {
-	return `${displayPath} is ${lines.toLocaleString("en-US")} lines; outline shown. Use read_symbol for a symbol, or read with offset/limit for a range.`;
+// The note placed above the outline that a read of a source or Markdown file returns.
+export function outlineFirstNote(displayPath: string, lines: number, markdown = false): string {
+	const module = call("read_symbol", { path: displayPath, module: true });
+	const part = markdown ? "the text before the first heading" : "imports and other module-level code";
+	const unit = markdown ? "a section" : "a function or class";
+	return `${displayPath} is ${lines.toLocaleString("en-US")} lines; its outline is shown instead of the file. Read ${part} with ${module}, and ${unit} with read_symbol, passing path and a line from an outline row's range.`;
 }
 
 export interface ShellCommand {

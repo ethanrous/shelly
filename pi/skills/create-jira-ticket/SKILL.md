@@ -1,6 +1,6 @@
 ---
 name: "create-jira-ticket"
-description: "Create a Jira ticket in any team project (GROW, BEL, …) via the atlassian MCP without the missing-field / reserved-word / permission fumbles"
+description: "Create a Jira ticket in any team project (GROW, BEL, etc.) via the atlassian MCP, avoiding missing-field, reserved-word and permission errors."
 version: 4
 created: "2026-09-28"
 updated: "2026-10-06"

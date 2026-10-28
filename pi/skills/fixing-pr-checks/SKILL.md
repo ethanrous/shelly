@@ -1,6 +1,6 @@
 ---
 name: fixing-pr-checks
-description: Use when a pull request has failing CI / status checks that need to be diagnosed and fixed — red checks on a PR, failing GitHub Actions, broken CI on a branch, "make the checks pass", a check that started failing after a push. Drives a diagnose-fix-push-watch loop until checks are green.
+description: "Use when a pull request has failing CI or status checks (red checks, failing GitHub Actions, \"make the checks pass\"). Loops diagnose, fix, push, watch until green."
 ---
 
 # Fixing PR Checks

@@ -1,6 +1,5 @@
 import { readFile } from "node:fs/promises";
 import { basename, extname } from "node:path";
-import { REFERENCES_LIMIT, SIGNATURE_MAX_CHARS } from "./config.ts";
 import { ALL_LANGS, definitionRules, escapeRegex, nameRegexBody, referenceRules, SCOPE_KINDS } from "./languages.ts";
 import { sgScan } from "./proc.ts";
 import {
@@ -130,17 +129,15 @@ export function enclosingName(defs: readonly Definition[], line: number): string
 }
 
 export async function describeReferences(refs: Reference[], options: SearchOptions): Promise<void> {
-	const shown = refs.slice(0, REFERENCES_LIMIT);
-	const defsByFile = await fileDefinitions([...new Set(shown.map((r) => r.file))], options);
+	const defsByFile = await fileDefinitions([...new Set(refs.map((r) => r.file))], options);
 	const sources = new Map<string, FileSource>();
-	for (const ref of shown) {
+	for (const ref of refs) {
 		let source = sources.get(ref.file);
 		if (!source) {
 			source = await readSource(ref.file);
 			sources.set(ref.file, source);
 		}
-		const text = (source.lines[ref.line - 1] ?? "").trim();
-		ref.text = text.length > SIGNATURE_MAX_CHARS ? `${text.slice(0, SIGNATURE_MAX_CHARS - 3)}...` : text;
+		ref.text = (source.lines[ref.line - 1] ?? "").trim();
 		ref.enclosing = enclosingName(defsByFile.get(ref.file) ?? [], ref.line);
 	}
 }

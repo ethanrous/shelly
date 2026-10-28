@@ -2,7 +2,9 @@ import { createReadStream } from "node:fs";
 import { mkdir, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, join, resolve } from "node:path";
+import { toolCall } from "./calls.ts";
 import { CAP_EXEMPT_TOOLS, CAP_MAX_BYTES, CAP_MAX_LINES, SPILL_DIR_NAME, SPILL_RETENTION_MS } from "./config.ts";
+import { isOutlinable } from "./languages.ts";
 
 export interface TextSize {
 	bytes: number;
@@ -37,10 +39,12 @@ export function exceedsCap(size: TextSize): boolean {
 	return size.bytes > CAP_MAX_BYTES || size.lines > CAP_MAX_LINES;
 }
 
+// Skill files are loaded whole by the agent, so reads of them are never capped or replaced.
+export const isSkillPath = (path: string): boolean => path.split(/[\\/]/).includes("skills");
+
 export function isCapExempt(toolName: string, input: Record<string, unknown>): boolean {
 	if (CAP_EXEMPT_TOOLS.has(toolName)) return true;
-	if (toolName === "read" && typeof input.path === "string") return input.path.split(/[\\/]/).includes("skills");
-	return false;
+	return toolName === "read" && typeof input.path === "string" && isSkillPath(input.path);
 }
 
 export function existingFullOutputPath(toolName: string, details: unknown, text: string): string | undefined {
@@ -63,15 +67,16 @@ export function capNotice(size: TextSize, path: string, exitCode?: number): stri
 	const exit = exitCode === undefined ? "" : `, bash exit code ${exitCode}`;
 	return (
 		`[Output too large for context: ${count(size.lines)} lines, ${formatBytes(size.bytes)}${exit}. Saved to ${path}.\n` +
-		`Search it with rg -n '<pattern>' ${path}, or view a slice with head -n N / tail -n N.]`
+		`Find text in it with ${toolCall("search", { pattern: "<text to find>", path })}, or view a slice with head -n N / tail -n N.]`
 	);
 }
 
 export function readNotice(size: TextSize, displayPath: string): string {
-	return (
-		`[${displayPath} is ${count(size.lines)} lines, ${formatBytes(size.bytes)}: too large to return whole. ` +
-		`Search it with rg -n '<pattern>' ${displayPath}, then read a range with offset/limit.]`
-	);
+	const head = `[${displayPath} is ${count(size.lines)} lines, ${formatBytes(size.bytes)}: too large to return whole. `;
+	if (isOutlinable(displayPath)) {
+		return `${head}List its structure with ${toolCall("outline", { path: displayPath })}, then read parts of it with read_symbol.]`;
+	}
+	return `${head}Find text in it with ${toolCall("search", { pattern: "<text to find>", path: displayPath })}, then read a range with offset/limit.]`;
 }
 
 export function spillPath(tmpRoot: string, sessionId: string, toolCallId: string): string {

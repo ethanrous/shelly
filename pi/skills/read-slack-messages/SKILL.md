@@ -1,6 +1,6 @@
 ---
 name: "read-slack-messages"
-description: "Read Slack messages via the Slack MCP, including group DMs (mpim) and threaded messages, avoiding the channel_not_found / search-no-results fumbles."
+description: "Read Slack messages via the Slack MCP, including group DMs (mpim) and threads, avoiding channel_not_found and empty-search errors."
 version: 1
 created: "2026-09-16"
 updated: "2026-10-06"

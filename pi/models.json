@@ -10,7 +10,7 @@
           "maxTokens": 32000,
           "input": ["text", "image"],
           "compat": {
-            "thinkingFormat": "reasoning_effort",
+            "thinkingFormat": "openai",
             "sendSessionAffinityHeaders": true
           },
           "reasoning": true,
@@ -42,7 +42,7 @@
           "maxTokens": 16384,
           "input": ["text"],
           "compat": {
-            "thinkingFormat": "reasoning_effort"
+            "thinkingFormat": "openai"
           },
           "reasoning": true,
           "thinkingLevelMap": {
@@ -66,6 +66,13 @@
           }
         }
       ]
+    },
+    "github-copilot": {
+      "modelOverrides": {
+        "claude-sonnet-5.5": { "compat": { "supportsMidConvoToolChanges": true } },
+        "claude-opus-5.5": { "compat": { "supportsMidConvoToolChanges": true } },
+        "claude-haiku-5.5": { "compat": { "supportsMidConvoToolChanges": true } }
+      }
     }
   }
 }

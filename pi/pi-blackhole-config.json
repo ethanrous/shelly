@@ -14,14 +14,34 @@
   "tailBehavior": "minimal",
   "retainedToolOutputMaxTokens": 20000,
   "recallResponseMaxChars": 48000,
-  "midRunCompaction": "off",
+  "midRunCompaction": "resume",
   "observeAfterTokens": 15000,
   "reflectAfterTokens": 25000,
-  "compactAfterPreset": "default",
-  "observationsPoolMaxTokens": 20000,
+  "compactAfterPreset": "cap-250k",
+  "compactAfterPresets": {
+    "cap-250k": [
+      {
+        "window": 32768,
+        "ratio": 0.9
+      },
+      {
+        "window": 131072,
+        "ratio": 0.8
+      },
+      {
+        "window": 262144,
+        "ratio": 0.7
+      },
+      {
+        "window": 1000000,
+        "ratio": 0.25
+      }
+    ]
+  },
+  "observationsPoolMaxTokens": 10000,
   "reflectionsPoolMaxTokens": 8000,
   "fullFoldAlways": true,
-  "observationsPoolTargetTokens": 10000,
+  "observationsPoolTargetTokens": 5000,
   "reflectorInputMaxTokens": 56000,
   "dropperInputMaxTokens": 56000,
   "dropperPressureThreshold": 0.7,

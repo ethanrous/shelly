@@ -1,21 +1,25 @@
 import { readFile, stat } from "node:fs/promises";
 import { basename, relative, sep } from "node:path";
-import { SIGNATURE_MAX_CHARS } from "./config.ts";
 import {
 	ALL_GLOBS,
 	ALL_LANGS,
 	CLASS_LIKE,
 	definitionRules,
+	escapeRegex,
+	type DefLang,
+	isMarkdown,
 	type KindLabel,
 	LANGUAGES,
 	type LangId,
 	languageForFile,
+	MARKDOWN_GLOBS,
 	nameRegexBody,
 	ruleKindLabel,
 	ruleLang,
+	OUTLINE_EXTENSIONS,
 	SCOPE_KINDS,
-	SUPPORTED_EXTENSIONS,
 } from "./languages.ts";
+import { type HeadingQuery, headingMatches, headingNearMatches, parseMarkdown } from "./markdown.ts";
 import { rgFiles, type RunOptions, type SgMatch, sgScan } from "./proc.ts";
 
 export interface SymbolName {
@@ -32,7 +36,7 @@ export interface FileSource {
 
 export interface Definition {
 	file: string;
-	lang: LangId;
+	lang: DefLang;
 	kind: KindLabel;
 	name: string;
 	scope: string[];
@@ -244,8 +248,7 @@ function stripLeadingAnnotations(text: string): string {
 function signatureOf(match: SgMatch, source: FileSource): string {
 	const end = match.meta.BODY ? match.meta.BODY.startByte : match.endByte;
 	const raw = stripLeadingAnnotations(source.buffer.subarray(match.startByte, end).toString("utf8"));
-	const text = raw.replace(/\s+/g, " ").trim().replace(/[;{]$/, "").trim();
-	return text.length > SIGNATURE_MAX_CHARS ? `${text.slice(0, SIGNATURE_MAX_CHARS - 3)}...` : text;
+	return raw.replace(/\s+/g, " ").trim().replace(/[;{]$/, "").trim();
 }
 
 function scopeOf(lang: LangId, file: string, source: FileSource, root: string): string[] {
@@ -306,8 +309,8 @@ function byPosition(a: Definition, b: Definition): number {
 	return a.file < b.file ? -1 : a.file > b.file ? 1 : a.startByte - b.startByte;
 }
 
-// Functions and classes, as opposed to namespaces and the declarations inside them.
-export const BODY_KINDS: ReadonlySet<KindLabel> = new Set<KindLabel>([...CLASS_LIKE, "function", "method", "constructor"]);
+// Functions, classes, and Markdown sections, as opposed to namespaces and the declarations inside them.
+export const BODY_KINDS: ReadonlySet<KindLabel> = new Set<KindLabel>([...CLASS_LIKE, "function", "method", "constructor", "section"]);
 
 // The innermost function or class spanning the line, else the smallest other declaration there. A namespace counts only on its own line.
 export function definitionAt(defs: readonly Definition[], line: number): Definition | undefined {
@@ -328,7 +331,7 @@ export function definitionAt(defs: readonly Definition[], line: number): Definit
 export async function candidateFiles(body: string, options: SearchOptions): Promise<string[]> {
 	if ((await stat(options.root)).isFile()) {
 		if (!languageForFile(options.root)) {
-			throw new Error(`${options.root} is not a Python, Java, or C/C++ file; supported extensions: ${SUPPORTED_EXTENSIONS}`);
+			throw new Error(`${options.root} is not a Python, Java, C/C++, or Markdown file; supported extensions: ${OUTLINE_EXTENSIONS}`);
 		}
 		return rgFiles(body, options.root, [], options);
 	}
@@ -337,7 +340,10 @@ export async function candidateFiles(body: string, options: SearchOptions): Prom
 
 export async function fileDefinitions(files: readonly string[], options: SearchOptions): Promise<Map<string, Definition[]>> {
 	const result = new Map<string, Definition[]>();
-	const grouped = byFile(await sgScan(definitionRules(ALL_LANGS), files, options));
+	const markdown = files.filter(isMarkdown);
+	for (const file of markdown) result.set(file, parseMarkdown(file, await readSource(file)));
+	const code = files.filter((file) => !isMarkdown(file));
+	const grouped = code.length > 0 ? byFile(await sgScan(definitionRules(ALL_LANGS), code, options)) : new Map<string, SgMatch[]>();
 	for (const [file, matches] of grouped) {
 		const source = await readSource(file);
 		const scope = scopeOf(ruleLang(matches[0].ruleId), file, source, options.cwd);
@@ -347,6 +353,21 @@ export async function fileDefinitions(files: readonly string[], options: SearchO
 	}
 	for (const file of files) if (!result.has(file)) result.set(file, []);
 	return result;
+}
+
+async function markdownFiles(query: HeadingQuery, options: SearchOptions): Promise<string[]> {
+	if ((await stat(options.root)).isFile()) return isMarkdown(options.root) ? [options.root] : [];
+	if (!query.token) return [];
+	return rgFiles(`\\w*${escapeRegex(query.token)}\\w*`, options.root, MARKDOWN_GLOBS, { ...options, ignoreCase: true });
+}
+
+// Markdown sections whose heading matches the query exactly, or by substring when near is set.
+export async function findSections(query: HeadingQuery, options: SearchOptions, near = false): Promise<Definition[]> {
+	const files = await markdownFiles(query, options);
+	if (files.length === 0) return [];
+	const matches = near ? headingNearMatches : headingMatches;
+	const defs = [...(await fileDefinitions(files, options)).values()].flat();
+	return defs.filter((def) => matches(def, query) && kindMatches(def, options.kind)).sort(byPosition);
 }
 
 export async function findDefinitions(sym: SymbolName, options: SearchOptions): Promise<Definition[]> {

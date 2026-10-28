@@ -123,15 +123,15 @@ test("non-ASCII text before a name keeps declaration and reference columns align
 	);
 });
 
-test("references past the limit are counted, not shown", async () => {
+test("every reference is listed, however many", async () => {
 	const dir = await mkdtemp(join(tmpdir(), "cg-refs-"));
 	const calls = Array.from({ length: 70 }, () => "        f();").join("\n");
 	await writeFile(join(dir, "T.java"), `class T {\n    void f() {}\n    void g() {\n${calls}\n    }\n}\n`);
 	const text = await runFindReferences({ symbol: "f" }, { cwd: dir });
 	const lines = text.split("\n");
 	assert.equal(lines[0], '70 references to "f" (syntactic: name matches; may include unrelated symbols with the same name)');
-	assert.equal(lines.filter((l) => l.startsWith("  ")).length, 60);
-	assert.equal(lines[lines.length - 1], "showing 60 of 70 in 1 file; narrow with path");
+	assert.equal(lines.filter((l) => l.startsWith("  ")).length, 70);
+	assert.ok(!text.includes("showing"), text);
 });
 
 test("several uses on one line are listed once", async () => {

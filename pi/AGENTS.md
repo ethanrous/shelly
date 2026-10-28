@@ -21,22 +21,33 @@
   - **Pick the subagent by the job.** The default subagent should be swift-1.5-35B, use it for implementation, refactors, debugging, review. **Prefer "xhigh" reasoning over medium**. If a more complex implementation is needed, use sonnet-5.5 as a subagent. Sonnet is faster and smarter, but more expensive. Swift is free and good enough for most tasks, as long as you review its work.
 - Run every subagent in the background, and wait for completion notification. Don't poll or block on subagents.
 
+### Tools
+
+- **Use `codemode` as often as possible, and avoid `tool_search`.**
+
 ### Shell Commands
 
 - **Foreground by default; never poll.** Run every `bash` command in the foreground and read its output from the result. Set `run_in_background: true` only for servers, watchers, or builds expected to run over 2 minutes while you do other work, then rely on the completion notification. You will be notified when a background command completes without the need to poll or wait, it is automatic.
 
-- **Search with `rg`, never `grep`** — ripgrep (rg) is much faster.
+- **Search with the `search` tool, not `rg` or `grep` in bash.** `rg` and `grep` on Python, Java, C/C++, or Markdown files, on directories, or recursively are always blocked, whatever the size; the block message gives the equivalent `search` call. `search` takes `pattern` (one string, or a list to match any of), an optional `path` (a file or directory, or a list), `regex: true` for a regex, `ignore_case`, and `glob` (one glob or a list; `!` excludes), e.g. `search {"pattern": "foo", "path": "src", "glob": ["*.py", "!**/tests/**"]}` in place of `grep -rn --include='*.py' --exclude-dir=tests foo src`. Its header counts the matching lines and files, and a match in a Python, Java, or C/C++ file names its enclosing function or class; read it with `read_symbol {"path": "src/app.py", "line": 302}`. Run other shell commands in their own `bash` call rather than bundling a search into them. `rg --files` is fine for listing files.
 
 ### Reading Code
 
-- **Read Python, Java, and C/C++ code by name or location, not by line range.** `read_symbol` takes a name (`Class.method`) or a `file:line` such as a match from `rg -n`, and returns the whole function or class. `sed -n`, `head`, `tail`, and `awk NR` reads of these files that cover a function or class are blocked, and so are `rg` and `grep` searches of them that match only definitions.
-  - `outline` lists a file's functions and classes (use it instead of `rg '^def |^class '`), `find_symbol` finds definitions, and `find_references` finds usages (`precise: true` for exact Python and Java results).
+- **`read_symbol`, `outline`, `find_symbol`, and `find_references` are the only way to read Python, Java, C/C++, and Markdown files.** Line-range reads (`read` offset/limit, `sed -n`, `head`, `tail`, `awk NR`), whole-file reads in bash (`cat`, `less`, `more`, `nl`, `bat`), and `rg` or `grep` on these files are always blocked, whatever the size. `read` without offset/limit returns the file's outline. The block message names the tool call to make instead; make that call, do not switch to another line-range tool.
+  - **Read** with `read_symbol`, passing separate fields (never `file:line`):
+    - `{"symbol": "Class.method"}` reads a definition by name (a Markdown heading, with `A > B` to qualify); `path` narrows where to look.
+    - `{"path": "src/app.py", "line": 302}` reads the function, class, or section containing a line, such as a `search` match or an `outline` row.
+    - `{"path": "src/app.py", "line": 280, "end_line": 340}` reads everything the range covers, widened to whole definitions.
+    - `{"path": "src/app.py", "module": true}` returns imports, constants, `__all__`, and other module-level code in full, with each top-level definition collapsed to its first line and line range.
+    - `after: N` / `before: N` add the neighboring definitions. The output is the exact source, safe to copy into an `edit`.
+  - **Find** with `outline` for a file's structure, `find_symbol` for a definition, and `find_references` for usages (`precise: true` for exact Python and Java results).
   - Dependencies such as `.venv` are git-ignored and skipped by default; pass `path` pointing into the package, e.g. `.venv/lib/python3.13/site-packages/<pkg>`.
-  - Use `rg` for text patterns, strings, config, and non-code files.
+  - Use `search` for text: strings, config keys, log messages, and anything in non-code files.
 
 ### Writing Code
 
 - Never use adhoc python scripts to do replacement work. ALWAYS use the edit tool instead.
+- **To change the same text in many places, use `replace`**, not repeated `edit` calls, `sed -i`, or `perl -pi`. It takes `pattern`, `with`, and the same `path`, `glob`, `regex`, and `ignore_case` as `search`, e.g. `replace {"pattern": "pkg.old_mod", "with": "pkg.new_mod", "path": "tests", "expect": 9}`. Pass `expect` with the count `search` reported; if the count differs, nothing changes.
 
 ### Code Comments
 
