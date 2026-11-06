@@ -1,11 +1,16 @@
 {
-  "lastChangelogVersion": "1.4.0",
+  "lastChangelogVersion": "1.5.0",
   "theme": "dark",
   "defaultProvider": "lucy",
   "defaultModel": "swift-1.5-27b",
   "defaultThinkingLevel": "medium",
   "compaction": {
-    "keepRecentTokens": 10000
+    "keepRecentTokens": 15000,
+    "modelOverrides": {
+      "lucy/swift-1.5-27b": {
+        "reserveTokens": 12000
+      }
+    }
   },
   "defaultTools": [
     "+tool_search"
@@ -13,24 +18,19 @@
   "packages": [
     "npm:pi-web-access",
     "npm:pi-hermes-memory",
-    "git:github.com/ethanrous/pi-subagents@master",
+    "/Users/erousseau/repos/pi-subagents",
+    "/Users/erousseau/repos/context-guard",
     "npm:pi-mono-ask-user-question",
     "npm:pi-blackhole",
     "npm:pi-token-speed",
     "npm:pi-thinking-tail",
     "npm:pi-bg-tasks",
-    "git:github.com/DietrichGebert/ponytail",
     "npm:@datadog/pi-plugin",
-    "npm:pi-browser-use"
+    "npm:pi-browser-use",
+    "npm:pi-context-view"
   ],
   "skills": [
-    "!skills/synced/*/built-in-browser",
-    "!skills/synced/*/chrome-browser",
-    "!skills/synced/*/computer-use",
-    "!skills/synced/*/docs",
-    "!skills/synced/*/google-workspace",
-    "!skills/synced/*/import-memory",
-    "!skills/synced/*/morning"
+    "!skills/synced/**"
   ],
   "reserveTokens": 24576,
   "timeoutMs": 36000000,
@@ -39,10 +39,165 @@
   "httpIdleTimeoutMs": 0,
   "hideThinkingBlock": true,
   "showCacheMissNotices": true,
+  "deferredTools": [
+    {
+      "patterns": [
+        "browser_*"
+      ],
+      "summary": "Browser automation: pages, clicks, forms, screenshots, console, network."
+    },
+    {
+      "patterns": [
+        "web_search",
+        "fetch_content",
+        "get_search_content",
+        "source_check"
+      ],
+      "summary": "Web search, URL and repo fetching, and cited sources."
+    },
+    {
+      "patterns": [
+        "datadog",
+        "ddtoolsets",
+        "ddconfig"
+      ],
+      "summary": "Datadog logs, metrics, traces, and other observability data."
+    },
+    {
+      "patterns": [
+        "session_search",
+        "recall"
+      ],
+      "summary": "Search past sessions, or this session's history and file writes."
+    },
+    {
+      "patterns": [
+        "memory_replace",
+        "memory_remove"
+      ],
+      "summary": "Replace or remove a memory entry."
+    },
+    {
+      "patterns": [
+        "skill_manage"
+      ],
+      "summary": "Create, update, view, or delete saved skills."
+    },
+    {
+      "patterns": [
+        "SubagentWorkflow"
+      ],
+      "summary": "Scripted multi-subagent workflows."
+    },
+    {
+      "patterns": [
+        "steer_subagent",
+        "stop_subagent"
+      ],
+      "summary": "Message or stop a running subagent."
+    },
+    {
+      "patterns": [
+        "bg_list",
+        "bg_output",
+        "bg_stop"
+      ],
+      "summary": "List, read, or stop background shell tasks."
+    },
+    {
+      "patterns": [
+        "diagnostics"
+      ],
+      "summary": "Type-check and lint with the project's own checkers."
+    }
+  ],
+  "toolOverrides": {
+    "memory_add": {
+      "description": "Save a durable fact to persistent memory: a user correction or preference, an environment fact, or a project convention. Not for task progress or TODOs. Keep entries compact.",
+      "parameters": {
+        "target": "user: who the user is and their preferences. memory: global and environment facts. project: repo conventions. failure: lessons such as failures, corrections, insights, and tool quirks.",
+        "content": "Entry text.",
+        "failure_reason": "Why the failure occurred."
+      }
+    },
+    "memory_replace": {
+      "description": "Replace a persistent memory entry, found by a substring of its text."
+    },
+    "memory_search": {
+      "description": "Search persistent memory: user preferences, project conventions, past failures, and lessons. Each result shows the target that memory_replace and memory_remove need.",
+      "parameters": {
+        "query": "Search terms.",
+        "project": "Project name to filter by, or null for global memories only."
+      }
+    },
+    "ask_user_question": {
+      "description": "Ask the user one or more questions in an interactive form: radio (single choice), checkbox (multiple choice), or text. Radio and checkbox questions get an \"Other\" option by default. A blank \"Other\" answer means the user wants the question rephrased or split.",
+      "promptGuidelines": [
+        "Use ask_user_question instead of plain-text questions when the user needs to choose or confirm something. Group related questions in one call."
+      ],
+      "parameters": {
+        "title": "Form title.",
+        "description": "Context shown under the title.",
+        "questions": "Questions to ask.",
+        "questions.id": "Unique id.",
+        "questions.type": "radio, checkbox, or text.",
+        "questions.prompt": "Question text.",
+        "questions.label": "Tab label; defaults to Q1, Q2, and so on.",
+        "questions.options": "Choices for radio and checkbox.",
+        "questions.options.value": "Value returned.",
+        "questions.options.label": "Display label.",
+        "questions.options.description": "Help text under the label.",
+        "questions.allowOther": "Add an Other option with text input; default true.",
+        "questions.allowComment": "Add an optional comment row; default false.",
+        "questions.required": "Whether an answer is required; default true.",
+        "questions.placeholder": "Placeholder for text input.",
+        "questions.default": "Default value; a list for checkbox."
+      }
+    }
+  },
+  "promptTrim": {
+    "dropSections": [
+      "tools"
+    ],
+    "dropRules": [
+      "Use bash for file operations like ls, rg, find",
+      "Use read to examine files instead of cat or sed."
+    ],
+    "sectionDirs": {
+      "docs": [
+        "~/shelly",
+        "~/repos/pi-subagents",
+        "~/repos/context-guard"
+      ]
+    },
+    "sectionsOnFirstUse": {
+      "datadog_organization": [
+        "datadog",
+        "ddconfig",
+        "ddtoolsets"
+      ],
+      "datadog_server_instructions": [
+        "datadog",
+        "ddconfig",
+        "ddtoolsets"
+      ]
+    }
+  },
+  "instructionFiles": {
+    "messageDeliveryModels": [
+      "lucy/*"
+    ]
+  },
   "editorPaddingX": 1,
   "tokenSpeed": {
     "countStrategy": "estimate",
     "useProviderTokens": true,
     "slidingWindow": 2000
+  },
+  "extensionChangelogVersions": {
+    "{\"source\":\"npm:pi-web-access\",\"scope\":\"user\"}": "0.46.0",
+    "{\"source\":\"/Users/erousseau/repos/pi-subagents\",\"scope\":\"user\"}": "0.22.1",
+    "{\"source\":\"npm:pi-mono-ask-user-question\",\"scope\":\"user\"}": "1.8.0",
+    "{\"source\":\"npm:pi-blackhole\",\"scope\":\"user\"}": "0.5.16"
   }
 }

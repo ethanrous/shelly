@@ -23,6 +23,12 @@
  * A compaction rewrites the prompt cache and keeps the current sections in its base prompt.
  * After one, every section is dropped from outgoing requests until a later write matches its
  * file again, which re-adds it under a new name at the end of the transcript.
+ *
+ * Models matching `instructionFiles.messageDeliveryModels` in ~/.pi/agent/settings.json, a list of
+ * `provider/model-id` globs where `*` matches any run of characters, get newly matched files as a
+ * hidden custom message instead of a section. pi folds a mid-conversation section into the leading system prompt for
+ * models without `supportsMidConvoSystemMessages`, which invalidates the cache after that point.
+ * A custom message is sent as a user message at the end of the transcript, so the prefix stays.
  */
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
@@ -32,6 +38,8 @@ import { homedir } from "node:os";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 const MAX_TOUCHED = 20_000;
+
+const MESSAGE_TYPE = "instruction-files";
 
 // ---------------------------------------------------------------------------
 // Frontmatter
@@ -347,21 +355,50 @@ export function writtenPaths(
 export interface BranchSections {
 	/** Sections added since the last compaction and not removed since, with their instruction file paths. */
 	active: Map<string, string | undefined>;
+	/** Names in `active` that were delivered in a custom message rather than a system section. */
+	inMessages: Set<string>;
 	/** Instruction file paths of every section the branch ever added. */
 	paths: Set<string>;
 	compactions: number;
 }
 
-/** Instruction sections recorded in the branch's system messages. */
+/** Section names and instruction file paths carried by one of this extension's custom messages. */
+interface MessageDetails {
+	sections: Record<string, string>;
+}
+
+function messageSections(value: { customType?: string; details?: unknown }): Record<string, string> | undefined {
+	if (value.customType !== MESSAGE_TYPE) return undefined;
+	const sections = (value.details as MessageDetails | undefined)?.sections;
+	return sections && typeof sections === "object" ? sections : undefined;
+}
+
+/** Instruction sections recorded in the branch's system messages and this extension's custom messages. */
 export function branchSections(entries: readonly unknown[]): BranchSections {
 	const active = new Map<string, string | undefined>();
+	const inMessages = new Set<string>();
 	const paths = new Set<string>();
 	let compactions = 0;
 	for (const entry of entries) {
-		const typed = entry as { type?: string; message?: { role?: string; sections?: Record<string, unknown> } };
+		const typed = entry as {
+			type?: string;
+			customType?: string;
+			details?: unknown;
+			message?: { role?: string; sections?: Record<string, unknown> };
+		};
 		if (typed.type === "compaction") {
 			compactions++;
 			active.clear();
+			inMessages.clear();
+			continue;
+		}
+		const delivered = typed.type === "custom_message" ? messageSections(typed) : undefined;
+		if (delivered) {
+			for (const [name, path] of Object.entries(delivered)) {
+				active.set(name, path);
+				inMessages.add(name);
+				paths.add(path);
+			}
 			continue;
 		}
 		if (typed.type !== "message" || typed.message?.role !== "system") continue;
@@ -371,12 +408,12 @@ export function branchSections(entries: readonly unknown[]): BranchSections {
 				active.delete(name);
 				continue;
 			}
-			const path = typeof value === "string" ? value.match(/^<project_instructions path="([^"]+)">/)?.[1] : undefined;
+			const path = typeof value === "string" ? value.match(/<project_instructions path="([^"]+)">/)?.[1] : undefined;
 			active.set(name, path);
 			if (path !== undefined) paths.add(path);
 		}
 	}
-	return { active, paths, compactions };
+	return { active, inMessages, paths, compactions };
 }
 
 interface SystemMessage {
@@ -389,12 +426,19 @@ interface SystemMessage {
 
 /**
  * Removes this extension's sections that are not in `active` from every system message, and drops
- * system messages left empty. Returns `messages` itself when nothing changes.
+ * system messages left empty and custom messages with no active section. Returns `messages` itself
+ * when nothing changes.
  */
 export function stripInactiveSections<T>(messages: readonly T[], active: ReadonlySet<string>): readonly T[] {
 	let changed = false;
 	const out: T[] = [];
 	for (const message of messages) {
+		const custom = message as unknown as { role?: string; customType?: string; details?: unknown };
+		const delivered = custom.role === "custom" ? messageSections(custom) : undefined;
+		if (delivered && !Object.keys(delivered).some((name) => active.has(name))) {
+			changed = true;
+			continue;
+		}
 		const system = message as unknown as SystemMessage;
 		if (system.role !== "system" || !system.sections) {
 			out.push(message);
@@ -425,16 +469,40 @@ function bodyKey(body: string): string {
 	return createHash("sha1").update(body).digest("hex");
 }
 
+/** `instructionFiles.messageDeliveryModels` from pi's settings.json; empty when unset or unreadable. */
+export function messageDeliveryModels(settingsPath = join(process.env.HOME ?? homedir(), ".pi", "agent", "settings.json")): string[] {
+	try {
+		const settings = JSON.parse(readFileSync(settingsPath, "utf8")) as { instructionFiles?: { messageDeliveryModels?: unknown } };
+		const patterns = settings.instructionFiles?.messageDeliveryModels;
+		return Array.isArray(patterns) ? patterns.filter((p): p is string => typeof p === "string") : [];
+	} catch {
+		return [];
+	}
+}
+
+/** True when `model` matches one of `patterns` as `provider/id`. */
+export function deliversAsMessage(model: { provider?: string; id?: string } | undefined, patterns: readonly string[]): boolean {
+	if (!model?.provider || !model.id) return false;
+	const key = `${model.provider}/${model.id}`;
+	return patterns.some((pattern) => segmentMatches(pattern, key));
+}
+
+function renderMessage(added: ReadonlyArray<{ d: Discovered }>): string {
+	const files = added.map(({ d }) => renderSection(d)).join("\n\n");
+	return `These project instructions apply to files changed in this session. Follow them as you would the system prompt.\n\n${files}`;
+}
+
 export default function instructionFilesExtension(pi: ExtensionAPI): void {
 	const cache = new Map<string, CacheEntry>();
 	const touched = new Set<string>();
 	const roots = new Set<string>();
 	const checked = new Set<string>();
 	let active = new Set<string>();
+	let inMessages = new Set<string>();
 	let generation = 0;
 	let cwd: string | undefined;
 
-	type Ctx = { sessionManager: { getBranch(): readonly unknown[] } };
+	type Ctx = { sessionManager: { getBranch(): readonly unknown[] }; model?: { provider?: string; id?: string } };
 
 	function rebuild(ctx: Ctx): void {
 		touched.clear();
@@ -443,6 +511,7 @@ export default function instructionFilesExtension(pi: ExtensionAPI): void {
 		try {
 			const state = branchSections(ctx.sessionManager.getBranch());
 			active = new Set(state.active.keys());
+			inMessages = state.inMessages;
 			generation = state.compactions;
 			for (const path of state.paths) {
 				const root = rootOfInstructionFile(path);
@@ -450,6 +519,7 @@ export default function instructionFilesExtension(pi: ExtensionAPI): void {
 			}
 		} catch (error) {
 			active = new Set();
+			inMessages = new Set();
 			generation = 0;
 			console.error(`[instruction-files] ${error instanceof Error ? error.message : String(error)}`);
 		}
@@ -462,6 +532,7 @@ export default function instructionFilesExtension(pi: ExtensionAPI): void {
 		if (compactions < generation) return rebuild(ctx);
 		generation = compactions;
 		active.clear();
+		inMessages.clear();
 		touched.clear();
 	}
 
@@ -485,22 +556,33 @@ export default function instructionFilesExtension(pi: ExtensionAPI): void {
 			for (const { d, name } of named) {
 				if (!active.has(name)) continue;
 				shown.add(bodyKey(d.body));
-				event.systemPromptOptions.sections[name] = renderSection(d);
+				if (!inMessages.has(name)) event.systemPromptOptions.sections[name] = renderSection(d);
 			}
+			const asMessage = deliversAsMessage(ctx.model, messageDeliveryModels());
+			const added: Array<{ d: Discovered; name: string }> = [];
 			for (const { d, name } of named) {
 				if (active.has(name) || !gatesPass(d, touched)) continue;
 				const key = bodyKey(d.body);
 				if (shown.has(key)) continue;
 				shown.add(key);
 				active.add(name);
-				event.systemPromptOptions.sections[name] = renderSection(d);
+				if (asMessage) {
+					inMessages.add(name);
+					added.push({ d, name });
+				} else {
+					event.systemPromptOptions.sections[name] = renderSection(d);
+				}
 			}
+			if (added.length === 0) return undefined;
+			const details: MessageDetails = { sections: Object.fromEntries(added.map(({ d, name }) => [name, d.abs])) };
+			return { message: { customType: MESSAGE_TYPE, content: renderMessage(added), display: false, details } };
 		} catch (error) {
 			console.error(`[instruction-files] ${error instanceof Error ? error.message : String(error)}`);
 		}
+		return undefined;
 	});
 
-	// A compaction keeps the current sections in its base prompt; this drops the ones not re-added since.
+	// A compaction keeps the current sections in its base prompt and may keep a delivery message in its tail; this drops the ones not re-added since.
 	pi.on("context_with_system", (event, ctx) => {
 		try {
 			sync(ctx);

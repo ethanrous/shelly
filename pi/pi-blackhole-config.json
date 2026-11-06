@@ -11,18 +11,30 @@
   "compactionEngine": "blackhole",
   "compactionSummaryMode": "default",
   "skipForProviders": [],
-  "tailBehavior": "minimal",
-  "retainedToolOutputMaxTokens": 20000,
+  "tailBehavior": "pi-default",
+  "retainedToolOutputMaxTokens": 10000,
   "recallResponseMaxChars": 48000,
   "midRunCompaction": "resume",
   "observeAfterTokens": 15000,
   "reflectAfterTokens": 25000,
-  "compactAfterPreset": "cap-250k",
+  "compactAfterPreset": "cap-186k",
   "compactAfterPresets": {
-    "cap-250k": [
+    "cap-186k": [
       {
         "window": 32768,
         "ratio": 0.9
+      },
+      {
+        "window": 65536,
+        "ratio": 0.866667
+      },
+      {
+        "window": 109568,
+        "ratio": 0.8905
+      },
+      {
+        "window": 122880,
+        "ratio": 0.808333
       },
       {
         "window": 131072,
@@ -33,8 +45,16 @@
         "ratio": 0.7
       },
       {
+        "window": 400000,
+        "ratio": 0.465
+      },
+      {
+        "window": 500000,
+        "ratio": 0.372
+      },
+      {
         "window": 1000000,
-        "ratio": 0.25
+        "ratio": 0.186
       }
     ]
   },
@@ -51,5 +71,6 @@
   "agentMaxTurns": 16,
   "memory": true,
   "debugLog": false,
-  "statusBar": false
+  "statusBar": false,
+  "showPreCompactionMessage": false
 }

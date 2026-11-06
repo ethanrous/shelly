@@ -23,6 +23,8 @@ export EDITOR="nvim"
 export CLAUDE_CODE_NO_FLICKER=1
 # pi requests a 1h prompt cache from Anthropic models and 24h from OpenAI-style APIs.
 export PI_CACHE_RETENTION=long
+# Skip pi's latest-version check against pi.dev (avoids the startup network request).
+export PI_SKIP_VERSION_CHECK=1
 export FPATH="$HOME/.docker/completions:$FPATH"
 
 ### Funcs ###

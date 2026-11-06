@@ -7,7 +7,8 @@
 
 ---@type vim.lsp.Config
 return {
-	cmd = { "tflint", "--langserver" },
+	-- tflint logs to stderr while exiting; a closed stderr pipe kills it with SIGPIPE before it stops its plugin process.
+	cmd = { "sh", "-c", "exec tflint --langserver 2>/dev/null" },
 	filetypes = { "terraform" },
 	root_markers = { ".terraform", ".git", ".tflint.hcl" },
 }

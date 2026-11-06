@@ -87,9 +87,13 @@ For each Category B item:
 
 Group related fixes together logically.
 
-## Step 6: Reply and resolve threads
+## Step 6: Commit and push the fixes
 
-For each thread being resolved (Categories A and B, after fixes are applied):
+Before replying to or resolving any thread, commit the fixes and push them to the branch (ask the user for confirmation first if the repo's rules require it). A resolved thread must point at code that exists on the remote branch — never resolve a thread whose fix only exists in the local working tree.
+
+## Step 7: Reply and resolve threads
+
+For each thread being resolved (Categories A and B, after fixes are pushed):
 
 Reply to the thread, then resolve it. These can be batched in parallel across threads:
 
@@ -113,7 +117,7 @@ for thread_id in THREAD_ID_1 THREAD_ID_2 THREAD_ID_3; do
 done
 ```
 
-## Step 7: Report summary
+## Step 8: Report summary
 
 After all actions are complete, present a summary table:
 
@@ -130,5 +134,5 @@ After all actions are complete, present a summary table:
 - **NEVER resolve discussion threads or questions** — only resolve threads where a concrete code suggestion has been addressed
 - **ALWAYS present your plan before making changes** — let the user approve which items to fix and which to skip
 - **Respect the project's CLAUDE.md** — follow existing conventions for code style, testing, etc.
-- **Do not create git commits** — only make code changes. The user handles version control.
+- **ALWAYS push the fixes before replying to or resolving threads** — a resolved thread must reference code that is on the remote branch. Commit and push after user confirmation (repo rules may require it); never leave a fix unpushed while marking its thread resolved.
 - **Run project linting/tests after fixes** if the project has `make lint` or equivalent configured
