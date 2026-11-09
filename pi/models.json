@@ -25,28 +25,17 @@
           }
         },
         {
-          "id": "ornith-1.5-35b",
-          "contextWindow": 204800,
-          "maxTokens": 32768,
-          "input": ["text", "image"],
-          "reasoning": true,
-          "compat": {
-            "thinkingFormat": "qwen-chat-template",
-            "thinkingTokenBudgetField": "thinking_token_budget",
-            "sendSessionAffinityHeaders": true
-          }
-        },
-        {
-          "id": "qwen3.8-flash-next",
-          "contextWindow": 65536,
-          "maxTokens": 16384,
+          "id": "flash-next-coder",
+          "contextWindow": 131072,
+          "maxTokens": 32000,
           "input": ["text"],
           "compat": {
-            "thinkingFormat": "openai"
+            "thinkingFormat": "openai",
+            "sendSessionAffinityHeaders": true
           },
           "reasoning": true,
           "thinkingLevelMap": {
-            "off": null,
+            "off": "none",
             "minimal": null,
             "low": "low",
             "medium": "medium",
